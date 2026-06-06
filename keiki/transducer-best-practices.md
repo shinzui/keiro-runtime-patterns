@@ -66,6 +66,14 @@ runSomeCommand vertex regs command = do
 The manual form repeats matching work and hides the fact that `step` is the intended
 aggregate execution API.
 
+When `step` returns `Nothing` and you need to know *why* a command was rejected — no
+outgoing edges, no matching guard, or two guards matched (ambiguity) — use `stepEither`,
+which returns `Either (StepFailure s) (s, RegFile rs, [co])` with the exact reason on the
+`Left` and the identical success triple on the `Right`. See
+[diagnosing-rejected-commands.md](./diagnosing-rejected-commands.md). Prefer `stepEither`
+in command processors that surface rejection reasons to callers or logs; keep `step` where
+a bare accept/reject is enough.
+
 ## Emit Every Command Field Needed For Replay
 
 This is the most important rule.
@@ -107,23 +115,35 @@ B.onCmd inCtorRequestTransferReservation $ \d -> B.do
 The private event does not need to match the public integration message. Keep public
 contracts bounded-context safe, but make private aggregate events replay-invertible.
 
-## Add Replay-Safety Tests For Every Transducer
+## Add Build-Time Validation Tests For Every Transducer
 
-Every service test suite should assert that each aggregate has no hidden replay
-inputs.
+Every service test suite should assert that each aggregate is well-formed. Prefer the
+umbrella check `validateTransducer`, which in one call covers hidden replay inputs,
+nondeterministic (overlapping) guards, and unreachable/dead edges — and is pure (no z3):
 
 ```haskell
-import Keiki.Core (checkHiddenInputs)
+import Keiki.Core (validateTransducer, defaultValidationOptions)
 
-testKeikiReplaySafety :: IO ()
-testKeikiReplaySafety = do
-  assertEqual "incident transducer has no hidden replay inputs" [] (checkHiddenInputs incidentTransducer)
-  assertEqual "reservation transducer has no hidden replay inputs" [] (checkHiddenInputs reservationTransducer)
+testKeikiValidation :: IO ()
+testKeikiValidation = do
+  assertEqual "incident transducer is well-formed" [] (validateTransducer defaultValidationOptions incidentTransducer)
+  assertEqual "reservation transducer is well-formed" [] (validateTransducer defaultValidationOptions reservationTransducer)
 ```
 
-If this assertion fails, inspect the named edge. Usually the fix is to add the
-missing command field to the emitted private event, or to remove the hidden command
-field read from the guard/update.
+Each entry in the result is a structured `TransducerValidationWarning s` you can
+pattern-match on — `HiddenInput`, `NondeterministicPair`, or `PossiblyDeadEdge` — each
+naming the offending edge by its typed `EdgeRef`. If the assertion fails, inspect the
+named edge: a `HiddenInput` usually means a guard/update reads a command field the emitted
+private event does not carry (add the field, per the rule above); a `NondeterministicPair`
+means two outgoing guards overlap (tighten one); a `PossiblyDeadEdge` means a vertex is
+unreachable or a guard is statically unsatisfiable.
+
+`checkHiddenInputs t` alone is still available if you want only the hidden-input slice, but
+`validateTransducer` is the recommended single assertion. For the exact, solver-backed
+determinism and dead-edge answers (which prove overlaps the pure path cannot), call
+`Keiki.Symbolic.checkTransitionDeterminismSym` / `checkDeadEdgesSym`. See
+[build-time-validation.md](./build-time-validation.md) for the full menu, including the
+opt-in opaque-guard audit.
 
 ## Prefer Readable Predicate Operators
 
@@ -144,14 +164,28 @@ B.slot @"availableIcuBeds" =: (B.reg @"availableIcuBeds" .- lit 1)
 B.slot @"reservedIcuBeds" =: (B.reg @"reservedIcuBeds" .+ lit 1)
 ```
 
-If the service prelude re-exports lens operators, `(.>)` may conflict. Hide the lens
-operator in the affected aggregate module:
+If the service prelude re-exports `lens`/`generic-lens`, the bare `(.>)` conflicts (in
+`lens` it is optic composition; in Keiki it is greater-than). There are three fixes — pick
+per module:
 
 ```haskell
+-- A. hide and re-import (fine for a handful of operators)
 import MyService.Prelude hiding (Index, (.>))
+import Keiki.Core (lit, (.>), (.>=), (.+), (.-))
+
+-- B. qualified Keiki.Operators (no hiding list to maintain)
+import qualified Keiki.Operators as K
+-- ... then write `B.reg @"x" K..> lit 0`
+
+-- C. inside a builder block, use the clash-free guard verbs (no operator at all)
+B.requireGt (B.reg @"availableIcuBeds") (lit 0)
+B.requireGe d.availableUnits           (lit 1)
 ```
 
-Then import Keiki's operator from `Keiki.Core`.
+Prefer **C** (`B.requireGt`/`requireGe`/`requireLt`/`requireLe`/`requireEq`) when authoring
+a guard inside a `B.do` block — it never clashes and needs no import gymnastics. Reach for
+A or B only when building a compound `HsPred` value outside a builder. See
+[operator-conflicts.md](./operator-conflicts.md).
 
 ## Use `derive*All` When Helper Names Match Constructors
 
@@ -206,19 +240,42 @@ Poor register slots:
 
 ## Be Careful With Whole-Collection Command Fields
 
-Until Keiki has structural collection operations, commands sometimes carry a full
-updated list, such as `activeResourceIds` or `pendingReservationIds`. This is
-acceptable, but it means the aggregate is trusting the caller to compute the new list
-correctly.
+Keiki has **no** structural collection operations, and as of the 2026-06 design review
+they are **deferred** (a prototype was built and ratified NO-GO; see
+[collections-and-opaque-guards.md](./collections-and-opaque-guards.md)). So commands carry
+a full updated list, such as `activeResourceIds` or `pendingReservationIds`, and the
+aggregate stores it wholesale with `=:`. This is acceptable — and, importantly, it is
+**fully replay-safe and verified**: a whole list arriving on the command
+(`B.slot @"items" =: d.items`) is a *structural* input read, so `solveOutput` inverts it
+and `validateTransducer` sees the whole list on the wire. It just means the aggregate
+trusts the caller to have computed the list correctly.
 
 When using this pattern:
 
 - The command processor or router must compute the collection deterministically.
 - The emitted private event must carry the full collection if replay needs it.
-- Tests should cover duplicate, remove, and idempotent retry behavior outside Keiki.
+- Keep append/remove/membership invariants in the application layer (against the read
+  model) and test duplicate/remove/idempotent-retry behavior there.
+- Your only *in-aggregate* collection guard should stay structural — e.g.
+  `B.reg @"items" .== lit []` (emptiness). That is verifiable today.
 
-Prefer future Keiki collection operators if available, such as `member`, `notMember`,
-`insert`, or `remove`, so the aggregate owns the invariant.
+The thing to avoid is an **opaque collection guard**: lifting `Map.member`/`all`/`null`/
+`elem` through a `TApp` closure to branch on collection *contents*. It compiles and
+evaluates, but Keiki's symbolic checker cannot see through it and silently under-verifies
+the edge — a green build that did not check what you think it did. To catch these, run the
+opt-in audit:
+
+```haskell
+validateTransducer defaultValidationOptions { warnOpaqueGuards = True } myTransducer
+-- ⇒ [ OpaqueGuard { tvwEdge = EdgeRef { ... } }, ... ]   -- guards the solver couldn't see
+```
+
+If you genuinely need a per-element collection invariant *inside* the aggregate, the sound
+option today is to split the lifecycle-bearing sub-entity into its own scalar aggregate
+(the sub-entity-as-aggregate pattern), which gets full Keiki guarantees per sub-aggregate.
+First-class collection registers (`UInsert`/`PMember`/`TLookupField`) may be revived if a
+real keyed-collection consumer appears. See
+[collections-and-opaque-guards.md](./collections-and-opaque-guards.md).
 
 ## Keep Private Events Replay-Oriented
 
@@ -315,10 +372,14 @@ durable source of truth for the process state.
 - Use `deriveAggregateCtorsAll` and `deriveWireCtorsAll` unless helper names need
   custom suffixes.
 - Author edges with `Keiki.Builder`.
-- Use `step` in the pure command runner.
-- Use readable Keiki predicate and arithmetic operators.
+- Use `step` in the pure command runner; use `stepEither` where you need the rejection reason.
+- Use readable Keiki predicate and arithmetic operators (and the `B.requireGt`-style verbs
+  to dodge any lens operator clash).
 - Ensure emitted private events carry every command field read by guards or updates.
-- Add a `checkHiddenInputs transducer == []` test.
+- Add a `validateTransducer defaultValidationOptions transducer == []` test (covers hidden
+  inputs, determinism, and dead edges in one assertion).
+- If the aggregate guards on collection contents through a `TApp`, run the
+  `warnOpaqueGuards = True` audit and confirm you understand each `OpaqueGuard`.
 - Add command tests for rejected guards and accepted transitions.
 - Add replay tests for any edge that reads command fields in guards.
 - Generate or review the Mermaid diagram for the aggregate.
