@@ -23,6 +23,8 @@ practices, then reach for the focused guides as needed.
   modeling pitfall. Storing a collection is fine and verified; guarding on its contents through
   a closure silently loses verification. The audit flag and the sound alternatives. First-class
   collection registers are deferred — this explains the decision and the patterns to use today.
+- **[diagram-docs.md](./diagram-docs.md)** — generate readable Mermaid diagrams, process-manager
+  sections, edge inspectors, and validation tests from service-owned transducers.
 - **[operator-conflicts.md](./operator-conflicts.md)** — resolving the `lens`/`generic-lens`
   `(.>)` clash three ways (hide-and-reimport, qualified `Keiki.Operators`, or the clash-free
   `B.requireGt` builder verbs).
@@ -37,6 +39,8 @@ These guides reflect the MasterPlan 14 round of Keiki improvements:
 - Explainable execution (`stepEither`/`StepFailure`).
 - The `validateTransducer` build-time umbrella plus determinism and dead-edge checks.
 - Per-constructor TH derivation overrides (`deriveAggregateCtorsWith`/`deriveWireCtorsWith`).
+- Readable Mermaid guards, multiline labels, typed atlas sections, edge inspectors, and diagram
+  validation helpers.
 - The `Keiki.Operators` qualified-import module for the operator clash.
 - The `keiki-codec-json` event-codec skeleton.
 - First-class collection registers: **prototyped and deferred (NO-GO)**; an opt-in

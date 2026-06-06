@@ -2,9 +2,12 @@
 
 Keiki has no first-class collection registers. This is the single most common thing Keiro
 service authors trip over, so read this before modeling any aggregate whose state holds a
-`Map`, `Set`, or list. The short version: **storing** a collection is fine and fully
-verified; **guarding on its contents** through a closure silently loses Keiki's
-verification; and the structural collection feature is **deferred**, not coming soon.
+`Map`, `Set`, or list. The short version from Keiki's own
+`docs/guide/modeling-collections.md`: project the collection down to the scalar facts your
+guards actually need, and promote any element with its own identity and lifecycle into its
+own aggregate. **Storing** a collection is fine and fully verified; **guarding on its
+contents** through a closure silently loses Keiki's verification; and the structural
+collection feature is **deferred**, not coming soon.
 
 ## Why there is no collection vocabulary (and what was decided)
 
@@ -83,9 +86,11 @@ Each `OpaqueGuard` names the edge by `EdgeRef`. Consider asserting your aggregat
 If a collection invariant must be enforced *inside* the aggregate (not just in the
 application layer), the options today are:
 
-1. **Application-layer invariant (default).** Keep append/remove/membership in the code that
-   builds the command, and let the aggregate store the result and guard structurally
-   (emptiness, counts via a separate scalar slot). This is what current Keiro services do.
+1. **Scalar tallies and application-layer invariants (default).** Keep append/remove/
+   membership in the code that builds the command, and let the aggregate store scalar facts
+   such as `openBlockerCount`, `pendingTransferNeeds`, or an emptiness flag. A whole-list
+   command field is sound when it is emitted for replay, but treat it as a read-model-style
+   summary, not the source of in-aggregate membership or quantifier guards.
 
 2. **Sub-entity-as-aggregate split.** If a collection element has its own identity and
    lifecycle (a blocker that opens/escalates/resolves), model *each element* as its own

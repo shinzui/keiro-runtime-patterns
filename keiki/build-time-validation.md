@@ -106,6 +106,8 @@ describe "Keiki well-formedness" $ do
     validateTransducer defaultValidationOptions reservationTransducer `shouldBe` []
   it "escalation process manager validates clean" $
     validateTransducer defaultValidationOptions escalationTransducer `shouldBe` []
+  it "incident aggregate has no opaque guards" $
+    validateTransducer defaultValidationOptions { warnOpaqueGuards = True } incidentTransducer `shouldBe` []
   -- optional, slower, needs z3:
   it "no provable determinism violations (solver)" $
     checkTransitionDeterminismSym incidentTransducer `shouldBe` []

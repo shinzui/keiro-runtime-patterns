@@ -187,7 +187,7 @@ a guard inside a `B.do` block — it never clashes and needs no import gymnastic
 A or B only when building a compound `HsPred` value outside a builder. See
 [operator-conflicts.md](./operator-conflicts.md).
 
-## Use `derive*All` When Helper Names Match Constructors
+## Use `derive*All` Or `derive*With` Instead Of Manual Enumeration
 
 Use the all-derived Template Haskell helpers whenever the generated helper suffix
 should equal the constructor name.
@@ -199,22 +199,27 @@ $(deriveAggregateCtorsAll ''CapacityCommand ''CapacityRegs)
 $(deriveWireCtorsAll ''CapacityEvent)
 ```
 
+When only a few helper suffixes differ, prefer the `With` variants and override just
+those constructors:
+
+```haskell
+$(deriveAggregateCtorsWith ''IncidentCommand ''IncidentRegs
+    defaultDeriveCtorOptions
+      { suffixOverrides = Map.fromList [("DeclareIncident", "Declare")]
+      }
+  )
+```
+
+Use the same pattern with `deriveWireCtorsWith` and `defaultDeriveWireOptions` when an
+event helper suffix differs from its constructor. Keep explicit `deriveAggregateCtors`
+or `deriveWireCtors` enumeration only as a legacy fallback for older Keiki versions.
+
 Avoid spelling out identity mappings:
 
 ```haskell
 $(deriveAggregateCtors ''CapacityCommand ''CapacityRegs
   [ ("ReportCapacity", "ReportCapacity")
   , ("ReserveIcuBed", "ReserveIcuBed")
-  ])
-```
-
-Keep the explicit `deriveAggregateCtors` or `deriveWireCtors` form only when at least
-one helper name intentionally differs from the constructor name, for example:
-
-```haskell
-$(deriveAggregateCtors ''IncidentCommand ''IncidentRegs
-  [ ("DeclareIncident", "Declare")
-  , ("AssignCommander", "AssignCommander")
   ])
 ```
 
@@ -242,10 +247,15 @@ Poor register slots:
 
 Keiki has **no** structural collection operations, and as of the 2026-06 design review
 they are **deferred** (a prototype was built and ratified NO-GO; see
-[collections-and-opaque-guards.md](./collections-and-opaque-guards.md)). So commands carry
-a full updated list, such as `activeResourceIds` or `pendingReservationIds`, and the
-aggregate stores it wholesale with `=:`. This is acceptable — and, importantly, it is
-**fully replay-safe and verified**: a whole list arriving on the command
+[collections-and-opaque-guards.md](./collections-and-opaque-guards.md)). Keiki's own
+modeling guide gives the rule: project collection facts into scalar tallies for guards,
+and promote elements with identity and lifecycle into their own aggregates or coordinated
+streams.
+
+Sometimes a command still carries a full updated list, such as `activeResourceIds` or
+`pendingReservationIds`, and the aggregate stores it wholesale with `=:`. This is acceptable
+for read-model-style summaries — and, importantly, it is **fully replay-safe and verified**:
+a whole list arriving on the command
 (`B.slot @"items" =: d.items`) is a *structural* input read, so `solveOutput` inverts it
 and `validateTransducer` sees the whole list on the wire. It just means the aggregate
 trusts the caller to have computed the list correctly.
@@ -355,8 +365,8 @@ Best practices:
 - Keep the target aggregate command separate from the process-manager command.
 - Emit all timer IDs, correlation IDs, and command fields needed to replay the
   process-manager state stream.
-- Add the process-manager transducer to the same `checkHiddenInputs` replay-safety
-  test as aggregate transducers.
+- Add the process-manager transducer to the same `validateTransducer defaultValidationOptions`
+  and opaque-guard audit tests as aggregate transducers.
 - Make timer-fired commands idempotent: if the process has already settled, command
   rejection should be acceptable to the timer worker.
 
