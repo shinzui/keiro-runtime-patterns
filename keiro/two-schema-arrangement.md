@@ -1,0 +1,42 @@
+# The two-schema arrangement
+
+**One service, two framework schemas: `kiroku` owns the log and notifications, while `keiro` owns runtime tables—qualify everything.**
+
+This standard separates event-store infrastructure, keiro runtime infrastructure, and application data so each migration owner and connection contract remains explicit.
+
+## Keep the namespaces separate
+
+The rule is one sentence: leave the kiroku connection schema at `kiroku`, let keiro migrations own `keiro`, and place projections in an application-owned schema.
+
+Kiroku resolves event-log tables and subscribes to `LISTEN <schema>.events` through its connection `schema`. Pointing that setting at `keiro` breaks the store contract rather than configuring the runtime. Keiro's framework SQL is instead fully qualified against the schema named by `Keiro.Schema.keiroSchema`; do not duplicate its current value, `"keiro"`, in application code.
+
+Application read-model tables conventionally occupy a third schema. Construct the pool with `keiroConnectionSettings connString appSchema`; it adds the application schema to `extraSearchPath` while keiro continues to address its own tables explicitly.
+
+## Qualify cross-schema SQL
+
+The rule is one sentence: application SQL that names framework or cross-schema tables must build identifiers with `qualifyTable`.
+
+`qualifyTable :: Text -> Text -> Text` produces a double-quoted `"schema"."table"` reference. Applications should normally use public runtime operations rather than query framework tables, but diagnostic or coordinating SQL must still follow this rule.
+
+```haskell
+-- CORRECT: follows the runtime's schema constant and quotes both identifiers.
+selectDueTimers =
+  "SELECT * FROM " <> qualifyTable keiroSchema "keiro_timers" <>
+  " WHERE wake_at <= now()"
+
+-- WRONG: depends on search_path and may resolve nowhere or to the wrong table.
+selectDueTimers =
+  "SELECT * FROM keiro_timers WHERE wake_at <= now()"
+```
+
+## Migrate before startup
+
+The rule is one sentence: run `keiro-migrate up` before the application starts; never create framework tables from application code.
+
+The native pg-migrate plan applies kiroku's component before keiro's component, then creates and evolves the dedicated runtime schema. For migration details, see the keiro repo's `docs/user/migrations.md` and `docs/user/upgrading-to-the-keiro-schema.md`.
+
+## Related Patterns
+
+- [Keiro runtime patterns](README.md)
+- [Kiroku event-store patterns](../kiroku/README.md)
+- [Migration standards](../migrations/README.md)

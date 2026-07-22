@@ -4,6 +4,7 @@ slug: document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance
 title: "Document the keiro runtime core and keiro-dsl adoption guidance"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -23,7 +24,7 @@ You can see it working by opening `keiro/README.md`, following any link, and cro
 
 ## Progress
 
-- [ ] Milestone 1: `keiro/` directory created; `keiro/two-schema-arrangement.md` (core glossary entry) written; `keiro/README.md` stub index created.
+- [x] Milestone 1: `keiro/` directory created; `keiro/two-schema-arrangement.md` (core glossary entry) written; `keiro/README.md` stub index created. (2026-07-22 17:45Z)
 - [ ] Milestone 2: `keiro/runtime-assembly.md` written.
 - [ ] Milestone 2: `keiro/command-cycle-and-errors.md` written.
 - [ ] Milestone 3: `keiro/read-models-and-projections.md` written.
@@ -42,7 +43,17 @@ You can see it working by opening `keiro/README.md`, following any link, and cro
 Document unexpected behaviors, bugs, optimizations, or insights discovered during
 implementation. Provide concise evidence.
 
-(None yet.)
+- Observation: `mkEventStreamOrThrow` is intentionally documented upstream for generated definitions and test fixtures with a sibling proof; hand-authored startup wiring should use `mkEventStream` and handle `Left [EventStreamWarning]` explicitly.
+  Evidence: `keiro-core/src/Keiro/EventStream/Validate.hs` documents the throwing helper's narrow use and labels `mkEventStreamUnchecked` for tests or emergency forensics.
+
+- Observation: snapshots are advisory only while the retained log is sufficient to hydrate from the beginning. After per-stream history truncation, a valid snapshot covering the hidden prefix is required or hydration returns `HydrationGapDetected`.
+  Evidence: command hydration falls back after missing, corrupt, or shape-mismatched snapshots, but checks the retained lower bound before replaying in `keiro/src/Keiro/Command.hs`.
+
+- Observation: the resume worker is required for suspended workflows and the timer worker is required only when `sleep` is used; `runWorkflowGcWorker` is optional retention housekeeping, not part of progress.
+  Evidence: `keiro/src/Keiro/Workflow/{Resume,Sleep,Gc}.hs` separates resumption, one-pass timer polling, and explicitly optional terminal-instance collection.
+
+- Observation: EP-2 already appended its DocRefs after the final keiki block, so the planned insertion point is no longer the end of the registry.
+  Evidence: the current `mori.dhall` has complete kiroku and migration blocks after `keiki-json-event-codecs`; EP-4 will append its block without reordering earlier plans' entries.
 
 
 ## Decision Log
@@ -69,6 +80,18 @@ implementation. Provide concise evidence.
 
 - Decision: The docs describe the runtime as "keiro 0.3" but attribute the behavioral contract to the 0.2.0.0 release, stating this explicitly in `keiro/README.md`.
   Rationale: 0.3.0.0 (2026-07-14) was a dependency-realignment release with no source changes to `keiro-core`, `keiro`, or `keiro-dsl`; every behavioral fact below (dedicated `keiro` schema, mandatory registration, strict validation, dead letters) landed in 0.2.0.0 (2026-07-13). Saying so prevents readers from hunting the 0.3 changelog for semantics that are not there.
+  Date: 2026-07-22
+
+- Decision: Hand-authored service assembly uses `mkEventStream` with explicit startup failure reporting, while generated code and fixtures may use `mkEventStreamOrThrow` when the validation proof is colocated.
+  Rationale: this follows the helper's source-level contract and preserves structured warnings at the application boundary.
+  Date: 2026-07-22
+
+- Decision: The snapshot standard includes a truncation exception: deletion is safe only while the event store retains a replayable prefix.
+  Rationale: stating that snapshots are unconditionally disposable would turn a performance mechanism into an unnoticed correctness dependency after compaction.
+  Date: 2026-07-22
+
+- Decision: Deploy workflow workers by capability: resume for suspended workflows, timer polling for `sleep`, external signal delivery for awakeables, and optional GC according to retention policy.
+  Rationale: the implementation exposes independent progress mechanisms; claiming that all three bundled workers are mandatory would overstate the runtime contract.
   Date: 2026-07-22
 
 
