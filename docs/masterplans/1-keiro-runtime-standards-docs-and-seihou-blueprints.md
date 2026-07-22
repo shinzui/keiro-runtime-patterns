@@ -4,6 +4,7 @@ slug: keiro-runtime-standards-docs-and-seihou-blueprints
 title: "Keiro runtime standards, docs, and seihou blueprints"
 kind: master-plan
 created_at: 2026-07-22T14:40:51Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 ---
 
 # Keiro runtime standards, docs, and seihou blueprints
@@ -41,7 +42,7 @@ Research grounding: nine parallel research reports were produced during planning
 
 | # | Title | Path | Hard Deps | Soft Deps | Status |
 |---|-------|------|-----------|-----------|--------|
-| 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Not Started |
+| 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | In Progress |
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Not Started |
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Not Started |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Not Started |

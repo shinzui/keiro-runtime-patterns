@@ -4,6 +4,7 @@ slug: rewrite-the-keiki-transducer-docs-for-keiki-0-2
 title: "Rewrite the keiki transducer docs for keiki 0.2"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -25,11 +26,11 @@ This plan is EP-1 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standar
 
 ## Progress
 
-- [ ] Milestone 1: `transducer-best-practices.md` corrected (mandatory output intent added, validation section updated to seven checks, structured-replay cross-reference added, builder import ritual added, process-manager section removed and replaced with the keiro redirect).
-- [ ] Milestone 1: `build-time-validation.md` corrected (eight `ValidationOptions` fields, eight warning constructors, updated determinism-pass description, keiro `mkEventStream` rejection note, symbolic-modeling gotchas).
-- [ ] Milestone 1: `json-event-codecs.md` corrected (five generated bindings, eight `EventCodecOptions` fields, in-band `"v"` version, `fcOnMissing`, cross-link to the new evolution guide).
-- [ ] Milestone 1: `diagram-docs.md` reframed ("Include Process Managers" replaced with orchestrator framing; `ProcessManagerDiagram` labeled cosmetic) and given additive cross-references.
-- [ ] Milestone 1: additive cross-references and style conformance applied to `diagnosing-rejected-commands.md`, `collections-and-opaque-guards.md`, and `operator-conflicts.md`.
+- [x] (2026-07-22 16:34Z) Milestone 1: `transducer-best-practices.md` corrected (mandatory output intent added, validation section updated to seven checks, structured-replay cross-reference added, builder import ritual added, process-manager section removed and replaced with the keiro redirect).
+- [x] (2026-07-22 16:34Z) Milestone 1: `build-time-validation.md` corrected (eight `ValidationOptions` fields, eight warning constructors, updated determinism-pass description, keiro `mkEventStream` rejection note, symbolic-modeling gotchas).
+- [x] (2026-07-22 16:34Z) Milestone 1: `json-event-codecs.md` corrected (five generated bindings, eight `EventCodecOptions` fields, in-band `"v"` version, `fcOnMissing`, cross-link to the new evolution guide).
+- [x] (2026-07-22 16:34Z) Milestone 1: `diagram-docs.md` reframed ("Include Process Managers" replaced with orchestrator framing; `ProcessManagerDiagram` labeled cosmetic) and given additive cross-references.
+- [x] (2026-07-22 16:34Z) Milestone 1: additive cross-references and style conformance applied to `diagnosing-rejected-commands.md`, `collections-and-opaque-guards.md`, and `operator-conflicts.md`.
 - [ ] Milestone 2: new doc `keiki/structured-replay-and-hydration.md` written.
 - [ ] Milestone 2: new doc `keiki/event-schema-evolution.md` written.
 - [ ] Milestone 2: new doc `keiki/checked-composition.md` written.

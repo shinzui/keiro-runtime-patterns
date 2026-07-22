@@ -1,5 +1,7 @@
 # Diagnosing Rejected Commands with `stepEither`
 
+**Use structured rejection reasons to separate expected command refusal from transducer defects.**
+
 `step` is Keiki's pure entry point for running one command. On success it returns
 `Just (nextVertex, nextRegs, events)`; on any failure it returns a single, opaque
 `Nothing`. That is fine when all you need is accept/reject, but it hides *why* a command was
@@ -66,5 +68,14 @@ runtime, the transducer has overlapping guards that `validateTransducer` /
 `checkTransitionDeterminismSym` should have caught. Keep `step` for hot paths where a bare
 accept/reject is all you need.
 
-See also: [transducer-best-practices.md](./transducer-best-practices.md) ("Prefer `step`
-Over `delta` Plus `omega`").
+Replay has the same diagnostic shape. `ReplayStepFailure` explains hydration through
+`ReplayNoInvertingEdge`, `ReplayAmbiguousInversions`, and `ReplayQueueMismatch`, just as
+`StepFailure` explains forward command execution. See
+[Structured Replay and Hydration](./structured-replay-and-hydration.md); never replace a
+replay failure with a partial state.
+
+## Related Patterns
+
+- [Keiki Transducer Best Practices](./transducer-best-practices.md) explains when to choose `step` or `stepEither`.
+- [Build-Time Validation](./build-time-validation.md) prevents the ambiguity defects surfaced here at runtime.
+- [Structured Replay and Hydration](./structured-replay-and-hydration.md) covers the replay-side failure taxonomy.

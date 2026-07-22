@@ -1,5 +1,7 @@
 # Collections and Opaque Guards
 
+**Store collections when needed, but keep every durable invariant structurally visible to Keiki.**
+
 Keiki has no first-class collection registers. This is the single most common thing Keiro
 service authors trip over, so read this before modeling any aggregate whose state holds a
 `Map`, `Set`, or list. The short version from Keiki's own
@@ -79,7 +81,9 @@ opaqueGuards =
 ```
 
 Each `OpaqueGuard` names the edge by `EdgeRef`. Consider asserting your aggregates have
-*no unaudited* opaque guards, or at least reviewing each one.
+*no unaudited* opaque guards, or at least reviewing each one. This call still runs all seven
+default checks; the list comprehension deliberately filters the combined result so this audit
+contains only `OpaqueGuard` findings.
 
 ## The sound options when you need an in-aggregate collection invariant
 
@@ -94,7 +98,7 @@ application layer), the options today are:
 
 2. **Sub-entity-as-aggregate split.** If a collection element has its own identity and
    lifecycle (a blocker that opens/escalates/resolves), model *each element* as its own
-   small **scalar** aggregate on its own stream, coordinated by a process manager. Full
+   small **scalar** aggregate on its own stream, coordinated by a keiro process manager. Full
    Keiki guarantees per sub-aggregate. This is usually the better design when you reach for
    a collection register — it is often a sign the aggregate boundary is too coarse.
 
@@ -112,6 +116,8 @@ application layer), the options today are:
 | Guard "k is a member" via `Map.member` in a `TApp` | works at runtime, but **not** symbolically verified — audit with `warnOpaqueGuards` | ⚠️ |
 | Per-element lifecycle inside the aggregate | split the element into its own scalar aggregate | ✅ |
 
-See also: [build-time-validation.md](./build-time-validation.md) and the "Be Careful With
-Whole-Collection Command Fields" section of
-[transducer-best-practices.md](./transducer-best-practices.md).
+## Related Patterns
+
+- [Build-Time Validation](./build-time-validation.md) explains the seven defaults and the opt-in audit.
+- [Keiki Transducer Best Practices](./transducer-best-practices.md) covers whole-collection command fields and replay.
+- [Checked Composition](./checked-composition.md) explains when independent identities belong on separate streams rather than inside one machine.

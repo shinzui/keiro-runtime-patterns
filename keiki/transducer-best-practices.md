@@ -1,7 +1,9 @@
 # Keiki Transducer Best Practices
 
+**Author replay-safe transducers whose private events make every durable decision reproducible.**
+
 Use this guide when building Keiki-backed transducers for Keiro runtime projects:
-aggregates, process-manager state streams, and other durable state machines. It
+aggregates, orchestrator transducers, and other durable state machines. It
 captures the practices that prevent hydration/replay failures and keeps modules close
 to the current Keiki DSL.
 
@@ -9,7 +11,7 @@ to the current Keiki DSL.
 
 Keiki is for pure durable transducers: command guards, typed register updates, event
 emission, replay, and diagram generation. In a Keiro service, that includes ordinary
-aggregates and process-manager state streams such as escalation or surge tracking. Do
+aggregates and orchestrators such as escalation or surge tracking. Do
 not use Keiki as a generic JSON validation layer or as a replacement for service
 integration contracts.
 
@@ -20,6 +22,18 @@ transducer decide whether those commands are valid in the current durable state.
 ## Author With The Builder DSL
 
 Prefer `Keiki.Builder` over hand-written `Edge` values.
+
+Builder modules need the two syntax extensions, a qualified builder import, and an
+unqualified assignment operator. The unqualified import is load-bearing for field-keyed
+assignment inside `B.do` blocks:
+
+```haskell
+{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE QualifiedDo #-}
+
+import qualified Keiki.Builder as B
+import Keiki.Builder ((.=))
+```
 
 Use this shape:
 
@@ -40,6 +54,30 @@ aggregateTransducer =
 
 Use direct AST construction only when the builder cannot express the edge shape.
 If a transducer needs many direct AST edges, treat that as a design review signal.
+
+Every `onCmd` and `onEpsilon` body must declare output intent before `goto`. Use `emit` or
+`emitWith` for persisted output, and call `noEmit` when the edge is deliberately silent.
+Reaching `goto` without any of those calls is an eager construction error in 0.2:
+
+```haskell
+-- WRONG: rejected at construction because output intent is missing.
+B.onCmd inCtorAcknowledge $ \d -> B.do
+  B.requireEq (B.reg @"settled") (lit False)
+  B.goto Acknowledged
+
+-- CORRECT: this edge is deliberately silent.
+B.onCmd inCtorAcknowledge $ \d -> B.do
+  B.requireEq (B.reg @"settled") (lit False)
+  B.noEmit
+  B.goto Acknowledged
+```
+
+`buildTransducer` preserves the convenient value-returning API and throws a rendered builder
+error for malformed edges. Prefer `buildTransducerEither` in tests, CLIs, and other callers
+that must handle construction failures as values; it returns all located `BuilderError`
+values, which `renderBuilderErrors` formats in declaration order. Both builders now require
+`DistinctNames (Names rs)` so duplicate register-slot names fail at compile time and `Eq v`
+for vertex grouping; the old `Bounded v` and `Enum v` constraints are gone.
 
 ## Prefer `step` Over `delta` Plus `omega`
 
@@ -115,11 +153,16 @@ B.onCmd inCtorRequestTransferReservation $ \d -> B.do
 The private event does not need to match the public integration message. Keep public
 contracts bounded-context safe, but make private aggregate events replay-invertible.
 
+For a multi-event edge, the first emitted event must carry every command field the edge
+consumes. Streaming replay chooses and inverts an edge from that head event alone; tail events
+are only equality-checked against the remaining expected queue. Tail-only coverage produces
+`HeadUnrecoverable`. See [Structured Replay and Hydration](./structured-replay-and-hydration.md)
+for `reconstituteEither`, `replayEvents`, and the structured failure surface.
+
 ## Add Build-Time Validation Tests For Every Transducer
 
 Every service test suite should assert that each aggregate is well-formed. Prefer the
-umbrella check `validateTransducer`, which in one call covers hidden replay inputs,
-nondeterministic (overlapping) guards, and unreachable/dead edges — and is pure (no z3):
+umbrella check `validateTransducer`, which runs seven default-on checks and is pure (no z3):
 
 ```haskell
 import Keiki.Core (validateTransducer, defaultValidationOptions)
@@ -131,19 +174,21 @@ testKeikiValidation = do
 ```
 
 Each entry in the result is a structured `TransducerValidationWarning s` you can
-pattern-match on — `HiddenInput`, `NondeterministicPair`, or `PossiblyDeadEdge` — each
-naming the offending edge by its typed `EdgeRef`. If the assertion fails, inspect the
-named edge: a `HiddenInput` usually means a guard/update reads a command field the emitted
-private event does not carry (add the field, per the rule above); a `NondeterministicPair`
-means two outgoing guards overlap (tighten one); a `PossiblyDeadEdge` means a vertex is
-unreachable or a guard is statically unsatisfiable.
+pattern-match on. The eight constructors are `HiddenInput`, `HeadUnrecoverable`,
+`InversionAmbiguity`, `UnguardedInputRead`, `StateChangingEpsilon`, `NondeterministicPair`,
+`PossiblyDeadEdge`, and the opt-in `OpaqueGuard`; each names the offending edge or edge pair.
+Fix the model rather than suppressing a warning.
+
+Keiro's `mkEventStream` runs this same umbrella at service startup and returns `Left warnings`
+for any finding. It force-enables the head-recoverability and state-changing-epsilon checks at
+the durable boundary, so a warning here is a deployment blocker rather than advice.
 
 `checkHiddenInputs t` alone is still available if you want only the hidden-input slice, but
 `validateTransducer` is the recommended single assertion. For the exact, solver-backed
 determinism and dead-edge answers (which prove overlaps the pure path cannot), call
 `Keiki.Symbolic.checkTransitionDeterminismSym` / `checkDeadEdgesSym`. See
-[build-time-validation.md](./build-time-validation.md) for the full menu, including the
-opt-in opaque-guard audit.
+[build-time-validation.md](./build-time-validation.md) for all warning-specific fixes, the
+opt-in opaque-guard audit, and the solver escalation path.
 
 ## Prefer Readable Predicate Operators
 
@@ -332,47 +377,19 @@ transducers. Regenerate diagrams after meaningful aggregate changes and review:
 
 Diagrams do not replace tests, but they catch modeling mistakes quickly.
 
-## Process-Manager State Streams
+## Orchestrators Are Transducers Too
 
-Keiro process managers can use Keiki for their own durable state stream, separate from
-the target aggregate stream. This is the right pattern when the process needs to
-remember acknowledgements, scheduled timers, escalation levels, follow-up state, or
-other cross-event progress.
+Keiki has no separate process-manager, saga, policy, or reactor abstraction. An orchestrator
+is itself a transducer: an aggregate maps commands to events, while an orchestrator maps
+events to commands. Author it with the same builder, validate it with the same
+`validateTransducer`, and wire it with `compose`, `composeChecked`, `alternative`, or the
+limited `feedback1` combinator from `Keiki.Composition`. See
+[Checked Composition](./checked-composition.md) before choosing a composition boundary.
 
-Use this shape:
-
-```haskell
-type EscalationEventStream =
-  EventStream
-    (HsPred EscalationRegs EscalationCommand)
-    EscalationRegs
-    EscalationState
-    EscalationCommand
-    EscalationEvent
-
-incidentEscalationProcessManager =
-  ProcessManager
-    { eventStream = escalationEventStream
-    , targetEventStream = incidentEventStream
-    , handle = \input -> ProcessManagerAction { command, commands, timers }
-    }
-```
-
-Best practices:
-
-- Model the process manager's durable state as a normal Keiki transducer.
-- Keep process-manager commands and events private to the service.
-- Keep the target aggregate command separate from the process-manager command.
-- Emit all timer IDs, correlation IDs, and command fields needed to replay the
-  process-manager state stream.
-- Add the process-manager transducer to the same `validateTransducer defaultValidationOptions`
-  and opaque-guard audit tests as aggregate transducers.
-- Make timer-fired commands idempotent: if the process has already settled, command
-  rejection should be acceptable to the timer worker.
-
-Do not store process-manager progress only in timers or read models. Timers are wakeup
-mechanisms, and read models are projections; the Keiki process-manager stream is the
-durable source of truth for the process state.
+The hosted, durable `ProcessManager` record belongs to keiro's `Keiro.ProcessManager`. It
+adds correlation keys, a saga event stream, target dispatch, atomic actions, and durable
+timers around a keiki transducer. The complete hosted pattern will be documented by
+[EP-5](../docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md).
 
 ## Minimum Checklist For A New Keiki Transducer
 
@@ -382,16 +399,28 @@ durable source of truth for the process state.
 - Use `deriveAggregateCtorsAll` and `deriveWireCtorsAll` unless helper names need
   custom suffixes.
 - Author edges with `Keiki.Builder`.
+- Declare output intent on every edge with `emit`, `emitWith`, or `noEmit`.
 - Use `step` in the pure command runner; use `stepEither` where you need the rejection reason.
 - Use readable Keiki predicate and arithmetic operators (and the `B.requireGt`-style verbs
   to dodge any lens operator clash).
 - Ensure emitted private events carry every command field read by guards or updates.
-- Add a `validateTransducer defaultValidationOptions transducer == []` test (covers hidden
-  inputs, determinism, and dead edges in one assertion).
+- Add a `validateTransducer defaultValidationOptions transducer == []` test covering all seven
+  default-on checks.
 - If the aggregate guards on collection contents through a `TApp`, run the
   `warnOpaqueGuards = True` audit and confirm you understand each `OpaqueGuard`.
 - Add command tests for rejected guards and accepted transitions.
-- Add replay tests for any edge that reads command fields in guards.
+- Add a replay round-trip test with `replayEvents` or `reconstituteEither` for any edge that
+  reads command fields in guards.
 - Generate or review the Mermaid diagram for the aggregate.
-- If the transducer backs a process manager, test timer-fired and already-settled
-  paths as well.
+- If the transducer backs a keiro process manager's saga stream, test timer-fired and
+  already-settled paths as well.
+
+## Related Patterns
+
+- [Build-Time Validation](./build-time-validation.md) is the complete warning and solver guide.
+- [Structured Replay and Hydration](./structured-replay-and-hydration.md) turns replay failures into actionable diagnostics.
+- [Checked Composition](./checked-composition.md) defines safe aggregate and orchestrator boundaries.
+- [Event Schema Evolution](./event-schema-evolution.md) keeps persisted private-event JSON compatible.
+- [Diagnosing Rejected Commands](./diagnosing-rejected-commands.md) explains forward command failures.
+- [Collections and Opaque Guards](./collections-and-opaque-guards.md) keeps collection invariants verifiable.
+- [Keiki Diagram Documentation](./diagram-docs.md) derives visual regression evidence from executable machines.

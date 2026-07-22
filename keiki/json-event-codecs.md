@@ -1,84 +1,103 @@
 # Deriving JSON Codecs for Keiki Event Sums
 
-Keiki core is intentionally codec-free — the pure layer talks only typed Haskell values. JSON
-serialization for the events you persist lives in the sibling package **`keiki-codec-json`**.
-This guide covers `deriveEventCodecSkeleton`, which generates a `kind`-discriminated
-encode/decode pair for an event sum type, eliminating the hand-written aeson per event and the
-drift risk between the Keiki payload shape and the stored JSON.
+**Generate explicit, versioned private-event codecs and make every schema choice compile-time visible.**
 
-> This is for the **private event sum** you store on the durable stream. Keep public
-> integration messages on their own hand-managed contracts — see "Keep Private Events
-> Replay-Oriented" in [transducer-best-practices.md](./transducer-best-practices.md).
+Keiki core is intentionally codec-free; JSON serialization for persisted private events lives in `keiki-codec-json`. Use `deriveEventCodecSkeleton` for sum types whose constructors wrap record payloads so encoding decisions, stable wire kinds, schema versions, and missing-field behavior remain explicit.
 
-## What the splice generates
+## Generate The Complete Codec Surface
 
-For an event sum (each constructor a single record payload):
+For an event sum, invoke the splice with deliberate field settings:
 
 ```haskell
-import Keiki.Codec.JSON.Event (deriveEventCodecSkeleton, defaultEventCodecOptions)
+import Keiki.Codec.JSON.Event
+  ( defaultEventCodecOptions
+  , deriveEventCodecSkeleton
+  )
 
 $(deriveEventCodecSkeleton defaultEventCodecOptions ''OrderEvent)
 ```
 
-four top-level bindings are emitted, prefixed by the lower-cased type name:
+The splice emits five top-level bindings, using a prefix made by lower-casing the type name's first letter:
 
 ```haskell
-orderEventToJSON     :: OrderEvent -> Aeson.Value
-orderEventFromJSON   :: Aeson.Value -> Either String OrderEvent
-orderEventEventTypes :: [Text]                 -- constructor names, in order
-orderEventKindMap    :: [(Text, Text)]         -- (constructor, kind) pairs
+orderEventToJSON        :: OrderEvent -> Aeson.Value
+orderEventFromJSON      :: Aeson.Value -> Either String OrderEvent
+orderEventEventTypes    :: [Text]
+orderEventKindMap       :: [(Text, Text)]
+orderEventSchemaVersion :: Int
 ```
 
-Each constructor encodes to a JSON object with a `"kind"` discriminator (the constructor
-name) plus one entry per payload field; the decoder reads `"kind"`, branches, and reassembles
-the payload field by field. The `EventTypes`/`KindMap` lists are handy for wiring a Keiro
-runtime's `eventTypes` registry.
+Use `deriveEventCodecSkeletonAs "myPrefix" opts ''OrderEvent` when the inferred prefix is unsuitable. `EventTypes` contains the resolved wire kinds in declaration order, `KindMap` pairs Haskell constructor names with those kinds, and `SchemaVersion` exposes the encoder's current version.
 
-Use `deriveEventCodecSkeletonAs "myPrefix" opts ''OrderEvent` if you need an explicit prefix.
+Every encoded object carries the discriminator key, defaulting to `"kind"`, and the in-band version key, defaulting to `"v"`, alongside its payload fields:
 
-## No silent generic fallback (the anti-drift property)
+```json
+{
+  "kind": "OrderPlaced",
+  "v": 1,
+  "orderId": "order-42"
+}
+```
 
-This is the point of the skeleton over a blanket `deriveJSON`. Every payload field is encoded
-one of three ways, chosen by **field name**:
+When `kindOverrides` names a constructor, the pinned value becomes the wire kind instead of the Haskell constructor name.
 
-- a name in `fieldCodecOverrides` uses the author-supplied `FieldCodec` functions;
-- a name in `passthroughFields` uses the field type's own `ToJSON`/`FromJSON`;
-- otherwise the field is *unhandled*, and `onMissingCodec` decides.
+## Keep The Anti-Drift Default
 
-There is never a quiet generic guess. `onMissingCodec` is either:
+Every payload field is handled by its field name in exactly one of three ways:
 
-- **`FailAtCompileTime`** (the default) — the splice aborts, listing every unhandled field, so
-  you must make a decision; or
-- **`EmitTodoBindings`** — emits clearly-named `_todo_Event_field` placeholders that compile
-  but are `error "TODO: ..."`-bodied, letting you stage the work.
+- `fieldCodecOverrides` selects an author-supplied `FieldCodec`.
+- `passthroughFields` uses the field type's `ToJSON` and `FromJSON` instances.
+- Every other field is unhandled, and `onMissingCodec` decides whether the splice fails or emits an explicit TODO binding.
 
-Either way, **adding a field to a payload record forces a compile-time decision** — the stored
-JSON cannot silently drift from the event shape.
+`FailAtCompileTime` is the default and should remain the service default. `EmitTodoBindings` is only a staging aid: its generated placeholders compile but throw if evaluated. There is no generic fallback, so adding a payload field forces a visible codec decision.
 
-## Options
+## Configure All Eight Options Deliberately
+
+`EventCodecOptions` has eight fields:
 
 ```haskell
 data EventCodecOptions = EventCodecOptions
-  { fieldCodecOverrides :: Map String FieldCodec  -- per-field-name custom encode/decode
-  , passthroughFields   :: Set String             -- fields that may use their own aeson instances
-  , kindFieldName       :: String                 -- discriminator key; default "kind"
-  , onMissingCodec      :: OnMissingCodec          -- FailAtCompileTime (default) | EmitTodoBindings
+  { fieldCodecOverrides :: Map String FieldCodec
+  , passthroughFields    :: Set String
+  , kindFieldName        :: String
+  , kindOverrides        :: Map String String
+  , versionFieldName     :: String
+  , currentVersion       :: Int
+  , upcasters            :: [(Int, Name)]
+  , onMissingCodec       :: OnMissingCodec
   }
-
-defaultEventCodecOptions  -- empty overrides/passthrough, kind="kind", FailAtCompileTime
 ```
 
-Typical use: list the fields whose types already have aeson instances in `passthroughFields`,
-supply a `FieldCodec` for anything bespoke in `fieldCodecOverrides`, and keep
-`FailAtCompileTime` so new fields can't slip through.
+Start from `defaultEventCodecOptions`: empty overrides and passthrough fields, `"kind"`, no kind pins, `"v"`, version `1`, no upcasters, and `FailAtCompileTime`.
 
-## Why a separate package
+Pin a wire kind before renaming a persisted constructor. For a structural envelope change, increase `currentVersion` and provide one upcaster for every historical source version. A version-`n` function upgrades one whole JSON object to version `n + 1`; the splice rejects gaps, duplicates, and any chain that is not exactly `[1 .. currentVersion - 1]`.
 
-`keiki-codec-json` exists so Keiki core stays aeson-free (a load-bearing constraint). The
-generated code references aeson but is produced by Template Haskell quotation, so a consumer
-module needs only `TemplateHaskell` and the splice — it imports neither aeson nor the codec
-helpers directly. Do **not** add an aeson dependency to a module just to hand-write event JSON;
-reach for the skeleton instead.
+## Use Missing-Field Defaults Only For Additive Changes
 
-See also the package's own `README` / `Keiki.Codec.JSON.Event` haddock in the Keiki repo for
-a full worked example and the negative-case (compile-failure) procedure.
+`FieldCodec` now carries a missing-key hook:
+
+```haskell
+data FieldCodec = FieldCodec
+  { fcEncode    :: Name
+  , fcDecode    :: Name
+  , fcOnMissing :: Maybe Name
+  }
+
+fieldCodec :: Name -> Name -> FieldCodec
+```
+
+`fcOnMissing` names a top-level constant of the field's Haskell type. Use it when a field is purely additive and old envelopes should decode with a stable default. The `fieldCodec encodeName decodeName` smart constructor creates the strict form with no missing-key default.
+
+Decoding ignores unknown object keys, so removing a field does not by itself break old envelopes. It can still break replay if that field carried command information needed to reconstruct a transition. Review the emit-every-field rule before deleting persisted data.
+
+The generated decoder calls runtime helpers such as `lookupVersion` and `migrateEnvelope`; application code normally does not call them directly. Upcasting runs before discriminator dispatch, so a migration may change both payload keys and the wire kind.
+
+## Preserve The Package Boundary
+
+`keiki-codec-json` exists so the pure core remains aeson-free. Do not add aeson to aggregate modules merely to hand-write private-event JSON when the skeleton can express the contract. Keep public integration events on separately versioned, bounded-context contracts; these generated codecs are for the private events stored on a service's durable stream.
+
+## Related Patterns
+
+- [Event Schema Evolution](./event-schema-evolution.md) gives the complete additive-field, constructor-rename, and upcaster playbook.
+- [Keiki Transducer Best Practices](./transducer-best-practices.md) explains why private event fields are shaped for replay rather than public integration contracts.
+- [Upgrading to Keiki 0.2](./upgrading-to-keiki-0-2.md) lists the fifth generated binding and other migration-visible changes.

@@ -1,5 +1,7 @@
 # Resolving Keiki Operator Conflicts with `lens` / `generic-lens`
 
+**Keep transducer guards readable without letting shared-prelude operators make imports ambiguous.**
+
 Keiki gives transducer authors infix predicate and term operators — comparison `(.<)`
 `(.<=)` `(.>)` `(.>=)`, equality `(.==)` `(./=)`, logical `(.&&)` `(.||)`, and arithmetic
 `(.+)` `(.-)` `(.*)`. They read well: `B.reg @"onHand" .>= lit 1`. The problem is a name
@@ -61,10 +63,13 @@ compound `HsPred` *value* with the operators (e.g. combining comparisons with `.
 before handing the result to `requireGuard`), or when constructing a predicate outside any
 builder block — in which case the qualified import (Recipe B) is cleanest.
 
-## Note
+## Know The Boundary
 
 No function-style aliases exist for the comparison *operators* beyond the builder verbs
 above (there is intentionally no `greaterThan`/`lessOrEqual`): inside a builder the verbs
-cover it, and outside one the qualified `Keiki.Operators` import does. See also the
-"Prefer Readable Predicate Operators" section of
-[transducer-best-practices.md](./transducer-best-practices.md).
+cover it, and outside one the qualified `Keiki.Operators` import does.
+
+## Related Patterns
+
+- [Keiki Transducer Best Practices](./transducer-best-practices.md) applies these imports in the complete authoring workflow.
+- [Build-Time Validation](./build-time-validation.md) shows how readable structural predicates feed the pure checker.
