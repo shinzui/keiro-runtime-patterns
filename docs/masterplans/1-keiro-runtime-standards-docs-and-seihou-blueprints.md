@@ -43,7 +43,7 @@ Research grounding: nine parallel research reports were produced during planning
 | # | Title | Path | Hard Deps | Soft Deps | Status |
 |---|-------|------|-----------|-----------|--------|
 | 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Complete |
-| 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | In Progress |
+| 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Complete |
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Not Started |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Not Started |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Not Started |
@@ -91,8 +91,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-1: Stale keiki docs corrected per the audit (per-file fixes for README, transducer-best-practices, build-time-validation, json-event-codecs)
 - [x] EP-1: New keiki 0.2 capability docs written (structured replay, new validation checks, noEmit intent, event-schema evolution, checked composition)
 - [x] EP-1: Process-manager framing removed from keiki docs and redirected; mori.dhall registrations complete (including the missing diagram-docs entry)
-- [ ] EP-2: Kiroku event-store best-practice docs written (append/read/subscription/consumer-group/operational invariants)
-- [ ] EP-2: pg-migrate standards written (component authoring, service migrations package, cohort upgrade paths) and registered
+- [x] EP-2: Kiroku event-store best-practice docs written (append/read/subscription/consumer-group/operational invariants)
+- [x] EP-2: pg-migrate standards written (component authoring, service migrations package, cohort upgrade paths) and registered
 - [ ] EP-3: Stale statements fixed in keiro repo (why-keiro §7.4, package README status, Keiro.version)
 - [ ] EP-3: Stale statements fixed in kiroku, settei, danwa, and haskell-jitsurei repos
 - [ ] EP-4: Keiro runtime core docs written (assembly, command cycle, read models, workflows, telemetry)
@@ -124,6 +124,11 @@ Findings from the planning research pass that shaped the decomposition (evidence
   /Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns --no-seihou-discovery` refresh made all
   twelve visible. EP-2, EP-4, EP-5, EP-6, and EP-8 must repeat that acceptance step after
   adding their DocRefs.
+- EP-2 found that `Kiroku.Metrics.Prometheus` calls the global-position-backed
+  `kiroku_events_appended_total` “gap-free,” while the public `GlobalPosition` contract
+  explicitly says positions need not be dense. The pattern corpus follows the public type
+  contract; EP-3 now owns correcting the stale upstream HELP text so later observability
+  docs do not inherit the contradiction.
 
 
 ## Decision Log
@@ -183,6 +188,13 @@ Source and style audits passed against the released `v0.2.0.0` tag. The remainin
 plans are unaffected except for the newly recorded requirement to refresh Mori after DocRef
 changes.
 
+EP-2 is complete. The repository now has eight Kiroku documents and seven pg-migrate
+documents, all linked, registered, and visible in Mori alongside the twelve Keiki docs.
+Validation passed against the released dependency tags: 30 symbol checks, complete style
+and relative-link audits, Dhall type-checking, Mori validation, and registry refresh. The
+ADR pass produced no new record; the one upstream stale-description finding was assigned
+to EP-3.
+
 
 ## Revision Notes
 
@@ -190,3 +202,7 @@ changes.
 - 2026-07-22 (EP-1 completion): marked the keiki 0.2 corpus complete and recorded the
   cross-plan Mori refresh requirement discovered during acceptance. Reason: later doc plans
   must update both `mori.dhall` and Mori's indexed projection to satisfy discoverability.
+- 2026-07-22 (EP-2 completion): added and registered the Kiroku and pg-migrate standards,
+  marked EP-2 complete, and cascaded the global-position Prometheus HELP contradiction to
+  EP-3. Reason: the pattern corpus must follow the public opaque-cursor contract while the
+  stale upstream description is corrected at its source.

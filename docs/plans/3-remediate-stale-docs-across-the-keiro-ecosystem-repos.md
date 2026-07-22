@@ -46,6 +46,7 @@ implementer can locate it even if line numbers drift.
 - [ ] M1: Set `Keiro.version` in `keiro/src/Keiro.hs` to `"0.3.0.0"` with a lockstep comment, and record the fix under `## [Unreleased]` in the repo-root `CHANGELOG.md`.
 - [ ] M1: Run the keiro acceptance greps; commit as two commits (docs, fix) with MasterPlan/ExecPlan trailers.
 - [ ] M2: Replace the codd/`CODD_SCHEMAS` quick-start paragraph in the kiroku `README.md` with the native `kiroku-store-migrate up` instruction; acceptance grep; commit.
+- [ ] M2: Correct the `kiroku_events_appended_total` Prometheus HELP text so it no longer calls `GlobalPosition` gap-free; acceptance grep; include in the kiroku commit.
 - [ ] M3: Update all four `0.1.0.0` release-status references in settei `README.md` (lines ~12, ~42) and `docs/compatibility.md` (lines ~3, ~74) to `0.2.0.0`; acceptance grep; commit.
 - [ ] M4: Fix the stale `description:` field of `danwa-core/danwa-core.cabal` (lines ~7-12).
 - [ ] M4: Insert two clearly-marked editorial notes in `docs/masterplans/1-bootstrap-danwa-event-sourced-conversation-substrate.md` (before the package list at line ~90 and before the superseded Decision Log entries at line ~571), each pointing at the reversal entry.
@@ -60,7 +61,11 @@ implementer can locate it even if line numbers drift.
 Document unexpected behaviors, bugs, optimizations, or insights discovered during
 implementation. Provide concise evidence.
 
-(None yet.)
+- EP-2 verified that `kiroku-metrics/src/Kiroku/Metrics/Prometheus.hs` describes
+  `kiroku_events_appended_total` as a “gap-free global position,” while
+  `kiroku-store/src/Kiroku/Store/Types.hs` explicitly defines `GlobalPosition` as opaque,
+  strictly increasing, and not necessarily dense. Milestone 2 now corrects that stale HELP
+  text together with the already-planned Kiroku README fix.
 
 
 ## Decision Log
@@ -498,15 +503,23 @@ the full command set (`plan`, `list`, `check`, `up`, `verify`, `status`,
 `new`, `repair`) and runtime settings.
 ````
 
-**Step 2.2 — commit.**
+**Step 2.2 — correct the stale Prometheus HELP text.** In
+`kiroku-metrics/src/Kiroku/Metrics/Prometheus.hs`, replace the description “Total events
+appended store-wide (gap-free global position).” with wording that states it is the current
+store global position and does not promise density. Preserve the metric name for
+compatibility; this step changes only its operator-facing HELP description.
+
+**Step 2.3 — commit.**
 
 ```bash
 cd /Users/shinzui/Keikaku/bokuno/kiroku-project/kiroku
-git add README.md
-git commit -m "docs(readme): replace codd quick-start with kiroku-store-migrate
+git add README.md kiroku-metrics/src/Kiroku/Metrics/Prometheus.hs
+git commit -m "docs(kiroku): correct migration and global-position guidance
 
 The quick-start still instructed CODD_SCHEMAS=kiroku; migrations moved
 to the native pg-migrate component applied via kiroku-store-migrate up.
+The Prometheus HELP text also promised gap-free global positions despite
+the public opaque-cursor contract.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
 ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
@@ -842,6 +855,8 @@ Kiroku (`/Users/shinzui/Keikaku/bokuno/kiroku-project/kiroku`):
 ```bash
 grep -rn "CODD_SCHEMAS" README.md                      # must return empty
 grep -n  "kiroku-store-migrate up" README.md           # must show the new quick-start
+grep -n  "gap-free global position" kiroku-metrics/src/Kiroku/Metrics/Prometheus.hs  # must return empty
+grep -n  "current store global position" kiroku-metrics/src/Kiroku/Metrics/Prometheus.hs  # must show the corrected HELP text
 ```
 
 Settei (`/Users/shinzui/Keikaku/bokuno/settei`):

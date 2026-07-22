@@ -48,7 +48,7 @@ Update this checklist at every stopping point. Split partially completed items i
 - [x] Milestone 3: symbol cross-check script runs with zero `MISS` lines
 - [x] Milestone 3: `dhall --file mori.dhall` type-checks and `mori validate` prints `Configuration is valid.`
 - [x] Milestone 3: link check over both README indexes reports no broken links
-- [ ] Completion: ADR distillation pass performed (create `docs/adr/` and seed records only if durable decisions emerged)
+- [x] Completion: ADR distillation pass performed (no new repository-level decision emerged; no ADR needed)
 
 
 ## Surprises & Discoveries
@@ -96,9 +96,22 @@ Record every decision made while working on the plan.
 
 ## Outcomes & Retrospective
 
-Summarize outcomes, gaps, and lessons learned at major milestones or at completion. Compare the result against the original purpose. Before marking the plan complete, distill durable project context from the Decision Log, Surprises & Discoveries, and this section into `docs/adr/`. Keep task-local execution details here.
+Completed 2026-07-22. The repository now contains the planned eight-file `kiroku/` corpus
+and seven-file `migrations/` corpus. The indexes reach every sibling document, the Kiroku
+runbook contains all ten operational invariants, and the highest-risk contracts—resource-
+aware transactional append, stopped-means-absent subscriptions, ledger-only verification,
+and evidence-honest Codd import—are stated prescriptively.
 
-(To be filled during and after implementation.)
+All acceptance checks passed: exactly 15 new Markdown files; one H1, tagged code fences,
+and trailing Related Patterns in every file; no broken relative links; 30 source symbols
+found with zero misses; Dhall type-check successful; `mori validate` reported
+`Configuration is valid.`; 15 prefix-scoped DocRefs; and the refreshed Mori registry lists
+27 total corpus documents. The release audit also matched Hackage and upstream tags.
+
+The ADR distillation pass found no new durable decision owned by this repository. The docs
+codify upstream Kiroku and pg-migrate contracts whose architecture is already recorded in
+those projects; corpus layout and DocRef choices are task-local execution decisions. The
+stale Prometheus HELP description discovered here was cascaded into EP-3 instead.
 
 
 ## Context and Orientation
