@@ -4,6 +4,7 @@ slug: codify-the-ddd-vertical-module-structure-standard
 title: "Codify the DDD vertical module structure standard"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -25,14 +26,14 @@ To see it working when done: run the file-existence verification loop in "Valida
 
 ## Progress
 
-Plan authored 2026-07-22. Implementation not started. Every stopping point must be recorded here, splitting partially finished items into done/remaining.
+Plan authored 2026-07-22. Implementation began 2026-07-22. Every stopping point must be recorded here, splitting partially finished items into done/remaining.
 
-- [ ] Milestone 1: `architecture/` directory created in this repo.
-- [ ] Milestone 1: `architecture/README.md` (index + one-paragraph statement of the standard) written.
-- [ ] Milestone 1: `architecture/service-packages.md` (six-package split, dependency diagram, monolith ruling) written.
-- [ ] Milestone 1: `architecture/vertical-slice-modules.md` (the per-concept module table, naming rules, firewall, authoritative-convention ruling) written.
-- [ ] Milestone 1: `architecture/cross-cutting-modules.md` (the closed allowlist + division heuristic) written.
-- [ ] Milestone 1: Milestone 1 verification loop run against the danwa checkout; zero missing paths.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/` directory created in this repo.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/README.md` (index + one-paragraph statement of the standard) written.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/service-packages.md` (six-package split, dependency diagram, monolith ruling) written.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/vertical-slice-modules.md` (the per-concept module table, naming rules, firewall, authoritative-convention ruling) written.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/cross-cutting-modules.md` (the closed allowlist + division heuristic) written.
+- [x] (2026-07-22T18:38:50Z) Milestone 1: verification loop run against the danwa checkout; output was `CHECKED` with zero missing paths.
 - [ ] Milestone 2: `architecture/extended-node-verticals.md` (read models, process managers, workflows, routers, publishers, inboxes, queues, contracts; integration-as-a-vertical rule) written.
 - [ ] Milestone 2: `architecture/spec-and-scaffolding.md` (`.keiro` placement, `context`/`layout` clauses, scaffold invocation, idempotent re-scaffold workflow) written.
 - [ ] Milestone 2: `architecture/test-layout.md` (danwa four-suite core split, per-package suites, vertical `*Spec` layout, `test-support` sublibrary, jitsurei six-suite superset) written.
