@@ -414,5 +414,81 @@ in  Schema.Project::{
             "Consolidated messaging gotcha catalogue across shibuya, pgmq, Kafka, kiroku, and keiro"
         , location = Schema.DocLocation.LocalFile "messaging/gotchas.md"
         }
+      , Schema.DocRef::{
+        , key = "architecture-overview"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Index of the keiro service architecture standard: packages, vertical slices, tests, scaffolding; start here"
+        , location = Schema.DocLocation.LocalFile "architecture/README.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-service-packages"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The six-package split standard for deployed keiro services and its dependency rules"
+        , location =
+            Schema.DocLocation.LocalFile "architecture/service-packages.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-vertical-slice-modules"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The authoritative Generated.* + Holes vertical-slice module convention per domain concept"
+        , location =
+            Schema.DocLocation.LocalFile
+              "architecture/vertical-slice-modules.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-cross-cutting-modules"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The closed allowlist of technical-layer modules and the domain-vs-technology division heuristic"
+        , location =
+            Schema.DocLocation.LocalFile
+              "architecture/cross-cutting-modules.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-extended-node-verticals"
+        , kind = Schema.DocKind.Pattern
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
+        , location =
+            Schema.DocLocation.LocalFile
+              "architecture/extended-node-verticals.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-spec-and-scaffolding"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Placing the .keiro spec at domain/<service>.keiro and running keiro-dsl scaffold idempotently"
+        , location =
+            Schema.DocLocation.LocalFile
+              "architecture/spec-and-scaffolding.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-test-layout"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The per-package test-suite standard: four core suites, vertical Spec modules, migrations test-support"
+        , location =
+            Schema.DocLocation.LocalFile "architecture/test-layout.md"
+        }
+      , Schema.DocRef::{
+        , key = "architecture-worked-example-conversation"
+        , kind = Schema.DocKind.Pattern
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Complete file listing of danwa's Conversation slice across all six packages"
+        , location =
+            Schema.DocLocation.LocalFile
+              "architecture/worked-example-conversation.md"
+        }
       ]
     }

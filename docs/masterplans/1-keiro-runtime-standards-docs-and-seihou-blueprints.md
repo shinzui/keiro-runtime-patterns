@@ -47,7 +47,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Complete |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Complete |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Complete |
-| 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | In Progress |
+| 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Complete |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Not Started |
 | 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Not Started |
 | 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | Not Started |
@@ -100,7 +100,7 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-5: Process manager and timer standards written
 - [x] EP-5: Integration event standards written (contract, outbox, inbox, versioning)
 - [x] EP-5: Messaging transport standards written (shibuya semantics, adapter selection matrix, keiro-pgmq jobs)
-- [ ] EP-6: Vertical module structure standard written and reconciled against danwa and keiro-runtime-jitsurei
+- [x] EP-6: Vertical module structure standard written and reconciled against danwa and keiro-runtime-jitsurei
 - [ ] EP-7: OpenTelemetry and request-logging API docs written in haskell-jitsurei
 - [ ] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
 - [ ] EP-8: Settei configuration standard written (layering, secrets, bindings)
@@ -148,6 +148,10 @@ Findings from the planning research pass that shaped the decomposition (evidence
   finalizes a thrown handler as `AckRetry 0`, while the current PGMQ adapter transactionally
   transfers configured DLQ messages; older adapter and keiro-pgmq prose still describe the
   superseded behavior. EP-6 and EP-9 must consume the corrected messaging docs.
+- EP-6 confirmed that keiro-dsl reports modules a changed spec no longer emits but never deletes
+  them. The structure standard therefore makes stale-path review and deliberate removal part of
+  every re-scaffold. EP-9 must encode that cleanup instruction alongside the generated/Holes
+  firewall rather than implying regeneration prunes the tree.
 
 
 ## Decision Log
@@ -215,6 +219,14 @@ Findings from the planning research pass that shaped the decomposition (evidence
   `Keiro.PGMQ.Runtime`, not the `Job` abstraction. Recorded in ADR 0003.
   Date: 2026-07-22
 
+- Decision: Standardize deployed services on six cabal packages and collocated per-concept
+  `Generated.*` plus one hand-owned `Holes` module; reserve single-package services for
+  explicitly labeled teaching repositories and reject duplicate legacy hand modules.
+  Rationale: this preserves independent dependency budgets and a regeneration-safe ownership
+  firewall while matching danwa's shipped structure and the released keiro-dsl placement model.
+  Recorded in ADR 0004.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -263,6 +275,14 @@ registry audits against the verified release cohort; all eleven `messaging-*` Do
 visible in Mori after refresh. ADR 0003 records the transport boundary. EP-6 can now cite
 stable worker/integration behavior, and EP-9 can consume the messaging DocRef keys.
 
+EP-6 is complete. The new `architecture/` area contains eight indexed standards for the
+six-package fleet boundary, vertical aggregate and extended-node placement, the generated-code
+firewall, cross-cutting allowlist, scaffolding, test ownership, and a complete Conversation
+example. Acceptance passed the danwa and jitsurei path checks, style and relative-link audits,
+Dhall type-checking, Mori refresh, and the novice `ticket` reconstruction; all eight
+`architecture-*` DocRefs are visible. ADR 0004 records the durable module and package convention,
+and EP-9's only hard dependency is satisfied.
+
 
 ## Revision Notes
 
@@ -287,3 +307,8 @@ stable worker/integration behavior, and EP-9 can consume the messaging DocRef ke
   transaction, idempotency, DLQ, and handler-exception assumptions against released source,
   refreshed Mori, and distilled transport selection into ADR 0003. Reason: EP-6 and EP-9
   need one precise connective-tissue contract for the service fleet.
+- 2026-07-22 (EP-6 completion): added and registered eight service-architecture standards,
+  reconciled danwa's shipped six-package verticals with jitsurei's extended node vocabulary,
+  documented advisory stale-path cleanup, refreshed Mori, and distilled the package/module
+  convention into ADR 0004. Reason: EP-9 needs one source-verified scaffold contract and can
+  now proceed without repeating or re-deciding service structure.
