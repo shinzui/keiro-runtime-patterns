@@ -42,7 +42,7 @@ Research grounding: nine parallel research reports were produced during planning
 
 | # | Title | Path | Hard Deps | Soft Deps | Status |
 |---|-------|------|-----------|-----------|--------|
-| 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | In Progress |
+| 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Complete |
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Not Started |
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Not Started |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Not Started |
@@ -88,9 +88,9 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 
 ## Progress
 
-- [ ] EP-1: Stale keiki docs corrected per the audit (per-file fixes for README, transducer-best-practices, build-time-validation, json-event-codecs)
-- [ ] EP-1: New keiki 0.2 capability docs written (structured replay, new validation checks, noEmit intent, event-schema evolution, checked composition)
-- [ ] EP-1: Process-manager framing removed from keiki docs and redirected; mori.dhall registrations complete (including the missing diagram-docs entry)
+- [x] EP-1: Stale keiki docs corrected per the audit (per-file fixes for README, transducer-best-practices, build-time-validation, json-event-codecs)
+- [x] EP-1: New keiki 0.2 capability docs written (structured replay, new validation checks, noEmit intent, event-schema evolution, checked composition)
+- [x] EP-1: Process-manager framing removed from keiki docs and redirected; mori.dhall registrations complete (including the missing diagram-docs entry)
 - [ ] EP-2: Kiroku event-store best-practice docs written (append/read/subscription/consumer-group/operational invariants)
 - [ ] EP-2: pg-migrate standards written (component authoring, service migrations package, cohort upgrade paths) and registered
 - [ ] EP-3: Stale statements fixed in keiro repo (why-keiro §7.4, package README status, Keiro.version)
@@ -118,6 +118,12 @@ Findings from the planning research pass that shaped the decomposition (evidence
 - danwa (the DDD reference) contradicts its own prose: the shipped code uses `Generated.*` + `Holes.hs`, while its cabal description and masterplan describe an abandoned flat layout. keiro-runtime-jitsurei demonstrates the richer DSL node vocabulary, pg-migrate, and real OpenTelemetry that danwa lacks (danwa is still on codd with a noop tracer).
 - settei has no ecosystem consumers yet — danwa uses raw Dhall — so the configuration standard documents an intended adoption surface, with `settei-example-service` as the canonical pattern.
 - Both target blueprints already exist (`haskell-keiro-service` 0.1.0, `migrate-keiro-stack` 0.1.1); EP-9 is a refresh, not greenfield.
+- A well-typed `mori.dhall` edit does not refresh Mori's indexed registry projection. EP-1
+  initially left `mori registry docs shinzui/keiro-runtime-patterns` showing seven entries;
+  the idempotent `mori register --local --path
+  /Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns --no-seihou-discovery` refresh made all
+  twelve visible. EP-2, EP-4, EP-5, EP-6, and EP-8 must repeat that acceptance step after
+  adding their DocRefs.
 
 
 ## Decision Log
@@ -154,6 +160,13 @@ Findings from the planning research pass that shaped the decomposition (evidence
   Rationale: pagination is an API-layer concern that applies to any servant service, keiro-based or not; haskell-jitsurei/api is where the servant standards live and where the user began that work.
   Date: 2026-07-22
 
+- Decision: Every child plan that changes `mori.dhall` must refresh this project's local Mori
+  registration and verify `mori registry docs shinzui/keiro-runtime-patterns`, in addition to
+  Dhall type-checking.
+  Rationale: EP-1 proved that the config file and Mori's indexed projection are separate; the
+  initiative's discoverability goal is not met until both agree.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -162,9 +175,18 @@ Compare the result against the original vision. Before marking the MasterPlan co
 distill durable project context from this MasterPlan and its child ExecPlans into
 docs/adr/. Keep task-local execution and coordination details here.
 
-(To be filled during and after implementation.)
+EP-1 is complete. The repository now has twelve keiki documents: the eight original files
+rewritten or conformed to the shared style plus four new 0.2 guides for structured replay,
+event-schema evolution, checked composition, and upgrading. All twelve are linked from the
+README, registered as `keiki-*` DocRefs, and visible through Mori's refreshed registry.
+Source and style audits passed against the released `v0.2.0.0` tag. The remaining eight child
+plans are unaffected except for the newly recorded requirement to refresh Mori after DocRef
+changes.
 
 
 ## Revision Notes
 
 - 2026-07-22 (authoring session, pre-commit): after parallel drafting of the nine child plans, a cross-plan consistency review made three corrections. (1) Added Integration Point 7 (ADR numbers allocated at implementation time) and rephrased the hard-coded `0001` ADR filenames in EP-5 and EP-6 to "next free number" — both plans seed `docs/adr/` and would otherwise collide. (2) Rescoped EP-1's and EP-2's `mori.dhall` acceptance counts from absolute `Schema.DocRef::` totals to counts of their own key prefixes (`keiki-*`, `kiroku-*`/`migrations-*`), because absolute totals depend on sibling-plan execution order. (3) Added the settei-as-adoption-target decision and EP-8's supersession edit of haskell-jitsurei's `cli/hierarchical-config.md` after the user clarified settei's purpose mid-planning. Reason: keep child plans order-independent and the registry conflict-free, per Integration Points 1 and 7.
+- 2026-07-22 (EP-1 completion): marked the keiki 0.2 corpus complete and recorded the
+  cross-plan Mori refresh requirement discovered during acceptance. Reason: later doc plans
+  must update both `mori.dhall` and Mori's indexed projection to satisfy discoverability.

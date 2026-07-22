@@ -43,7 +43,7 @@ aggregateTransducer =
     B.from InitialVertex do
       B.onCmd inCtorSomeCommand $ \d -> B.do
         B.requireGuard (d.count .>= lit 0)
-        B.slot @"aggregateId" =: d.aggregateId
+        B.slot @"aggregateId" .= d.aggregateId
         B.emit wireSomeEvent SomeEventTermFields
           { aggregateId = d.aggregateId
           , commandId = d.commandId

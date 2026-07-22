@@ -37,8 +37,8 @@ This plan is EP-1 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standar
 - [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/upgrading-to-keiki-0-2.md` written.
 - [x] (2026-07-22 16:40Z) Milestone 3: `keiki/README.md` rewritten as the 0.2 index linking all eleven guides.
 - [x] (2026-07-22 16:40Z) Milestone 3: `mori.dhall` updated with five new DocRefs (the missing `keiki-diagram-docs` plus one per new file); `dhall --file mori.dhall` passes.
-- [ ] Milestone 4: symbol audit completed — every named symbol in every `keiki/*.md` code sample located in the keiki 0.2 source.
-- [ ] Milestone 4: acceptance commands run and recorded (`git grep ProcessManagerAction`, link check, DocRef count, dhall type-check).
+- [x] (2026-07-22 16:43Z) Milestone 4: symbol audit completed — every named keiki symbol in every `keiki/*.md` code sample located in the released 0.2 source; the explicit high-risk inventory returned no missing definitions.
+- [x] (2026-07-22 16:43Z) Milestone 4: acceptance commands passed — `ProcessManagerAction` and `targetEventStream` both returned no match (`exit=1`); eleven unique sibling links resolved across twelve Markdown files; `mori.dhall` contained twelve `keiki-*` keys and type-checked; Mori listed all twelve after local re-registration; source spot-checks confirmed 8 validation fields, 8 warning constructors, 5 generated codec bindings, and 8 codec options.
 
 
 ## Surprises & Discoveries
@@ -56,6 +56,16 @@ implementation. Provide concise evidence.
   guides more than once. Its transcript therefore contained 23 `OK` lines rather than the
   expected eleven even though only eleven unique sibling paths existed. The acceptance loop
   now sorts paths uniquely before testing them.
+- Editing and type-checking `mori.dhall` does not refresh Mori's indexed registry view.
+  Before re-registration, `mori registry docs shinzui/keiro-runtime-patterns` still listed
+  the original seven entries; after `mori register --local --path
+  /Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns --no-seihou-discovery`, it listed all
+  twelve. Every sibling plan that adds DocRefs must perform the same idempotent refresh before
+  claiming discoverability.
+- The plan's source-audit routing grouped `PoisonedCompositionError` with
+  `Keiki.Composition`, but that exception and `SomeSymTransducer` poison provenance live in
+  `src/Keiki/Profunctor.hs`. The implemented composition guide uses the correct module; the
+  audit commands and Interfaces section below were corrected.
 
 
 ## Decision Log
@@ -80,6 +90,13 @@ implementation. Provide concise evidence.
   Rationale: keiki has no `ProcessManager`, `Saga`, `Policy`, `Reactor`, or `EventStream` type anywhere in its source tree (the only literal `ProcessManager` token is the cosmetic `ProcessManagerDiagram` constructor of `MermaidSectionKind` at `/Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Render/Mermaid.hs` lines 999-1001). Presenting keiro's record as keiki API is the highest-priority staleness found by the audit. Pointing at EP-5's plan path avoids inventing file names EP-5 owns.
   Date: 2026-07-22
 
+- Decision: Refresh this project's local Mori registry after changing DocRefs and require the
+  indexed `mori registry docs` view as acceptance evidence.
+  Rationale: `dhall --file mori.dhall` proves configuration shape but does not update Mori's
+  stored projection; without `mori register --local`, developers and agents still discover
+  the stale seven-entry view.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -88,12 +105,27 @@ Compare the result against the original purpose. Before marking the plan complet
 distill durable project context from the Decision Log, Surprises & Discoveries, and
 this section into docs/adr/. Keep task-local execution details here.
 
-(To be filled during and after implementation.)
+EP-1 completed the keiki 0.2 corpus: all eight existing documents now follow the shared style
+and current API, four focused guides cover structured replay, event evolution, checked
+composition, and upgrading, and the README provides a release-aware route through all eleven
+sibling guides. The highest-risk ownership error is removed: no keiki document presents
+`ProcessManagerAction` or `targetEventStream` as keiki API, while the remaining process-manager
+references either describe orchestrator transducers or attribute hosting to keiro.
+
+Validation closed every acceptance path. All high-risk library symbols resolve in the released
+`v0.2.0.0` source; the four load-bearing counts match source; Markdown structure and relative
+links pass; `mori.dhall` has twelve well-typed `keiki-*` DocRefs; and Mori's refreshed registry
+lists all twelve. No work remains in EP-1.
+
+The ADR distillation pass found no new architecture decision to promote. The documentation
+style and repository role are already cross-plan decisions in the MasterPlan, while the two
+source-attribution corrections and Mori refresh requirement are execution facts preserved in
+the living plans. No `docs/adr/` directory was created for task-local details.
 
 
 ## Context and Orientation
 
-This repository, `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns`, is a documentation-only repository: terse, agent-facing patterns and best practices for the keiro runtime stack. It contains no Haskell code. The files this plan touches are the eight Markdown documents under `keiki/` plus the registry file `mori.dhall` at the repository root. Nothing outside this repository is edited.
+This repository, `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns`, is a documentation-only repository: terse, agent-facing patterns and best practices for the keiro runtime stack. It contains no Haskell code. The files this plan touches are the eight original Markdown documents under `keiki/`, four new Markdown guides in the same directory, and the registry file `mori.dhall` at the repository root. No source file outside this repository is edited; completion refreshes this project's entry in Mori's local registry so the new DocRefs become queryable.
 
 `docs/adr/` does not exist yet in this repository — there are no relevant ADRs to consult. This plan (or a sibling under the same MasterPlan) may seed the first ones at completion, per the distillation pass described in Outcomes & Retrospective.
 
@@ -327,6 +359,18 @@ mori.dhall OK
 
 (The file's remote `mori-schema` import is content-addressed with a sha256, so this works offline once the import is cached; if the cache is cold it fetches once. Any Dhall type error prints a diagnostic and a non-zero exit instead.)
 
+Refresh Mori's indexed view, then prove the new documents are discoverable:
+
+```bash
+mori register --local \
+  --path /Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns \
+  --no-seihou-discovery
+mori registry docs shinzui/keiro-runtime-patterns
+```
+
+Expected: registration reports `Project updated: shinzui/keiro-runtime-patterns`, and the
+docs table lists twelve `keiki-*` entries including the five additions.
+
 **Step 5 — Symbol audit (Milestone 4).** For each `keiki/*.md` file, extract the identifiers named in its code fences and confirm each exists in the keiki 0.2 source. Practical procedure: for every function, type, constructor, or field name a sample uses, grep the owning module's export list or definition site. The owning modules are:
 
 ```bash
@@ -334,8 +378,10 @@ mori.dhall OK
 grep -n "<symbol>" /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Core.hs | head -5
 # Builder verbs (onCmd, emit, noEmit, requireGuard, buildTransducerEither, ...)
 grep -n "<symbol>" /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Builder.hs | head -5
-# Composition (compose, composeChecked, alternative, feedback1, poison types)
+# Composition (compose, composeChecked, alternative, feedback1)
 grep -n "<symbol>" /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Composition.hs | head -5
+# Existential wrappers and poison provenance
+grep -n "<symbol>" /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Profunctor.hs | head -5
 # Solver-backed checks
 grep -n "<symbol>" /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Symbolic.hs | head -5
 # Shape hashing
@@ -393,9 +439,10 @@ Expected: eleven `OK ./<name>.md` lines (every non-README doc linked at least on
 ```bash
 grep -c 'key = "keiki-' mori.dhall
 dhall --file mori.dhall > /dev/null && echo "mori.dhall OK"
+mori registry docs shinzui/keiro-runtime-patterns
 ```
 
-Expected: `12` keiki-prefixed keys (seven existing plus five new), then `mori.dhall OK`. The count is scoped to the `keiki-` prefix on purpose: sibling plans under the same MasterPlan append their own DocRef blocks (`kiroku-*`, `keiro-*`, `messaging-*`, …), so an absolute total would depend on execution order. A Dhall type error (for example a missing comma in an appended record) prints a diagnostic instead — fix and re-run; the command is safe to repeat.
+Expected: `12` keiki-prefixed keys (seven existing plus five new), then `mori.dhall OK`, then a Mori table containing the same twelve entries. The count is scoped to the `keiki-` prefix on purpose: sibling plans under the same MasterPlan append their own DocRef blocks (`kiroku-*`, `keiro-*`, `messaging-*`, …), so an absolute total would depend on execution order. A Dhall type error (for example a missing comma in an appended record) prints a diagnostic instead — fix and re-run; the command is safe to repeat. If the table is stale, rerun the local registration command from Concrete Step 4.
 
 **4. The corpus is faithful to keiki 0.2.** The Step-5 symbol audit found a definition site for every named symbol, and four spot-checks of load-bearing numbers hold: `ValidationOptions` has exactly 8 fields (`sed -n '1823,1852p' /Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Core.hs`), `TransducerValidationWarning` has exactly 8 constructors (`sed -n '1740,1821p'` of the same file), the codec splice haddock promises five bindings (`sed -n '19,27p' /Users/shinzui/Keikaku/bokuno/keiki/keiki-codec-json/src/Keiki/Codec/JSON/Event.hs`), and `EventCodecOptions` has exactly 8 fields (`sed -n '166,196p'` of the same file). The docs must state those same numbers.
 
@@ -404,7 +451,7 @@ Style acceptance: open any two rewritten files and confirm the contract shape �
 
 ## Idempotence and Recovery
 
-Every step is a plain-text edit to files tracked by git; all steps are safe to repeat. The `mori.dhall` change is append-only within the `docs` list, so re-applying it is detectable by check 3 (a count above 12 means a double-append — delete the duplicates). If an edit goes wrong, recover any single file with `git checkout -- <path>` (before commit) or `git revert <sha>` (after). The validation commands (`git grep`, `dhall`, the link loop) are read-only and repeatable. No step touches any repository other than this one, and no step runs code from the keiki repository — keiki is only read. If the symbol audit reveals that a claim in this plan itself is wrong (for example a source line moved after a keiki commit), fix the doc against the current source, record the discrepancy in Surprises & Discoveries, and update this plan's anchor in the same commit.
+Every file edit is plain text and safe to repeat. The `mori.dhall` change is append-only within the `docs` list, so re-applying it is detectable by check 3 (a count above 12 means a double-append — delete the duplicates). Local `mori register` is idempotent and updates this project's existing registry projection; it does not register sibling projects. If an edit goes wrong, recover any single file with `git checkout -- <path>` (before commit) or `git revert <sha>` (after). The other validation commands (`git grep`, `dhall`, the link loop) are read-only and repeatable. No source repository other than this one is changed, and no code from the keiki repository is run — keiki is only read. If the symbol audit reveals that a claim in this plan itself is wrong (for example a source line moved after a keiki commit), fix the doc against the current source, record the discrepancy in Surprises & Discoveries, and update this plan's anchor in the same commit.
 
 
 ## Interfaces and Dependencies
@@ -413,7 +460,8 @@ This plan produces documentation and one registry edit; it introduces no code in
 
 - `Keiki.Core` (`/Users/shinzui/Keikaku/bokuno/keiki/src/Keiki/Core.hs`): `stepEither :: … -> Either (StepFailure s) (s, RegFile rs, [co])`; `validateTransducer :: (Bounded s, Enum s, Ord s, Show s) => ValidationOptions -> SymTransducer (HsPred rs ci) rs s ci co -> [TransducerValidationWarning s]`; `reconstituteEither`, `replayEvents`, `applyEventsEither`, `applyEventStreamingEither`; `InFlight`, `ReplayStepFailure`, `ReplayFailureReason`, `ReplayFailure`; the 8-field `ValidationOptions` and 8-constructor `TransducerValidationWarning`.
 - `Keiki.Builder` (`src/Keiki/Builder.hs`): `buildTransducer`, `buildTransducerEither`, `noEmit`, `BuilderDefect`, `BuilderError`, `renderBuilderErrors`, and the `DistinctNames (Names rs)`/`Eq v` build constraints.
-- `Keiki.Composition` (`src/Keiki/Composition.hs`): `compose`, `composeChecked`, `checkComposeAlignment`, `alternative`, `feedback1`, `PoisonedCompositionError`.
+- `Keiki.Composition` (`src/Keiki/Composition.hs`): `compose`, `composeChecked`, `checkComposeAlignment`, `alternative`, and `feedback1`.
+- `Keiki.Profunctor` (`src/Keiki/Profunctor.hs`): `SomeSymTransducer`, `PoisonProvenance`, and `PoisonedCompositionError`.
 - `Keiki.Symbolic` (`src/Keiki/Symbolic.hs`): `checkTransitionDeterminismSym`, `checkDeadEdgesSym`, `satResultIsProvablyUnsat`; requires the external `z3` binary on `PATH` at run time (documented, not executed by this plan).
 - `Keiki.Shape` (`src/Keiki/Shape.hs`): `regFileShapeHash`, `CanonicalTypeName`.
 - `Keiki.Codec.JSON.Event` (`keiki-codec-json/src/Keiki/Codec/JSON/Event.hs`): `deriveEventCodecSkeleton`, `deriveEventCodecSkeletonAs`, the 8-field `EventCodecOptions`, `FieldCodec {fcEncode, fcDecode, fcOnMissing}`, `fieldCodec`, `OnMissingCodec`.
@@ -431,3 +479,7 @@ Tooling dependencies: `git` and `grep`/`sed` (already in use in this repository)
 - 2026-07-22 (implementation): made the README acceptance loop unique its extracted link
   paths. The README must link the same guide from its index, release summary, and Related
   Patterns section, so occurrence-counting contradicted the expected eleven-guide result.
+- 2026-07-22 (implementation): added the idempotent local Mori registration step required to
+  refresh indexed DocRefs, and corrected `PoisonedCompositionError` ownership from
+  `Keiki.Composition` to `Keiki.Profunctor`. Both changes preserve reproducible acceptance
+  from this plan alone.
