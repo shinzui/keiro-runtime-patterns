@@ -36,13 +36,13 @@ Update this checklist at every stopping point. Split partially completed items i
 - [x] Milestone 1: `kiroku/observability.md` written
 - [x] Milestone 1: `kiroku/lifecycle-and-deletion.md` written
 - [x] Milestone 1: `kiroku/README.md` index written; every kiroku doc linked
-- [ ] Milestone 2: `migrations/pg-migrate-model.md` written
-- [ ] Milestone 2: `migrations/authoring.md` written
-- [ ] Milestone 2: `migrations/service-package.md` written
-- [ ] Milestone 2: `migrations/operations.md` written
-- [ ] Milestone 2: `migrations/testing.md` written
-- [ ] Milestone 2: `migrations/codd-transition.md` written
-- [ ] Milestone 2: `migrations/README.md` index written; every migrations doc linked
+- [x] Milestone 2: `migrations/pg-migrate-model.md` written
+- [x] Milestone 2: `migrations/authoring.md` written
+- [x] Milestone 2: `migrations/service-package.md` written
+- [x] Milestone 2: `migrations/operations.md` written
+- [x] Milestone 2: `migrations/testing.md` written
+- [x] Milestone 2: `migrations/codd-transition.md` written
+- [x] Milestone 2: `migrations/README.md` index written; every migrations doc linked
 - [ ] Milestone 3: fifteen DocRef entries appended to `mori.dhall`
 - [ ] Milestone 3: `shinzui/pg-migrate` and `shinzui/pgmq-hs` appended to the `dependencies` list
 - [ ] Milestone 3: symbol cross-check script runs with zero `MISS` lines
@@ -60,6 +60,7 @@ Document unexpected behaviors, bugs, optimizations, or insights discovered durin
 - Release verification on 2026-07-22 matched local package versions to both Hackage and upstream tags: `kiroku-store` 0.3.0.1, `kiroku-store-migrations` 0.3.0.0, `kiroku-otel` 0.2.0.1, `kiroku-metrics` 0.1.0.1, `shibuya-kiroku-adapter` 0.4.0.0, pg-migrate 1.1.0.0, and pgmq-hs 0.4.0.1.
 - `Kiroku.Metrics.Prometheus` describes `kiroku_events_appended_total` as a “gap-free global position,” but `Kiroku.Store.Types.GlobalPosition` explicitly promises only a strictly increasing total order and says positions need not be dense. The fleet docs follow the public type contract and name the metric without repeating the misleading HELP text.
 - The released Kiroku native manifest now contains an eighth migration, while `Kiroku.Store.Migrations.History.Codd` intentionally retains seven mappings because only the seven historical Codd files need import evidence. `migrations/codd-transition.md` must describe the history map as seven entries without implying the native component stopped growing.
+- pg-migrate derives the durable local migration name from the manifest filename without `.sql`; renaming the file therefore changes identity. The model and authoring docs state this explicitly rather than preserving the Plan of Work's ambiguous phrase “stable even if the file is renamed.”
 - (Implementation discoveries go here.)
 
 
