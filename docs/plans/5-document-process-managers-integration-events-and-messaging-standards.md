@@ -4,6 +4,7 @@ slug: document-process-managers-integration-events-and-messaging-standards
 title: "Document process managers, integration events, and messaging standards"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -46,7 +47,7 @@ Concrete Steps section gives the exact grep commands and expected hits).
 
 ## Progress
 
-- [ ] M1: `messaging/` directory created; `messaging/glossary.md` written; `messaging/README.md` stub written.
+- [x] (2026-07-22T18:14:45Z) M1: `messaging/` directory created; `messaging/glossary.md` written; `messaging/README.md` stub written.
 - [ ] M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
 - [ ] M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
 - [ ] M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
@@ -83,6 +84,26 @@ sources); the implementer should confirm they still hold and record anything new
   `IntegrationProducer` subscription serializes same-key enqueues and does not have this
   problem. This must appear in the outbox doc. Evidence: `keiro/src/Keiro/Outbox.hs`
   module haddock, final paragraph.
+- The released `Keiro.ProcessManager` contract is not one all-or-nothing saga
+  transaction. The manager-state append and its timers commit together; each target
+  command and inline projections then commit in a separate transaction. Deterministic
+  ids make source-event replay fill missing target writes after a crash. Evidence:
+  `keiro-0.3.0.0:keiro/src/Keiro/ProcessManager.hs`, module haddock and
+  `runProcessManagerOnce`.
+- Shibuya 0.8.0.1 changed the handler-exception behavior assumed by the planning
+  draft: its supervised runner substitutes `AckRetry (RetryDelay 0)` and always calls
+  the finalizer. On that cohort a bare Kiroku handler does not leave the ack permanently
+  unfilled; `guardKirokuHandler` remains the recommended adapter-specific policy because
+  it gives thrown handlers a one-second retry delay instead of an immediate storm.
+  Evidence: `shibuya-core` v0.8.0.1
+  `Shibuya.Internal.Runner.Supervised.processOne` and
+  `shibuya-kiroku-adapter` v0.4.0.0 `guardKirokuHandler`.
+- The released `IntegrationProducer` surface defines and validates the mapper and
+  provides `enqueueProducerEventTx`, but it does not ship a subscription runner that
+  atomically owns a Kiroku checkpoint. The standard must require caller-owned
+  at-least-once subscription wiring and stable outbox/message identities instead of
+  attributing checkpoint atomicity to the helper. Evidence:
+  `keiro-0.3.0.0:keiro/src/Keiro/Outbox.hs` and a repository-wide symbol search.
 
 
 ## Decision Log
@@ -140,6 +161,28 @@ sources); the implementer should confirm they still hold and record anything new
   the cross-plan ADR candidates to be seeded "during implementation", and the ExecPlan
   specification mandates an ADR distillation pass before a plan is marked complete. If a
   sibling plan seeds `docs/adr/` first, take the next free number.
+  Date: 2026-07-22
+
+- Decision: Describe the released process-manager persistence boundary precisely:
+  manager state plus timers are one transaction, while each target dispatch is its own
+  transaction recovered by deterministic replay.
+  Rationale: the 0.3.0.0 source explicitly rejects the planning draft's stronger
+  "all three atomically" claim; documenting the narrower guarantee is necessary for
+  correct failure handling.
+  Date: 2026-07-22
+
+- Decision: Recommend `guardKirokuHandler` for bounded, non-spinning retry behavior,
+  but do not claim it is required to make Shibuya 0.8.0.1 finalize a thrown handler.
+  Rationale: the current Shibuya runner always finalizes thrown handlers as
+  `AckRetry 0`; the guard still improves the adapter policy to `AckRetry 1` and remains
+  useful for explicitness and older compatible cores.
+  Date: 2026-07-22
+
+- Decision: Treat `IntegrationProducer` as the producer definition and transactional
+  enqueue primitive, not as a complete checkpoint-owning worker.
+  Rationale: the released public API has no subscription runner. An application must
+  supply at-least-once source consumption and stable identities so replayed enqueue
+  attempts coalesce.
   Date: 2026-07-22
 
 
