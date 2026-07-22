@@ -50,17 +50,17 @@ This section must always reflect the actual current state of the work.
 
 - [x] ExecPlan authored from the planning research reports; both blueprints, both registries, and the seihou CLI docs read and drift catalogued (2026-07-22).
 - [x] M1: Cohort versions re-verified against Hackage and upstream release tags; EP-6/EP-8 and available soft-dependency docs read; doc-citation and release tables recorded (2026-07-22).
-- [ ] M2: `haskell-keiro-service` blueprint.dhall refreshed (version 0.2.0, description, files list, allowedTools).
-- [ ] M2: `haskell-keiro-service` prompt.md refreshed (pg-migrate, Hackage cohort, validated streams, settei, OTel, health, test layout, doc citations).
-- [ ] M2: `haskell-keiro-service` files/ refreshed (cabal.project, core.cabal, AppConfig.hs) and new reference files added (Migrations.hs, manifest, Telemetry.hs, settei config reference, standards-map.md).
-- [ ] M2: `seihou validate-blueprint` passes for haskell-keiro-service.
-- [ ] M3: `migrate-keiro-stack` blueprint.dhall refreshed (version 0.2.0, description, files list, tags).
-- [ ] M3: `migrate-keiro-stack` prompt.md refreshed (two new workflow phases, cohort re-verification, mori doc discovery).
-- [ ] M3: `migrate-keiro-stack` existing files/ refreshed (cohort-and-runtime-reference.md, pg-migrate-implementation-reference.md, persistent-database-cutover.md, disposable-database-fast-path.md).
-- [ ] M3: New reference files vertical-structure-refactor.md and settei-migration.md written.
-- [ ] M3: `seihou validate-blueprint` passes for migrate-keiro-stack.
-- [ ] M4: `seihou registry sync-versions` + `seihou registry validate` clean in both registries; okf-docs regenerated in seihou-modules.
-- [ ] M4: Conventional Commits with MasterPlan/ExecPlan trailers landed in both registry repos.
+- [x] M2: `haskell-keiro-service` blueprint.dhall refreshed (version 0.2.0, description, files list, allowedTools).
+- [x] M2: `haskell-keiro-service` prompt.md refreshed (pg-migrate, Hackage cohort, validated streams, settei, OTel, health, test layout, doc citations).
+- [x] M2: `haskell-keiro-service` files/ refreshed; Hackage-only project and 13 reference files include migrations, telemetry, Settei Settings, and standards map.
+- [x] M2: `seihou validate-blueprint` passes for haskell-keiro-service; legacy-engine grep is clean (2026-07-22).
+- [x] M3: `migrate-keiro-stack` blueprint.dhall refreshed (version 0.2.0, description, six-file reference list, tags).
+- [x] M3: `migrate-keiro-stack` prompt.md refreshed with eight consistently numbered phases, current cohort, Mori discovery, and the original fail-closed policy guard intact.
+- [x] M3: Existing migration/database references refreshed with current provenance, Kiroku's release-owned history mapping, and `cohort-migrate` restored-clone guidance.
+- [x] M3: `vertical-structure-refactor.md` and `settei-migration.md` written with normative DocRef citations.
+- [x] M3: `seihou validate-blueprint` passes for migrate-keiro-stack (2026-07-22).
+- [x] M4: Registry sync/check and validation clean in both registries; seihou-modules okf-docs regenerated and `okf validate` passes.
+- [x] M4: Registry commits landed as seihou-modules `fb3ac19` and agent-seihou `52dd09e`, each with MasterPlan, ExecPlan, and Intention trailers.
 - [ ] M5: Scratch apply of haskell-keiro-service completed; tree-diff acceptance script passes; build and tests pass in the scaffold.
 - [ ] M5: migrate-keiro-stack debug render reviewed; danwa-clone rehearsal set up (or explicitly deferred with rationale in the Decision Log).
 - [ ] MasterPlan registry row for EP-9 updated; ADR distillation pass done (create docs/adr/ in this repo if a durable decision emerged).
@@ -100,6 +100,10 @@ Findings from plan authoring (2026-07-22), recorded here because they shaped the
 - `hasql-notifications-0.2.5.0` is current on Hackage but the upstream repository's newest
   release tag is `0.2.4.0`. Hackage is authoritative for the Hackage-only cohort; the missing
   matching upstream tag is recorded rather than replaced with an invented revision pin.
+- The bootstrap blueprint directory existed as a wholly untracked working baseline in
+  seihou-modules, while the migration blueprint already carried uncommitted shared-`haskell-nix`
+  integration work. The implementation preserved both baselines, incorporated the `haskell-nix`
+  behavior into the 0.2.0 workflow, and left unrelated seihou-modules edits unstaged.
 
 (More to be added during implementation.)
 
@@ -113,6 +117,14 @@ Record every decision made while working on the plan.
   Rationale: both changes alter the blueprint's contract (what gets scaffolded / which workflow
   phases run), which under pre-1.0 semver is a minor bump, not a patch. Keeping the two at the
   same minor also signals they encode the same standards generation.
+  Date: 2026-07-22
+
+- Decision: Name the bootstrap configuration reference `Settings.hs` and keep it separate from
+  `AppConfig.hs`.
+  Rationale: EP-8 defines an inspectable `Config ServiceConfig` that resolves startup values before
+  runtime resources are acquired; `AppConfig` remains the strict Effectful dependency record for
+  pools, store handles, validated streams, and telemetry. Separating them makes that lifecycle
+  visible and avoids treating source-loading details as runtime dependencies.
   Date: 2026-07-22
 
 - Decision: The blueprint–docs coupling mechanism is citation, not duplication. Reference
