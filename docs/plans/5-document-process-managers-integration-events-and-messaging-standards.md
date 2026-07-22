@@ -49,7 +49,7 @@ Concrete Steps section gives the exact grep commands and expected hits).
 
 - [x] (2026-07-22T18:14:45Z) M1: `messaging/` directory created; `messaging/glossary.md` written; `messaging/README.md` stub written.
 - [x] (2026-07-22T18:18:23Z) M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
-- [ ] M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
+- [x] (2026-07-22T18:20:51Z) M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
 - [ ] M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
 - [ ] M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
 - [ ] M5 validation: symbol cross-check greps all pass; `dhall type` passes; README index check passes; DocRef location check passes.
@@ -109,6 +109,15 @@ sources); the implementer should confirm they still hold and record anything new
   reaction must derive it from stable business facts or redelivery can create a second
   deadline. Evidence: `keiro-0.3.0.0:keiro/src/Keiro/ProcessManager.hs` and
   `keiro/src/Keiro/Timer.hs`.
+- `enqueueProducerEventTx` mints a fresh `messageId` every time it is invoked. Reusing
+  only its caller-supplied `OutboxId` therefore does not make a replayed invocation
+  coalesce on the actual `(source, message_id)` conflict target. Caller-owned source
+  wiring must either make checkpoint plus enqueue atomic or build an envelope with
+  stable message and outbox identities. Evidence: `mintIntegrationEvent`,
+  `enqueueProducerEventTx`, and `enqueueOutboxStmt` in keiro 0.3.0.0.
+- `outboxMaintenancePass` reclaims stale publishing rows and samples backlog, but does
+  not call `garbageCollectSent`. Retention must be scheduled independently. Evidence:
+  `keiro-0.3.0.0:keiro/src/Keiro/Outbox.hs`.
 
 
 ## Decision Log
@@ -195,6 +204,14 @@ sources); the implementer should confirm they still hold and record anything new
   Rationale: `TimerRequest` owns its `timerId`, and `scheduleTimerTx` upserts by that
   value. Stable ids turn source-event replay into a timer upsert instead of a duplicate
   deadline.
+  Date: 2026-07-22
+
+- Decision: Make source-redelivery idempotency an application wiring requirement for
+  integration producers and keep sent-row retention separate from outbox maintenance.
+  Rationale: the released producer helper owns neither the source checkpoint nor a
+  stable replayed message id, and the maintenance pass owns no garbage collection.
+  The standard must describe the public behavior rather than the stronger guarantees
+  in the planning draft.
   Date: 2026-07-22
 
 
