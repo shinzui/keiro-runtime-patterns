@@ -46,7 +46,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Complete |
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Complete |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Complete |
-| 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | In Progress |
+| 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Complete |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Not Started |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Not Started |
 | 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Not Started |
@@ -97,9 +97,9 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-3: Stale statements fixed in kiroku, settei, danwa, and haskell-jitsurei repos
 - [x] EP-4: Keiro runtime core docs written (assembly, command cycle, read models, workflows, telemetry)
 - [x] EP-4: keiro-dsl adoption guidance written (when to use, when to skip, firewall and holes, evolution gate)
-- [ ] EP-5: Process manager and timer standards written
-- [ ] EP-5: Integration event standards written (contract, outbox, inbox, versioning)
-- [ ] EP-5: Messaging transport standards written (shibuya semantics, adapter selection matrix, keiro-pgmq jobs)
+- [x] EP-5: Process manager and timer standards written
+- [x] EP-5: Integration event standards written (contract, outbox, inbox, versioning)
+- [x] EP-5: Messaging transport standards written (shibuya semantics, adapter selection matrix, keiro-pgmq jobs)
 - [ ] EP-6: Vertical module structure standard written and reconciled against danwa and keiro-runtime-jitsurei
 - [ ] EP-7: OpenTelemetry and request-logging API docs written in haskell-jitsurei
 - [ ] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
@@ -141,6 +141,13 @@ Findings from the planning research pass that shaped the decomposition (evidence
 - EP-4 also found that `kirokuEventBridge` counts only terminal
   `KirokuEventSubscriptionDeadLettered` events before calling its delegate synchronously; it
   is not a generic store-retry observer. Messaging telemetry in EP-5 must preserve that scope.
+- EP-5 found that three planning guarantees were wider than the released APIs. Process-manager
+  state plus timers commit before separately transacted target dispatches, and timer ids are
+  caller-owned. `IntegrationProducer` is a mapper/enqueue primitive rather than a
+  checkpoint-owning runner, and it mints a new message id per call. Shibuya 0.8.0.1 always
+  finalizes a thrown handler as `AckRetry 0`, while the current PGMQ adapter transactionally
+  transfers configured DLQ messages; older adapter and keiro-pgmq prose still describe the
+  superseded behavior. EP-6 and EP-9 must consume the corrected messaging docs.
 
 
 ## Decision Log
@@ -199,6 +206,15 @@ Findings from the planning research pass that shaped the decomposition (evidence
   Recorded in ADR 0002.
   Date: 2026-07-22
 
+- Decision: Use PGMQ for in-context jobs and work needing leases, retry caps, DLQs, or
+  ordered groups; use Kafka for cross-context event streaming only with serial consumers
+  and application-owned DLQ/retry bookkeeping; use Kiroku subscriptions only for local
+  event-log reactions.
+  Rationale: the three adapters expose materially different failure and ordering contracts.
+  PGMQ integration-event transport remains unscheduled and must eventually build on
+  `Keiro.PGMQ.Runtime`, not the `Job` abstraction. Recorded in ADR 0003.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -239,6 +255,14 @@ configuration validation. The implementation seeded ADR 0001 for schema separati
 0002 for the DSL adoption boundary; EP-5 is now dependency-ready with the core glossary in
 place.
 
+EP-5 is complete. The new `messaging/` area contains eleven indexed standards covering
+process managers and timers, integration contracts, transactional outbox/inbox boundaries,
+Shibuya processing, transport selection, PGMQ jobs, Kiroku subscriptions, shared vocabulary,
+and production gotchas. Acceptance passed the full source-symbol, link, style, Dhall, and
+registry audits against the verified release cohort; all eleven `messaging-*` DocRefs are
+visible in Mori after refresh. ADR 0003 records the transport boundary. EP-6 can now cite
+stable worker/integration behavior, and EP-9 can consume the messaging DocRef keys.
+
 
 ## Revision Notes
 
@@ -259,3 +283,7 @@ place.
   distilled schema ownership and DSL adoption into the repository's first two ADRs. Reason:
   EP-5 and the later architecture/blueprint plans need stable, source-verified runtime terms
   and decision boundaries rather than duplicated prose.
+- 2026-07-22 (EP-5 completion): added and registered eleven messaging standards, corrected
+  transaction, idempotency, DLQ, and handler-exception assumptions against released source,
+  refreshed Mori, and distilled transport selection into ADR 0003. Reason: EP-6 and EP-9
+  need one precise connective-tissue contract for the service fleet.

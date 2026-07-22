@@ -52,9 +52,9 @@ Concrete Steps section gives the exact grep commands and expected hits).
 - [x] (2026-07-22T18:20:51Z) M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
 - [x] (2026-07-22T18:24:32Z) M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
 - [x] (2026-07-22T18:27:21Z) M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
-- [ ] M5 validation: symbol cross-check greps all pass; `dhall type` passes; README index check passes; DocRef location check passes.
-- [ ] ADR distillation: `docs/adr/` seeded with the pgmq-versus-Kafka transport selection ADR (or deferral recorded in the Decision Log with rationale).
-- [ ] MasterPlan registry row for EP-5 flipped to Complete; Outcomes & Retrospective written.
+- [x] (2026-07-22T18:29:01Z) M5 validation: source-symbol checks, `dhall type`, README index, relative links, style, DocRef locations, and Mori registry refresh pass.
+- [x] (2026-07-22T18:29:01Z) ADR distillation: `docs/adr/0003-pgmq-vs-kafka-transport-selection.md` records the transport boundary.
+- [x] (2026-07-22T18:29:01Z) MasterPlan registry row for EP-5 flipped to Complete; Outcomes & Retrospective written.
 
 
 ## Surprises & Discoveries
@@ -182,12 +182,10 @@ sources); the implementer should confirm they still hold and record anything new
   Date: 2026-07-22
 
 - Decision: The pgmq-versus-Kafka selection rationale is written into
-  `messaging/transport-selection.md` now and promoted to `docs/adr/` as this
-  repository's first ADR during this plan's completion pass (not authored up front).
-  Rationale: `docs/adr/` does not exist yet; the MasterPlan lists this rationale among
-  the cross-plan ADR candidates to be seeded "during implementation", and the ExecPlan
-  specification mandates an ADR distillation pass before a plan is marked complete. If a
-  sibling plan seeds `docs/adr/` first, take the next free number.
+  `messaging/transport-selection.md` and promoted to
+  `docs/adr/0003-pgmq-vs-kafka-transport-selection.md`.
+  Rationale: EP-4 seeded ADRs 0001 and 0002 before this plan ran, so the completion
+  pass took the next free number as required by the MasterPlan.
   Date: 2026-07-22
 
 - Decision: Describe the released process-manager persistence boundary precisely:
@@ -242,7 +240,21 @@ Compare the result against the original purpose. Before marking the plan complet
 distill durable project context from the Decision Log, Surprises & Discoveries, and
 this section into docs/adr/. Keep task-local execution details here.
 
-(To be filled during and after implementation.)
+EP-5 is complete. The repository now has eleven indexed messaging documents covering
+the shared vocabulary, process managers and timers, integration contracts, transactional
+outbox and inbox boundaries, Shibuya semantics, transport selection, typed PGMQ jobs,
+Kiroku subscriptions, and eighteen production gotchas. The source audit corrected four
+planning assumptions: the process-manager transaction is intentionally split across
+target dispatches; timer ids are caller-owned; `IntegrationProducer` owns neither a
+checkpoint runner nor a stable replayed message id; and current Shibuya/PGMQ adapter
+behavior differs from older module prose.
+
+Acceptance passed for all eleven files and DocRefs: Dhall type-checking, complete index
+and relative-link checks, style and tagged-fence checks, seven exported inbox runners,
+the full source-symbol audit against the verified release cohort, and Mori registration
+refresh. `mori registry docs shinzui/keiro-runtime-patterns` now lists all eleven
+`messaging-*` entries. ADR 0003 preserves the transport decision independently of the
+implementation notes. No Haskell source or dependency bounds changed.
 
 
 ## Context and Orientation
@@ -256,9 +268,9 @@ complements it, it does not duplicate it). Today the repo contains one doc area,
 `keiki/` (eight files on the keiki transducer library), plus `mori.dhall` (the mori
 registry manifest that makes each doc discoverable), `docs/masterplans/` and
 `docs/plans/` (planning documents, including this one), and seihou-managed agent skills
-under `agents/`. There is no `docs/adr/` directory yet — no ADRs exist in this
-repository, so there is no relevant ADR context to summarize; this plan will seed the
-first ADR at completion (see the Decision Log).
+under `agents/`. At authoring time `docs/adr/` did not exist. EP-4 later seeded the
+schema-ownership and DSL-adoption decisions; this plan adds ADR 0003 for transport
+selection.
 
 This plan creates a second doc area, `messaging/`, at the repository root (sibling of
 `keiki/`), and registers each file in `mori.dhall`. This plan is EP-5 of the MasterPlan
@@ -632,12 +644,12 @@ grep-check against `keiro-core/src/Keiro/Integration/Event.hs`,
   the decision to publish must commit atomically with the local state that caused it,
   and only an outbox row does that. Then the pattern in keiro's shape, three moving
   parts:
-- **The producer.** The canonical path is an `IntegrationProducer`
-  (`mkIntegrationProducer`) — a checkpointed subscription over private events that maps
-  each relevant event to an `IntegrationEvent` (`mintIntegrationEvent`, or
-  `draftToEvent` from an `IntegrationEventDraft`) and writes one `keiro.keiro_outbox`
-  row per mapped event (`enqueueProducerEventTx`) *in the same transaction that advances
-  its own subscription cursor*. It never touches Kafka. The inline escape hatch for
+- **The producer.** `IntegrationProducer` (`mkIntegrationProducer`) defines and validates
+  a pure mapping from private events to `IntegrationEventDraft`; it is not a
+  checkpoint-owning subscription runner. Application wiring must make source checkpoint
+  plus enqueue atomic or reuse stable message and outbox identities across redelivery,
+  because `enqueueProducerEventTx` mints a fresh message id on each call. It never
+  touches Kafka. The inline escape hatch for
   sagas/process managers that must emit without an intermediate private event is
   `enqueueIntegrationEventTx` (+ `freshOutboxId`) inside the caller's transaction — with
   the documented caveat: per-key ordering sorts by `created_at` (transaction start
@@ -653,10 +665,10 @@ grep-check against `keiro-core/src/Keiro/Integration/Event.hs`,
   the producer. Evidence: danwa's `OutboxPublisherWorker` drives this from a 1-second
   `pollingStream` tick adapter, keeps the real Kafka producer behind a cabal flag, and
   on publish failure marks rows retryable — never dropped.
-- **The maintenance pass.** `outboxMaintenancePass` on a separate slower schedule:
-  reclaims rows stuck in `publishing` by crashed workers (`requeueStuckOutbox`), samples
-  the backlog gauge (`countOutboxBacklog`), and garbage-collects sent rows
-  (`garbageCollectSent`).
+- **The maintenance pass.** `outboxMaintenancePass` on a separate slower schedule
+  reclaims rows stuck in `publishing` by crashed workers (`requeueStuckOutbox`) and
+  samples the backlog gauge (`countOutboxBacklog`). Schedule `garbageCollectSent`
+  independently for retention.
 - **Deterministic outbox ids.** When the producer may run more than once for the same
   triggering fact (any reactor under at-least-once delivery), derive the outbox id
   deterministically from the fact instead of minting fresh per attempt, so redelivery
@@ -815,11 +827,10 @@ links to the ADR and keeps only the matrix. Related Patterns: `shibuya-processin
   deliveries — then dead-letter as `DeadLetterMaxAttempts`); `AckDeadLetter` → record in
   `kiroku.dead_letters` and advance; `AckHalt` → cancel the subscription without
   advancing, so the halting event is redelivered on restart.
-- **`guardKirokuHandler` is mandatory.** Because the bridge is ack-coupled, a handler
-  that lets a synchronous exception escape leaves the ack unfinalized and the worker
-  blocks *forever* — not crash, block. `guardKirokuHandler` maps escaping exceptions to
-  `AckRetry (RetryDelay 1)`. Write it as a CORRECT/WRONG pair (wrapped versus bare
-  handler). `kirokuConsumerGroupProcessors` applies the guard automatically.
+- **Prefer `guardKirokuHandler`.** Shibuya 0.8.0.1 catches a thrown handler and finalizes
+  `AckRetry (RetryDelay 0)`, so the supported cohort does not leave the ack unfilled.
+  The adapter guard changes that fallback to a one-second retry and avoids a hot loop.
+  `kirokuConsumerGroupProcessors` applies the guard automatically.
 - Consumer groups: `kirokuConsumerGroupProcessors` yields N named processors pinned to
   `(PartitionedInOrder, Serial)` — member concurrency is Serial by policy; streams are
   hashed to members in SQL (`hashtextextended(stream_id::text, 0) % size`); each member
@@ -856,17 +867,18 @@ each must survive its grep-check):
    time.
 5. pgmq `maxRetries = 0` dead-letters every message before the handler runs;
    `mkRetryPolicy` rejects it, raw constructors do not.
-6. pgmq DLQ redrive and one-shot paths are not atomic across the queue pair — a crash
-   can briefly leave a message in both queues; handlers must be idempotent.
+6. The supervised pgmq adapter's direct/topic DLQ transfer is transactional, while
+   Keiro's one-shot drain sends then deletes separately; know which boundary you run
+   and keep one-shot handlers idempotent.
 7. pgmq prefetch delays (never loses) messages on shutdown; keep
    bufferSize × batchSize × average processing time below the visibility timeout.
 8. Finalizers must be idempotent — the framework re-runs a throwing finalizer with the
    same decision on a [10ms, 50ms, 250ms] schedule.
 9. A throwing handler becomes `AckRetry 0`; on pgmq an always-throwing handler is an
    immediate redelivery storm. Catch and return explicit decisions for poison inputs.
-10. A kiroku-bridged handler that escapes an exception blocks its worker forever —
-    always `guardKirokuHandler` (or use `kirokuConsumerGroupProcessors`, which guards
-    for you).
+10. A thrown handler becomes `AckRetry 0` in Shibuya 0.8.0.1; use
+    `guardKirokuHandler` to make the Kiroku fallback a one-second retry instead of a
+    zero-delay spin (group helpers guard automatically).
 11. pgmq `Envelope.headers` is always `Nothing` on the worker path (JSONB headers are
     unordered); raw headers are only available on the one-shot drain via
     `JobContext`.
@@ -936,8 +948,8 @@ The shape of one entry, exactly matching the file's existing style:
 Do not touch the `dependencies` list (EP-2's remit — see the Decision Log).
 
 **ADR distillation.** Create `docs/adr/` and write
-`docs/adr/0001-pgmq-vs-kafka-transport-selection.md` (next free number if a sibling plan
-seeded the directory first): context (two queue transports plus the event-log bridge;
+`docs/adr/0003-pgmq-vs-kafka-transport-selection.md` (the next free number when this plan
+ran): context (two queue transports plus the event-log bridge;
 twenty services must choose consistently), decision (the rule of thumb from
 `transport-selection.md`), consequences (Kafka consumers accept Serial-only/no
 attempt/no DLQ and bring their own producer; pgmq bounded by Postgres; case B is
@@ -1108,9 +1120,8 @@ the recovery path is to diff against the entry template in Milestone 5 — the c
 mistakes are a missing comma before `Schema.DocRef::{` or an unclosed string. If a
 commit lands with a failing check, fix forward with a follow-up `docs(messaging): fix
 ...` commit; nothing here needs rollback machinery. The ADR step creates a new directory
-and file; if the number 0001 is taken by the time this runs, renumber to the next free
-integer — nothing links ADRs by number except the transport-selection doc's single
-relative link, which is added in the same commit.
+and file; allocate the next free integer and update the transport-selection doc's single
+relative link in the same commit.
 
 
 ## Interfaces and Dependencies
@@ -1161,3 +1172,15 @@ Sibling-plan interfaces: forward links target `../keiro/README.md` (EP-4's index
 Decision Log) and are consumed by EP-6 (which cites `messaging/` for worker/integration
 behavior) and EP-9 (whose blueprints cite the DocRef keys). This plan reads, but never
 edits, anything outside this repository.
+
+
+## Revision Notes
+
+- 2026-07-22 (implementation completion): added the eleven messaging standards and
+  DocRefs, refreshed Mori, and recorded transport selection in ADR 0003. Corrected the
+  original draft wherever released source showed narrower behavior: split
+  process-manager transactions and caller-owned timer ids, caller-owned producer
+  checkpoint/idempotency wiring, separate outbox retention, transactional supervised
+  PGMQ DLQ transfer versus non-atomic one-shot drains, and Shibuya 0.8.0.1's
+  always-finalize handler-exception path. Reason: the pattern corpus must describe the
+  verified release cohort rather than stronger guarantees or stale module prose.
