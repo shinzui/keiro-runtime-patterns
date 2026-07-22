@@ -4,6 +4,7 @@ slug: document-kiroku-event-store-and-pg-migrate-standards
 title: "Document kiroku event store and pg-migrate standards"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -27,14 +28,14 @@ You can see it working like this: from the repository root, `mori validate` prin
 
 Update this checklist at every stopping point. Split partially completed items into "done" and "remaining" parts rather than leaving them ambiguous.
 
-- [ ] Milestone 1: `kiroku/append-and-read.md` written
-- [ ] Milestone 1: `kiroku/transactions-and-projections.md` written
-- [ ] Milestone 1: `kiroku/connection-settings.md` written
-- [ ] Milestone 1: `kiroku/subscriptions.md` written
-- [ ] Milestone 1: `kiroku/operational-invariants.md` written (all ten invariants)
-- [ ] Milestone 1: `kiroku/observability.md` written
-- [ ] Milestone 1: `kiroku/lifecycle-and-deletion.md` written
-- [ ] Milestone 1: `kiroku/README.md` index written; every kiroku doc linked
+- [x] Milestone 1: `kiroku/append-and-read.md` written
+- [x] Milestone 1: `kiroku/transactions-and-projections.md` written
+- [x] Milestone 1: `kiroku/connection-settings.md` written
+- [x] Milestone 1: `kiroku/subscriptions.md` written
+- [x] Milestone 1: `kiroku/operational-invariants.md` written (all ten invariants)
+- [x] Milestone 1: `kiroku/observability.md` written
+- [x] Milestone 1: `kiroku/lifecycle-and-deletion.md` written
+- [x] Milestone 1: `kiroku/README.md` index written; every kiroku doc linked
 - [ ] Milestone 2: `migrations/pg-migrate-model.md` written
 - [ ] Milestone 2: `migrations/authoring.md` written
 - [ ] Milestone 2: `migrations/service-package.md` written
@@ -56,6 +57,9 @@ Document unexpected behaviors, bugs, optimizations, or insights discovered durin
 
 - During plan authoring (2026-07-22), every load-bearing symbol named in this plan was verified by grep against the kiroku and pg-migrate working trees: `runTransactionAppendingResource` and `enrichEventsIO` in `kiroku-store/src/Kiroku/Store/Transaction.hs`, `extraSearchPath`/`statementTimeout` in `Connection.hs`, `WrongExpectedVersion` constructed with `StreamVersion 0` in `Error.hs` (line 274 as of kiroku-store 0.3.0.1), `withSubscription` in `Subscription.hs`, `subscriptionTraceHandler :: Tracer -> IO (KirokuEvent -> IO ())` in kiroku-otel, `readinessMaxLag` default `10_000` in kiroku-metrics, `kirokuMigrationPlan :: Either PlanError MigrationPlan` in kiroku-store-migrations, `withMigratedDatabase` in pg-migrate-test-support, and the directive string `pg-migrate: no-transaction` in `pg-migrate/src/Database/PostgreSQL/Migrate/Sql/Scanner.hs` (line 103 as of pg-migrate 1.1.0.0).
 - The pg-migrate basic example lives at the repository root, `/Users/shinzui/Keikaku/bokuno/pg-migrate/examples/basic/app/Main.hs`, not under the `pg-migrate/` package subdirectory as an earlier research note implied. The plan below cites the corrected path.
+- Release verification on 2026-07-22 matched local package versions to both Hackage and upstream tags: `kiroku-store` 0.3.0.1, `kiroku-store-migrations` 0.3.0.0, `kiroku-otel` 0.2.0.1, `kiroku-metrics` 0.1.0.1, `shibuya-kiroku-adapter` 0.4.0.0, pg-migrate 1.1.0.0, and pgmq-hs 0.4.0.1.
+- `Kiroku.Metrics.Prometheus` describes `kiroku_events_appended_total` as a “gap-free global position,” but `Kiroku.Store.Types.GlobalPosition` explicitly promises only a strictly increasing total order and says positions need not be dense. The fleet docs follow the public type contract and name the metric without repeating the misleading HELP text.
+- The released Kiroku native manifest now contains an eighth migration, while `Kiroku.Store.Migrations.History.Codd` intentionally retains seven mappings because only the seven historical Codd files need import evidence. `migrations/codd-transition.md` must describe the history map as seven entries without implying the native component stopped growing.
 - (Implementation discoveries go here.)
 
 
