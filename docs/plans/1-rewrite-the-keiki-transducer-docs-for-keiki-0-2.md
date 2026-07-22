@@ -31,10 +31,10 @@ This plan is EP-1 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standar
 - [x] (2026-07-22 16:34Z) Milestone 1: `json-event-codecs.md` corrected (five generated bindings, eight `EventCodecOptions` fields, in-band `"v"` version, `fcOnMissing`, cross-link to the new evolution guide).
 - [x] (2026-07-22 16:34Z) Milestone 1: `diagram-docs.md` reframed ("Include Process Managers" replaced with orchestrator framing; `ProcessManagerDiagram` labeled cosmetic) and given additive cross-references.
 - [x] (2026-07-22 16:34Z) Milestone 1: additive cross-references and style conformance applied to `diagnosing-rejected-commands.md`, `collections-and-opaque-guards.md`, and `operator-conflicts.md`.
-- [ ] Milestone 2: new doc `keiki/structured-replay-and-hydration.md` written.
-- [ ] Milestone 2: new doc `keiki/event-schema-evolution.md` written.
-- [ ] Milestone 2: new doc `keiki/checked-composition.md` written.
-- [ ] Milestone 2: new doc `keiki/upgrading-to-keiki-0-2.md` written.
+- [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/structured-replay-and-hydration.md` written.
+- [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/event-schema-evolution.md` written.
+- [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/checked-composition.md` written.
+- [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/upgrading-to-keiki-0-2.md` written.
 - [ ] Milestone 3: `keiki/README.md` rewritten as the 0.2 index linking all eleven guides.
 - [ ] Milestone 3: `mori.dhall` updated with five new DocRefs (the missing `keiki-diagram-docs` plus one per new file); `dhall --file mori.dhall` passes.
 - [ ] Milestone 4: symbol audit completed — every named symbol in every `keiki/*.md` code sample located in the keiki 0.2 source.
@@ -46,7 +46,11 @@ This plan is EP-1 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standar
 Document unexpected behaviors, bugs, optimizations, or insights discovered during
 implementation. Provide concise evidence.
 
-(None yet.)
+- The plan's proposed `reconstituteEither` example named its successful first component
+  `wrapperState`, but the released signature returns a settled control state: `Either
+  (ReplayFailure s co) (s, RegFile rs)`. Only `replayEvents` returns an `InFlight` wrapper.
+  The implemented guide follows the source signature and uses `(state, regs)` for
+  `reconstituteEither`; the worked example below was corrected to match.
 
 
 ## Decision Log
@@ -200,7 +204,7 @@ Scope: create four new files in `keiki/`, each conforming to the style contract,
 
 ```haskell
 case reconstituteEither orderTransducer storedEvents of
-  Right (wrapperState, regs) -> …            -- hydrated
+  Right (state, regs) -> …                   -- hydrated at a stable vertex
   Left ReplayFailure {replayFailedIndex, replayFailureReason} ->
     -- log the index and reason; do NOT fall back to a partial state
     …
@@ -411,3 +415,11 @@ This plan produces documentation and one registry edit; it introduces no code in
 - Keiro (read-only context, never presented as keiki API): `Keiro.ProcessManager` at `/Users/shinzui/Keikaku/bokuno/keiro/keiro/src/Keiro/ProcessManager.hs` and `mkEventStream` at `/Users/shinzui/Keikaku/bokuno/keiro/keiro-core/src/Keiro/EventStream/Validate.hs`.
 
 Tooling dependencies: `git` and `grep`/`sed` (already in use in this repository) and the `dhall` executable for the registry type-check. Cross-plan dependencies per the MasterPlan: none hard; this plan writes forward references to the messaging standards by the plan path `docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md` (EP-5), and later plans (EP-2, EP-4, EP-5, EP-6, EP-8) copy this plan's realized doc style and its `mori.dhall` DocRef shape.
+
+
+## Revision Notes
+
+- 2026-07-22 (implementation): corrected the structured-replay worked example so
+  `reconstituteEither` returns `(state, regs)` and reserved the `InFlight` wrapper for
+  `replayEvents`, matching the released 0.2 source. The discrepancy and its impact are
+  recorded in Surprises & Discoveries.
