@@ -44,7 +44,7 @@ Research grounding: nine parallel research reports were produced during planning
 |---|-------|------|-----------|-----------|--------|
 | 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Complete |
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Complete |
-| 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Not Started |
+| 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | In Progress |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Not Started |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Not Started |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Not Started |

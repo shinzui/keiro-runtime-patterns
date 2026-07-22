@@ -4,6 +4,7 @@ slug: remediate-stale-docs-across-the-keiro-ecosystem-repos
 title: "Remediate stale docs across the keiro ecosystem repos"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
@@ -129,12 +130,13 @@ implementation. Provide concise evidence.
 - Decision: Commit messages follow Conventional Commits, and every commit in every repo
   carries both git trailers exactly as written below, with paths relative to the
   keiro-runtime-patterns repository even though the commits land in foreign repos:
-  `MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md`
-  and `ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md`.
+  `MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md`,
+  `ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md`, and
+  `Intention: intention_01ky5agv9gehqa8dbw03cdcpwv`.
   Rationale: The parent MasterPlan decided that keiro-runtime-patterns is the
-  coordination home and that cross-repo commits point back at its plan files. No
-  Intention ID is active (neither this plan's frontmatter nor the MasterPlan's carries
-  one), so no `Intention:` trailer is added.
+  coordination home and that cross-repo commits point back at its plan files. The child
+  inherits the MasterPlan's active intention, so every implementation commit carries all
+  three trailers.
   Date: 2026-07-22
 
 - Decision: For the haskell-jitsurei pin fix, the base `package.dhall` sha256 is copied
@@ -454,7 +456,8 @@ durable execution as future v2 work; both contradicted the root README
 and the shipped 0.2.0.0/0.3.0.0 releases.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 
 git add keiro/src/Keiro.hs CHANGELOG.md
 git commit -m "fix(keiro): align Keiro.version with the released package version
@@ -465,7 +468,8 @@ automation owns it; a lockstep comment and a changelog entry guard
 future releases.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 
@@ -522,7 +526,8 @@ The Prometheus HELP text also promised gap-free global positions despite
 the public opaque-cursor contract.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 
@@ -596,7 +601,8 @@ README and the compatibility matrix still described 0.1.0.0 as the
 prepared release while every publishable package ships 0.2.0.0.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 
@@ -705,7 +711,8 @@ migrate-to-validated-event-stream.md is unblocked: keiro 0.2 shipped
 ExecPlan 84.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 
@@ -801,7 +808,8 @@ checklist.dhall pin a3c59033; the extension's semantic hash is
 unchanged, the base package hash comes from mori.dhall.
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 
@@ -821,7 +829,8 @@ git add docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md \
 git commit -m "docs(plans): mark EP-3 stale-doc remediation complete
 
 MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
-ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md"
+ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md
+Intention: intention_01ky5agv9gehqa8dbw03cdcpwv"
 ```
 
 No ADR distillation pass is expected: the durable-context candidate touched here (the
