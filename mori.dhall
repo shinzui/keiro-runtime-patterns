@@ -82,5 +82,49 @@ in  Schema.Project::{
             "Deriving kind-discriminated JSON codecs with keiki-codec-json"
         , location = Schema.DocLocation.LocalFile "keiki/json-event-codecs.md"
         }
+      , Schema.DocRef::{
+        , key = "keiki-diagram-docs"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Generating Mermaid diagrams, atlas sections, and edge inspectors from transducers"
+        , location = Schema.DocLocation.LocalFile "keiki/diagram-docs.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiki-structured-replay-and-hydration"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Diagnosing hydration failures with reconstituteEither, replayEvents, and ReplayFailure"
+        , location =
+            Schema.DocLocation.LocalFile
+              "keiki/structured-replay-and-hydration.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiki-event-schema-evolution"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Evolving persisted event JSON with in-band versions, pinned kinds, and upcaster chains"
+        , location =
+            Schema.DocLocation.LocalFile "keiki/event-schema-evolution.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiki-checked-composition"
+        , kind = Schema.DocKind.Pattern
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Wiring transducers with composeChecked, alternative, and the feedback1 stateless-only trap"
+        , location = Schema.DocLocation.LocalFile "keiki/checked-composition.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiki-upgrading-to-keiki-0-2"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Migration notes for keiki 0.2: noEmit, new validation warnings, snapshot-hash change, Decider removal"
+        , location =
+            Schema.DocLocation.LocalFile "keiki/upgrading-to-keiki-0-2.md"
+        }
       ]
     }

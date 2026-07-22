@@ -35,8 +35,8 @@ This plan is EP-1 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standar
 - [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/event-schema-evolution.md` written.
 - [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/checked-composition.md` written.
 - [x] (2026-07-22 16:38Z) Milestone 2: new doc `keiki/upgrading-to-keiki-0-2.md` written.
-- [ ] Milestone 3: `keiki/README.md` rewritten as the 0.2 index linking all eleven guides.
-- [ ] Milestone 3: `mori.dhall` updated with five new DocRefs (the missing `keiki-diagram-docs` plus one per new file); `dhall --file mori.dhall` passes.
+- [x] (2026-07-22 16:40Z) Milestone 3: `keiki/README.md` rewritten as the 0.2 index linking all eleven guides.
+- [x] (2026-07-22 16:40Z) Milestone 3: `mori.dhall` updated with five new DocRefs (the missing `keiki-diagram-docs` plus one per new file); `dhall --file mori.dhall` passes.
 - [ ] Milestone 4: symbol audit completed — every named symbol in every `keiki/*.md` code sample located in the keiki 0.2 source.
 - [ ] Milestone 4: acceptance commands run and recorded (`git grep ProcessManagerAction`, link check, DocRef count, dhall type-check).
 
@@ -51,6 +51,11 @@ implementation. Provide concise evidence.
   (ReplayFailure s co) (s, RegFile rs)`. Only `replayEvents` returns an `InFlight` wrapper.
   The implemented guide follows the source signature and uses `(state, regs)` for
   `reconstituteEither`; the worked example below was corrected to match.
+- The original README link-check loop visited every Markdown link occurrence, but the
+  required 0.2 summary and trailing Related Patterns section intentionally link several
+  guides more than once. Its transcript therefore contained 23 `OK` lines rather than the
+  expected eleven even though only eleven unique sibling paths existed. The acceptance loop
+  now sorts paths uniquely before testing them.
 
 
 ## Decision Log
@@ -375,7 +380,7 @@ Expected: no matching lines, `exit=1` (grep's no-match exit). Additionally, `git
 **2. Every doc is reachable from the index.**
 
 ```bash
-for f in $(grep -o '(\./[a-z0-9-]*\.md)' keiki/README.md | tr -d '()' ); do
+for f in $(grep -o '(\./[a-z0-9-]*\.md)' keiki/README.md | tr -d '()' | sort -u); do
   test -f "keiki/$f" && echo "OK $f" || echo "MISSING $f"
 done
 ls keiki/*.md | wc -l
@@ -423,3 +428,6 @@ Tooling dependencies: `git` and `grep`/`sed` (already in use in this repository)
   `reconstituteEither` returns `(state, regs)` and reserved the `InFlight` wrapper for
   `replayEvents`, matching the released 0.2 source. The discrepancy and its impact are
   recorded in Surprises & Discoveries.
+- 2026-07-22 (implementation): made the README acceptance loop unique its extracted link
+  paths. The README must link the same guide from its index, release summary, and Related
+  Patterns section, so occurrence-counting contradicted the expected eleven-guide result.
