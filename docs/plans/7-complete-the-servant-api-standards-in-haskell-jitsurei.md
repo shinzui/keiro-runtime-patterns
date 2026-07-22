@@ -4,6 +4,7 @@ slug: complete-the-servant-api-standards-in-haskell-jitsurei
 title: "Complete the servant API standards in haskell-jitsurei"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 
