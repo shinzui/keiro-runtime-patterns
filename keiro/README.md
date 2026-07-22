@@ -12,8 +12,8 @@ Use this area as the fleet standard for application wiring and operating boundar
 - [Read models and projections](read-models-and-projections.md) — register consistency contracts, honor async fences, and rebuild safely.
 - [Durable workflows](durable-workflows.md) — journal side effects and deploy the progress mechanisms each workflow uses.
 - [Telemetry](telemetry.md) — connect tracing, metrics, propagation, and application logging hooks.
-
-The remaining DSL adoption and gotcha guides will be added as this documentation plan advances.
+- [Keiro-dsl adoption](dsl-adoption.md) — decide when checked specifications and the evolution gate pay off.
+- [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, and Kafka integration traps.
 
 ## Related Patterns
 

@@ -30,8 +30,8 @@ You can see it working by opening `keiro/README.md`, following any link, and cro
 - [x] Milestone 3: `keiro/read-models-and-projections.md` written. (2026-07-22 17:49Z)
 - [x] Milestone 3: `keiro/durable-workflows.md` written. (2026-07-22 17:49Z)
 - [x] Milestone 3: `keiro/telemetry.md` written. (2026-07-22 17:49Z)
-- [ ] Milestone 4: `keiro/dsl-adoption.md` (the centerpiece decision doc) written.
-- [ ] Milestone 4: `keiro/gotchas.md` written.
+- [x] Milestone 4: `keiro/dsl-adoption.md` (the centerpiece decision doc) written. (2026-07-22 17:51Z)
+- [x] Milestone 4: `keiro/gotchas.md` written. (2026-07-22 17:51Z)
 - [ ] Milestone 5: `keiro/README.md` finalized as a complete index.
 - [ ] Milestone 5: nine `Schema.DocRef` entries appended to `mori.dhall`; `dhall type` passes.
 - [ ] Milestone 5: symbol cross-check script passes against the keiro source tree.
