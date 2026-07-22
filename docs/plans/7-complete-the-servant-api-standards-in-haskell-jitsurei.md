@@ -42,24 +42,27 @@ one standard. Success is observable: `dhall --file mori.dhall` type-checks with 
 DocRef entries, every module and function name the docs cite greps to a real definition
 in its source repository, and every relative cross-link resolves to a file on disk.
 
-The work happens entirely in `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei` (plus one
-throwaway prototype in a scratch directory). This plan file lives in the coordination
-repository `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns` and is the only file
-this plan changes there. Commits in haskell-jitsurei follow Conventional Commits and
-carry the MasterPlan/ExecPlan git trailers described in Concrete Steps.
+The primary artifacts live in `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei`, plus one
+throwaway prototype in a scratch directory. Source verification exposed an incorrect
+OTLP per-signal endpoint assumption in `/Users/shinzui/Keikaku/bokuno/keiro-runtime-jitsurei`,
+so implementation also corrected that example's documentation and two scenario scripts.
+This plan file lives in the coordination repository
+`/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns`. Cross-repository commits follow
+Conventional Commits and carry the MasterPlan/ExecPlan/Intention trailers described in
+Concrete Steps.
 
 
 ## Progress
 
-- [ ] Milestone 1: `api/opentelemetry-integration.md` written and symbol-verified.
-- [ ] Milestone 2: request-logging middleware prototyped in the scratch directory; trace-id correlation demonstrated end to end.
-- [ ] Milestone 2: `api/request-logging.md` written and symbol-verified.
-- [ ] Milestone 3: `api/relay-pagination.md` written and symbol-verified.
-- [ ] Milestone 4: `api/health-endpoints.md` written and symbol-verified.
-- [ ] Milestone 5: four DocRef entries added to `mori.dhall`; `dhall --file mori.dhall` type-checks.
-- [ ] Milestone 5: "Related Patterns" section appended to `api/servant-routes.md`; all relative links in all api/ docs resolve.
-- [ ] Milestone 5: full validation pass run (symbol greps, doc-shape checks, link checks); results recorded here.
-- [ ] Living sections updated; Outcomes & Retrospective written.
+- [x] Milestone 1: `api/opentelemetry-integration.md` written and symbol-verified. Completed 2026-07-22 in `7365ab4`.
+- [x] Milestone 2: request-logging middleware prototyped in the scratch directory; trace-id correlation demonstrated end to end. Completed 2026-07-22.
+- [x] Milestone 2: `api/request-logging.md` written and symbol-verified. Completed 2026-07-22 in `ccdd30f`.
+- [x] Milestone 3: `api/relay-pagination.md` written and symbol-verified. Completed 2026-07-22 in `9135085`.
+- [x] Milestone 4: `api/health-endpoints.md` written, symbol-verified, and its complete route/handler sample compiled against `servant-0.20.3.0`. Completed 2026-07-22 in `7cdd4bc`.
+- [x] Milestone 5: four DocRef entries added to `mori.dhall`; `dhall --file mori.dhall` type-checks and Mori lists all four. Completed 2026-07-22 in `6ca0e5f`.
+- [x] Milestone 5: "Related Patterns" section appended to `api/servant-routes.md`; all relative links in all api/ docs resolve. Completed 2026-07-22 in `6ca0e5f`.
+- [x] Milestone 5: full validation pass run (symbol greps, doc-shape checks, typed-fence checks, link checks, Dhall check, and registry refresh). Completed 2026-07-22.
+- [x] Living sections updated; Outcomes & Retrospective written. Completed 2026-07-22.
 
 
 ## Surprises & Discoveries
@@ -92,6 +95,31 @@ adding entries during implementation):
   `application/json`), not an RFC 7807 problem document — a deliberate library contract
   that conflicts on the surface with `rfc7807-problem-details.md`. Resolved by a
   recorded exemption; see the Decision Log.
+- The released OTLP HTTP exporter distinguishes generic and per-signal endpoints:
+  `OTEL_EXPORTER_OTLP_ENDPOINT` is a base URL that receives `/v1/traces`, while
+  `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` is used unchanged. The planning draft and
+  `keiro-runtime-jitsurei/docs/observability.md` incorrectly said both received the
+  suffix. The example's scenario scripts also populated the per-signal variable with a
+  base host, so implementation fixed the prose and both script defaults in `b9bcf3c`.
+- OpenAPI and Relay publication status changed after the planning source snapshot.
+  Hackage and upstream tags show all four Relay packages at 0.1.0.0, `openapi-hs` at
+  5.0.0, and `servant-openapi-hs` at 5.1.0. `relay-pagination-servant-0.1.0.0` retains
+  a coherent 4.1.* OpenAPI dependency cohort. The existing OpenAPI guide's
+  "unpublished forks" instructions were therefore stale and were corrected in
+  `603f59b`.
+- The OpenTelemetry SDK batch processor fails at runtime unless the executable is built
+  with `-threaded`. The request logger prototype exposed this before its successful run,
+  so the OpenTelemetry standard makes the flag mandatory.
+- With the threaded runtime and an active OTLP processor, the prototype emitted these
+  two access records (timestamps omitted here):
+  `trace_id=4bf92f3577b34da6a3ce929d0e0e4736,
+  span_id=10a3e37aac7ffcd5` for the supplied `traceparent`, and
+  `trace_id=f3a4293d2c75f8d741da1b121e243cf6,
+  span_id=5b0d3f4706805cc4` for a request without one. This proved both middleware ordering
+  and fresh-root correlation.
+- Compiling the health route excerpt caught two sample-only mistakes before publication:
+  released servant imports the method as `StdMethod (GET)`, and `Data.SOP` comes from
+  `sop-core`; the final excerpt compiled with GHC 9.10.3 and servant 0.20.3.0.
 
 
 ## Decision Log
@@ -129,12 +157,12 @@ adding entries during implementation):
 
 - Decision: the cross-link requirement is satisfied by appending a trailing
   `## Related Patterns` section to `api/servant-routes.md` linking all six sibling api/
-  docs, plus each new doc carrying its own Related Patterns section. The two other
-  existing docs (`openapi-from-types.md`, `rfc7807-problem-details.md`) are not
-  restructured — they already cross-link inline and belong to EP-3/no plan's remit;
-  this plan touches them not at all.
-  Rationale: minimal, additive edits to existing prose; servant-routes.md is the family
-  root and the mandated place for the links.
+  docs, plus each new doc carrying its own Related Patterns section.
+  `rfc7807-problem-details.md` remains unchanged. `openapi-from-types.md` was updated
+  only where its publication and compatibility guidance had become false.
+  Rationale: servant-routes.md is the family root and the mandated place for links, but
+  preserving stale "not on Hackage" instructions would violate the initiative's
+  accuracy goal and contradict the Relay standard.
   Date: 2026-07-22
 
 - Decision: the OpenTelemetry doc instructs services to set
@@ -145,13 +173,38 @@ adding entries during implementation):
   migrate later.
   Date: 2026-07-22
 
+- Decision: configure only the generic OTLP base endpoint by default; when a deployment
+  explicitly sets the trace-specific endpoint, require the complete `/v1/traces` URL.
+  Rationale: `hs-opentelemetry-exporter-otlp-1.0.0.0` appends a signal path only to the
+  generic endpoint. Treating the per-signal value as a host silently targets the wrong
+  collector path. The reference scenario scripts now leave that variable unset unless
+  the operator supplies a complete override.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
-(To be filled during and after implementation. Before marking the plan complete,
-distill durable context: this coordination repository has no `docs/adr/` yet — if any
-decision here proves durable beyond this plan, seed `docs/adr/` in
-keiro-runtime-patterns per the MasterPlan's Integration Points.)
+EP-7 is complete. Haskell-jitsurei now has four source-verified API standards covering
+OpenTelemetry, bounded production request logging, Relay keyset pagination, and
+Kubernetes health endpoints. Six focused commits (`7365ab4` through `6ca0e5f`) added
+the docs, corrected the now-published OpenAPI package guidance, registered the four
+DocRefs, and linked the API family. `mori register --local` refreshed the indexed
+projection, and `mori registry docs shinzui/haskell-jitsurei` lists all four keys.
+
+The request-logging prototype compiled against the released OpenTelemetry 1.0.0.0
+cohort and emitted one JSON record whose trace id matched the supplied W3C
+`traceparent` (`4bf92f3577b34da6a3ce929d0e0e4736`); a request without a parent emitted
+a fresh trace id. The complete health route/handler sample separately compiled against
+released servant 0.20.3.0. All Dhall, document-shape, typed-fence, relative-link, symbol,
+shell-syntax, and whitespace checks passed.
+
+Source verification improved an upstream example as well as the corpus: commit
+`b9bcf3c` corrected the OTLP trace-endpoint default in both
+keiro-runtime-jitsurei scenario paths and its observability guide. No new ADR was
+created. These are implementation standards whose durable home is the four canonical
+haskell-jitsurei documents; the existing coordination ADRs govern different runtime
+architecture boundaries, and duplicating the API rules in an ADR would create a second
+source of truth.
 
 
 ## Context and Orientation
@@ -161,10 +214,9 @@ keiro-runtime-patterns per the MasterPlan's Integration Points.)
 Nothing in this section assumes prior knowledge; every path is absolute.
 
 - `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns` — the coordination repository.
-  This plan file lives here (`docs/plans/7-…md`). **`docs/adr/` does not exist in this
-  repository** — there are no ADRs to consult; the MasterPlan at
-  `docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md` confirms
-  this and expects this initiative to seed the first ones. No other file here changes.
+  This plan file lives here (`docs/plans/7-…md`). The initiative has since created
+  `docs/adr/0001` through `0004`; they govern schema ownership, DSL adoption, transport
+  selection, and vertical module structure, not the API standards in this plan.
 - `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei` — where the work happens. A
   documentation-only repository (no Haskell code): directories `api/`, `cli/`, `core/`,
   `mori/`, and the registry file `mori.dhall` at the root. The three existing api/ docs
@@ -241,13 +293,13 @@ by opening the file, not from memory. The research below already did this once (
 numbers cited are as of 2026-07-22); the implementer re-runs the greps in Validation and
 Acceptance because the sources may have moved.
 
-### No relevant ADRs
+### Relevant ADRs
 
-`docs/adr/` does not exist in keiro-runtime-patterns (verified: the directory is
-absent). haskell-jitsurei has no `docs/adr/` either — it has no `docs/` directory at
-all. The two ADR sets that informed the research (relay-pagination's `docs/adr/1..7`,
-kiroku's `docs/adr/0001-0003`) belong to those libraries and are cited inside the
-relevant milestones rather than summarized here.
+The coordination ADRs created by earlier child plans do not govern these general API
+standards. Haskell-jitsurei has no `docs/adr/` directory. The two ADR sets that informed
+the research (relay-pagination's `docs/adr/1..7`, kiroku's `docs/adr/0001-0003`) belong
+to those libraries and are cited inside the relevant milestones rather than summarized
+here.
 
 
 ## Plan of Work
@@ -316,11 +368,10 @@ the module haddock of `sdk/src/OpenTelemetry/Trace.hs`); the OTLP exporter reads
 `OTEL_EXPORTER_OTLP_ENDPOINT` (default `http://localhost:4318` for HTTP),
 per-signal `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`, and `OTEL_EXPORTER_OTLP_PROTOCOL`
 (verified in `exporters/otlp/src/OpenTelemetry/Exporter/OTLP/Internal/Config.hs`).
-Kubernetes manifests set these; code does not hardcode endpoints. One sharp edge worth
-repeating from
-`/Users/shinzui/Keikaku/bokuno/keiro-runtime-jitsurei/docs/observability.md`: at the
-pinned revision the exporter appends `/v1/traces` itself — endpoint variables must be
-host URLs without that suffix.
+Kubernetes manifests set these; code does not hardcode endpoints. One sharp edge found
+during implementation is that the generic endpoint is a base URL and receives
+`/v1/traces`, while `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` is a complete per-signal URL
+and is used unchanged.
 
 **3. The WAI middleware and its placement.** Package
 `hs-opentelemetry-instrumentation-wai` (1.0.0.0), module
@@ -432,7 +483,7 @@ params consciously). Health-probe endpoints (`/health/live`, `/health/ready`) ma
 excluded from logging to avoid probe noise — the middleware takes a path predicate.
 
 **The prototype (do this before finalizing the doc).** In the scratch directory
-`/private/tmp/claude-501/-Users-shinzui-Keikaku-bokuno-keiro-runtime-patterns/de3eb3fb-e0fd-40c8-9430-4f77450f8288/scratchpad/reqlog-prototype`,
+`/private/tmp/keiro-reqlog.k4Bg68`,
 create a minimal cabal project (one `Main.hs`) that: initializes the SDK bracket,
 builds `newOpenTelemetryWaiMiddleware`, wraps a trivial servant (or plain WAI) app with
 otel-then-logger, and runs warp. Drive it:
@@ -538,13 +589,12 @@ conformance test booting the real app over warp and driving it through the typed
 servant client, plus typed 400 assertions. Cite the paths; excerpt only the endpoint
 type and the handler case.
 
-**Packaging note.** `relay-pagination-servant` depends on the `openapi-hs` /
-`servant-openapi-hs` forks (OpenAPI 3.1 + `HasOpenApi` for `MultiVerb`) and is blocked
-from Hackage until they publish; consume it via `source-repository-package` pins, one
-tag across the cohort — same rule and same reason as `api/openapi-from-types.md`, link
-it. `Relay.Pagination.Servant.OpenApi` is the canonical sole home of the OpenAPI orphan
-instances; importing it is what makes the four query params and schemas appear in the
-generated document.
+**Packaging note.** All four Relay 0.1.0.0 packages and both OpenAPI forks are published
+on Hackage. `relay-pagination-servant-0.1.0.0` bounds `openapi-hs` and
+`servant-openapi-hs` to the compatible 4.1.* cohort; consumers must follow that cohort
+rather than force the current 5.x pair. `Relay.Pagination.Servant.OpenApi` is the
+canonical sole home of the OpenAPI orphan instances; importing it is what makes the
+four query params and schemas appear in the generated document.
 
 Related Patterns: `./servant-routes.md`, `./openapi-from-types.md`,
 `./rfc7807-problem-details.md`.
@@ -688,7 +738,7 @@ All commands run from `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei` unless st
 5. Run the full validation pass (next section), then update this plan's Progress,
    Surprises & Discoveries, and Decision Log.
 
-6. Commit style — Conventional Commits, in haskell-jitsurei, with both trailers per the
+6. Commit style — Conventional Commits, in haskell-jitsurei, with all three trailers per the
    MasterPlan's Decision Log (plans live in keiro-runtime-patterns; commits elsewhere
    point back at them). One commit per document plus one for registration/cross-links
    is the expected shape:
@@ -701,6 +751,7 @@ All commands run from `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei` unless st
 
     MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md
     ExecPlan: docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md
+    Intention: intention_01ky5agv9gehqa8dbw03cdcpwv
     ```
 
    Do not commit in keiro-runtime-patterns except to update this plan file, and never
@@ -781,10 +832,11 @@ curl (see Milestone 2 for the exact command and expected value). This is the pla
 one runtime proof; the other milestones are documentation whose "runtime" is the
 symbol greps above.
 
-**6. The three pre-existing docs are otherwise untouched.**
-`git -C /Users/shinzui/Keikaku/bokuno/haskell-jitsurei diff --stat` during review must
-show `api/servant-routes.md` changed only by the appended Related Patterns section, and
-`openapi-from-types.md` / `rfc7807-problem-details.md` unchanged.
+**6. Existing API guidance remains coherent.**
+`api/servant-routes.md` changes only by the appended Related Patterns section, and
+`api/rfc7807-problem-details.md` remains unchanged. `api/openapi-from-types.md` now
+describes the published `openapi-hs` / `servant-openapi-hs` cohorts and the Relay 0.1
+compatibility constraint instead of the obsolete unpublished-fork pins.
 
 
 ## Idempotence and Recovery
@@ -826,7 +878,8 @@ tell readers to confirm released versions on Hackage before pinning.
     {traceId, spanId, …}`; `OpenTelemetry.Trace.Id.traceIdBaseEncodedText` /
     `spanIdBaseEncodedText`; `makeTracer`, `tracerOptions`, `InstrumentationLibrary`.
   - `hs-opentelemetry-exporter-otlp`: env vars `OTEL_EXPORTER_OTLP_ENDPOINT`
-    (default `http://localhost:4318` HTTP), `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`,
+    (default `http://localhost:4318` HTTP; base URL with a signal path appended),
+    `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` (complete trace URL, used unchanged),
     `OTEL_EXPORTER_OTLP_PROTOCOL` (in
     `src/OpenTelemetry/Exporter/OTLP/Internal/Config.hs`).
   - Logging bridges (mention-only): `hs-opentelemetry-instrumentation-co-log`
@@ -875,3 +928,14 @@ tell readers to confirm released versions on Hackage before pinning.
 At the end of each doc milestone, the named surface for that milestone must appear in
 the doc exactly as it exists in source — module path, function name, and signature
 where a signature is quoted.
+
+
+## Plan Revision Note
+
+2026-07-22: implementation revised the original scope and acceptance text after
+authoritative source and release verification disproved two planning assumptions. OTLP
+generic and per-signal endpoints have different suffix behavior, requiring a small fix
+in keiro-runtime-jitsurei, and the Relay/OpenAPI packages are now published on Hackage,
+requiring the existing OpenAPI guide to be corrected. The health sample was also added
+to the compilation proof after its first type-check caught import details that symbol
+greps alone did not exercise.

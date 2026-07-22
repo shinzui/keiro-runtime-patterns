@@ -48,7 +48,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Complete |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Complete |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Complete |
-| 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | In Progress |
+| 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Complete |
 | 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Not Started |
 | 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | Not Started |
 
@@ -101,8 +101,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-5: Integration event standards written (contract, outbox, inbox, versioning)
 - [x] EP-5: Messaging transport standards written (shibuya semantics, adapter selection matrix, keiro-pgmq jobs)
 - [x] EP-6: Vertical module structure standard written and reconciled against danwa and keiro-runtime-jitsurei
-- [ ] EP-7: OpenTelemetry and request-logging API docs written in haskell-jitsurei
-- [ ] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
+- [x] EP-7: OpenTelemetry and request-logging API docs written in haskell-jitsurei
+- [x] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
 - [ ] EP-8: Settei configuration standard written (layering, secrets, bindings)
 - [ ] EP-8: Kubernetes operational standard written (overlays, downward API, check-config gate, no-reload rollouts)
 - [ ] EP-9: haskell-keiro-service blueprint refreshed to scaffold the standards
@@ -152,6 +152,15 @@ Findings from the planning research pass that shaped the decomposition (evidence
   them. The structure standard therefore makes stale-path review and deliberate removal part of
   every re-scaffold. EP-9 must encode that cleanup instruction alongside the generated/Holes
   firewall rather than implying regeneration prunes the tree.
+- EP-7 found that the OTLP HTTP exporter appends signal paths only to the generic endpoint;
+  `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` is already a complete URL. The planning draft and
+  keiro-runtime-jitsurei scenario scripts assumed both were base hosts, so EP-7 corrected the
+  example and its observability guide. EP-9 must scaffold the generic base endpoint by default
+  and treat any per-signal override as a complete path.
+- EP-7 also found that Relay 0.1.0.0 and the OpenAPI 3.1 forks are published on Hackage. Relay
+  0.1 pins the OpenAPI libraries to their 4.1.* cohort even though the current standalone pair
+  is openapi-hs 5.0.0 plus servant-openapi-hs 5.1.0. EP-9 must respect the consuming package's
+  coherent cohort instead of forcing the newest pair or adding obsolete git pins.
 
 
 ## Decision Log
@@ -186,6 +195,16 @@ Findings from the planning research pass that shaped the decomposition (evidence
 
 - Decision: relay-pagination is documented in the servant API stream (EP-7) in haskell-jitsurei rather than in this repo.
   Rationale: pagination is an API-layer concern that applies to any servant service, keiro-based or not; haskell-jitsurei/api is where the servant standards live and where the user began that work.
+  Date: 2026-07-22
+
+- Decision: Standardize production HTTP access logging as a small WAI middleware inside the
+  OpenTelemetry server span, emitting one bounded JSON record without bodies, credentials,
+  arbitrary headers, or raw query strings.
+  Rationale: wai-extra's JSON formatter captures full request bodies, error response bodies,
+  nearly all headers, and query strings, while the OpenTelemetry ecosystem supplies application
+  log bridges but no request logger. The compiled prototype proved trace correlation with the
+  public 1.0 APIs. The canonical implementation lives in haskell-jitsurei rather than an
+  invented shared package.
   Date: 2026-07-22
 
 - Decision: Every child plan that changes `mori.dhall` must refresh this project's local Mori
@@ -283,6 +302,17 @@ Dhall type-checking, Mori refresh, and the novice `ticket` reconstruction; all e
 `architecture-*` DocRefs are visible. ADR 0004 records the durable module and package convention,
 and EP-9's only hard dependency is satisfied.
 
+EP-7 is complete. Haskell-jitsurei now has four indexed API standards covering the released
+OpenTelemetry 1.0 service wiring, a compiled trace-correlated production request logger, Relay
+0.1 keyset pagination and its six-invariant conformance gate, and compiled typed Kubernetes
+health routes with separate liveness/readiness semantics. Six focused commits added and linked
+the corpus, corrected the stale OpenAPI publication guidance, and refreshed Mori so all four
+DocRefs are discoverable. A seventh commit in keiro-runtime-jitsurei fixed the OTLP per-signal
+endpoint default exposed by source verification. Dhall, source-symbol, shape, fence, link,
+shell-syntax, whitespace, prototype, and registry checks passed. No ADR was added because the
+four general Haskell standards are the canonical durable records and no coordination-level
+runtime boundary was introduced.
+
 
 ## Revision Notes
 
@@ -312,3 +342,9 @@ and EP-9's only hard dependency is satisfied.
   documented advisory stale-path cleanup, refreshed Mori, and distilled the package/module
   convention into ADR 0004. Reason: EP-9 needs one source-verified scaffold contract and can
   now proceed without repeating or re-deciding service structure.
+- 2026-07-22 (EP-7 completion): added and registered the four missing servant API standards,
+  compiled the request logger and health route examples, corrected stale OpenAPI publication
+  guidance, refreshed Mori, and fixed the reference scenario's OTLP trace-endpoint default.
+  Reason: EP-8 can now cross-reference stable probe semantics, and EP-9 can scaffold verified
+  telemetry, logging, pagination, and health contracts without inheriting the two stale
+  dependency assumptions.
