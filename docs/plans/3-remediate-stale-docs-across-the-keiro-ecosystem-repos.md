@@ -42,19 +42,19 @@ implementer can locate it even if line numbers drift.
 
 ## Progress
 
-- [ ] M1: Rewrite `docs/why-keiro.md` §7.4 ("Pre-1.0 today") in the keiro repo and fix the same stale claim in the "Do **not** choose keiro when" bullet (lines ~788-789).
-- [ ] M1: Rewrite the "Status" section of the package README `keiro/README.md` (lines ~86-95).
-- [ ] M1: Set `Keiro.version` in `keiro/src/Keiro.hs` to `"0.3.0.0"` with a lockstep comment, and record the fix under `## [Unreleased]` in the repo-root `CHANGELOG.md`.
-- [ ] M1: Run the keiro acceptance greps; commit as two commits (docs, fix) with MasterPlan/ExecPlan trailers.
-- [ ] M2: Replace the codd/`CODD_SCHEMAS` quick-start paragraph in the kiroku `README.md` with the native `kiroku-store-migrate up` instruction; acceptance grep; commit.
-- [ ] M2: Correct the `kiroku_events_appended_total` Prometheus HELP text so it no longer calls `GlobalPosition` gap-free; acceptance grep; include in the kiroku commit.
-- [ ] M3: Update all four `0.1.0.0` release-status references in settei `README.md` (lines ~12, ~42) and `docs/compatibility.md` (lines ~3, ~74) to `0.2.0.0`; acceptance grep; commit.
-- [ ] M4: Fix the stale `description:` field of `danwa-core/danwa-core.cabal` (lines ~7-12).
-- [ ] M4: Insert two clearly-marked editorial notes in `docs/masterplans/1-bootstrap-danwa-event-sourced-conversation-substrate.md` (before the package list at line ~90 and before the superseded Decision Log entries at line ~571), each pointing at the reversal entry.
-- [ ] M4: Update the status line of `docs/migrate-to-validated-event-stream.md` from "blocked on upstream" to "unblocked — pending adoption".
-- [ ] M4: Run the danwa acceptance greps; commit with trailers.
-- [ ] M5: Align `mori/tech-radar.dhall` in haskell-jitsurei to the `a3c59033…` mori-schema pin (both imports), verify hashes, confirm `dhall --file mori/tech-radar.dhall` type-checks; commit with trailers.
-- [ ] Final: Update the living sections of this plan (Progress, Surprises & Discoveries, Decision Log, Outcomes & Retrospective) and mark the corresponding MasterPlan progress items for EP-3 complete.
+- [x] (2026-07-22) M1: Rewrote `docs/why-keiro.md` §7.4 and the matching “Do not choose” bullet.
+- [x] (2026-07-22) M1: Rewrote the package `keiro/README.md` Status section to match the shipped runtime.
+- [x] (2026-07-22) M1: Set `Keiro.version` to `"0.3.0.0"`, added the lockstep comment, and updated `CHANGELOG.md`.
+- [x] (2026-07-22) M1: Acceptance greps passed; `nix develop --command cabal build keiro` passed; commits `1bdcd17` and `9e81fff` carry all three trailers.
+- [x] (2026-07-22) M2: Replaced the Codd quick-start with `kiroku-store-migrate up`; acceptance greps passed.
+- [x] (2026-07-22) M2: Corrected the `kiroku_events_appended_total` HELP text to follow the opaque-position contract; commit `be99330` carries all three trailers.
+- [x] (2026-07-22) M3: Updated all stale version references plus the false unpublished-release paragraph; Hackage/tag checks and acceptance greps passed; commit `b326814` carries all three trailers.
+- [x] (2026-07-22) M4: Fixed the stale `description:` field of `danwa-core/danwa-core.cabal`.
+- [x] (2026-07-22) M4: Inserted two clearly-marked editorial notes in `docs/masterplans/1-bootstrap-danwa-event-sourced-conversation-substrate.md`, each pointing at the reversal entry.
+- [x] (2026-07-22) M4: Updated `docs/migrate-to-validated-event-stream.md` from "blocked on upstream" to "unblocked — pending adoption".
+- [x] (2026-07-22) M4: Acceptance greps and `nix develop --command cabal build danwa-core --dry-run` passed; commit `66597cb` carries all three trailers.
+- [x] (2026-07-22) M5: Aligned both imports in haskell-jitsurei's `mori/tech-radar.dhall` to `a3c59033…`; the locally verified extension hash matched, Dhall type-checking passed, and commit `76f2ff2` carries all three trailers.
+- [x] (2026-07-22) Final: Completed the cross-repository acceptance and trailer audit, updated the living plan and parent MasterPlan, cascaded the corrected Settei release fact into EP-8, and completed the ADR distillation pass (no ADR created; the durable module-layout decision remains owned by EP-6).
 
 
 ## Surprises & Discoveries
@@ -67,6 +67,27 @@ implementation. Provide concise evidence.
   `kiroku-store/src/Kiroku/Store/Types.hs` explicitly defines `GlobalPosition` as opaque,
   strictly increasing, and not necessarily dense. Milestone 2 now corrects that stale HELP
   text together with the already-planned Kiroku README fix.
+- The host `cabal build keiro` uses GHC 9.10 and failed dependency solving because
+  `jitsurei` requires `base >=4.21`; the repository's pinned Nix shell selected GHC
+  9.12.4 and built `keiro` successfully. The pre-commit formatter also converted the
+  expanded Haddock into a block comment on its first pass; staging that canonical output
+  made the second commit pass.
+- A belt-and-braces `nix develop --command cabal build kiroku-metrics` reached GHC 9.12.4
+  but failed in an unrelated, unstaged change to
+  `kiroku-store/src/Kiroku/Store/Effect/Resource.hs`: the newly added
+  `runKirokuStoreWith = evalStaticRep . KirokuStoreResource` lacks the `IOE :> es`
+  constraint required by the installed Effectful API. That file was not staged or changed
+  by EP-3; the planned README/HELP acceptance checks passed and commit `be99330` contains
+  only the two prescribed files.
+- Settei had drifted beyond the four planned version strings: its README still said the
+  release had not been tagged or uploaded, but upstream has the annotated `v0.2.0.0` tag
+  and Hackage serves version 0.2.0.0 for all eight public packages. The milestone therefore
+  corrected the complete release-status paragraph rather than producing a document that
+  still contradicted authoritative release state.
+- Git's trailer parser recognizes the final contiguous trailer block, not labels separated
+  into independent message paragraphs. The first Danwa and haskell-jitsurei commit-message
+  drafts contained all three labels but parsed only `Intention:`; both messages were amended
+  without file changes, and the final hashes (`66597cb`, `76f2ff2`) parse all three trailers.
 
 
 ## Decision Log
@@ -110,6 +131,14 @@ implementation. Provide concise evidence.
   happened; renumbering it is the settei release owner's call, not a mechanical doc fix.
   Date: 2026-07-22
 
+- Decision: Expand the Settei edit to replace the README's “not tagged or uploaded” claim
+  with the verified current state; retain `docs/release-checklist.md` as a historical
+  initial-release record.
+  Rationale: The `v0.2.0.0` annotated upstream tag and all eight public Hackage pages are
+  authoritative evidence. Merely changing version numerals would leave the surrounding
+  release-status paragraph newly and materially false.
+  Date: 2026-07-22
+
 - Decision: In the danwa MasterPlan document, add editorial notes; do not rewrite or
   delete the stale prose or the superseded Decision Log entries.
   Rationale: Explicit instruction from the parent MasterPlan: a completed plan document
@@ -128,7 +157,7 @@ implementation. Provide concise evidence.
   Date: 2026-07-22
 
 - Decision: Commit messages follow Conventional Commits, and every commit in every repo
-  carries both git trailers exactly as written below, with paths relative to the
+  carries all three git trailers exactly as written below, with paths relative to the
   keiro-runtime-patterns repository even though the commits land in foreign repos:
   `MasterPlan: docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md`,
   `ExecPlan: docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md`, and
@@ -150,6 +179,12 @@ implementation. Provide concise evidence.
   hash this plan asserts.
   Date: 2026-07-22
 
+- Decision: Cascade the verified Settei release state into EP-8's planning observations.
+  Rationale: EP-8 still said the README claimed 0.1.0.0 and assigned the fix to EP-3.
+  After EP-3 landed, retaining that statement would make the next plan begin from known-
+  stale context; EP-8 now records 0.2.0.0 as the published baseline.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -158,7 +193,21 @@ Compare the result against the original purpose. Before marking the plan complet
 distill durable project context from the Decision Log, Surprises & Discoveries, and
 this section into docs/adr/. Keep task-local execution details here.
 
-(To be filled during and after implementation.)
+EP-3 is complete. Six implementation commits across five repositories corrected every
+catalogued stale statement: Keiro's shipped-runtime/version claims, Kiroku's migration
+quick-start and opaque-position metric description, Settei's current release state,
+Danwa's live module metadata and superseded historical prose, and haskell-jitsurei's
+mori-schema pin. All stale/corrected phrase checks passed; Keiro built in its pinned Nix
+shell, Danwa's Cabal dry run passed, the mori-schema extension hash was verified at the
+pinned commit, and the updated Dhall expression type-checked. Every implementation commit
+is Conventional and parses the MasterPlan, ExecPlan, and Intention trailers.
+
+The only incomplete belt-and-braces build was `kiroku-metrics`, blocked by a concurrent
+unstaged edit in `Kiroku.Store.Effect.Resource` that EP-3 neither changed nor committed.
+The scoped Kiroku acceptance checks passed. All pre-existing unrelated working-tree files
+remain untouched. The ADR distillation pass produced no new record: the only durable
+architectural candidate, Danwa's `Generated.*` + `Holes` convention, is explicitly owned
+by EP-6, which will codify it with the corresponding standard.
 
 
 ## Context and Orientation
@@ -270,8 +319,10 @@ instead of `CODD_SCHEMAS=kiroku`. Acceptance: `grep -rn "CODD_SCHEMAS" README.md
 empty.
 
 Milestone 3 — settei repo (`/Users/shinzui/Keikaku/bokuno/settei`). At the end, the
-README release-status section and the compatibility matrix reference 0.2.0.0.
-Acceptance: `grep -rn "0\.1\.0\.0" README.md docs/compatibility.md` is empty.
+README release-status section and the compatibility matrix reference 0.2.0.0, and the
+README acknowledges the annotated tag and eight Hackage uploads. Acceptance:
+`grep -rn "0\.1\.0\.0" README.md docs/compatibility.md` is empty and the corrected release
+paragraph matches the authoritative registries.
 
 Milestone 4 — danwa repo (`/Users/shinzui/Keikaku/bokuno/danwa`). At the end, the
 `danwa-core.cabal` description matches the shipped `Generated.*` + `Holes` convention,
@@ -872,7 +923,7 @@ Settei (`/Users/shinzui/Keikaku/bokuno/settei`):
 
 ```bash
 grep -rn "0\.1\.0\.0" README.md docs/compatibility.md  # must return empty
-grep -rn "0\.2\.0\.0" README.md docs/compatibility.md  # must show exactly 4 lines
+grep -rn "0\.2\.0\.0" README.md docs/compatibility.md  # must show exactly 5 lines
 ```
 
 Danwa (`/Users/shinzui/Keikaku/bokuno/danwa`):
@@ -898,8 +949,8 @@ dhall --file mori/tech-radar.dhall > /dev/null && echo TYPECHECK-OK        # pri
 ```
 
 Finally, in each of the five repos, `git log -2 --format=%B` must show the Conventional
-Commits subject and both trailers (`MasterPlan:` and `ExecPlan:` with the
-keiro-runtime-patterns-relative paths) on the commits made here, and
+Commits subject and all three trailers (`MasterPlan:`, `ExecPlan:`, and `Intention:` with
+the keiro-runtime-patterns-relative paths and active intention id) on the commits made here, and
 `git status --porcelain` must show no unintended staged or committed files (remember the
 untracked `docs/plans/111-…md` in keiro stays untracked).
 

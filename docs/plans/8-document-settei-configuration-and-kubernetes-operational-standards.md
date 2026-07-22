@@ -47,7 +47,7 @@ This section must always reflect the actual current state of the work.
 Document unexpected behaviors, bugs, optimizations, or insights discovered during
 implementation. Provide concise evidence.
 
-(None yet. Planning-stage observations that shaped this plan: settei has zero ecosystem consumers — even danwa uses raw Dhall — so these docs define an intended adoption surface, not a description of current practice; and settei's own `README.md` still claims version 0.1.0.0 while every package ships 0.2.0.0, a stale-doc fix owned by EP-3, not this plan.)
+(None yet. Planning-stage observations that shaped this plan: settei has zero ecosystem consumers — even danwa uses raw Dhall — so these docs define an intended adoption surface, not a description of current practice. EP-3 subsequently aligned settei's README and compatibility matrix with the annotated, Hackage-published 0.2.0.0 release; EP-8 therefore treats 0.2.0.0 as the current published baseline.)
 
 
 ## Decision Log

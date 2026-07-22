@@ -44,7 +44,7 @@ Research grounding: nine parallel research reports were produced during planning
 |---|-------|------|-----------|-----------|--------|
 | 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Complete |
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Complete |
-| 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | In Progress |
+| 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Complete |
 | 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Not Started |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Not Started |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Not Started |
@@ -93,8 +93,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-1: Process-manager framing removed from keiki docs and redirected; mori.dhall registrations complete (including the missing diagram-docs entry)
 - [x] EP-2: Kiroku event-store best-practice docs written (append/read/subscription/consumer-group/operational invariants)
 - [x] EP-2: pg-migrate standards written (component authoring, service migrations package, cohort upgrade paths) and registered
-- [ ] EP-3: Stale statements fixed in keiro repo (why-keiro §7.4, package README status, Keiro.version)
-- [ ] EP-3: Stale statements fixed in kiroku, settei, danwa, and haskell-jitsurei repos
+- [x] EP-3: Stale statements fixed in keiro repo (why-keiro §7.4, package README status, Keiro.version)
+- [x] EP-3: Stale statements fixed in kiroku, settei, danwa, and haskell-jitsurei repos
 - [ ] EP-4: Keiro runtime core docs written (assembly, command cycle, read models, workflows, telemetry)
 - [ ] EP-4: keiro-dsl adoption guidance written (when to use, when to skip, firewall and holes, evolution gate)
 - [ ] EP-5: Process manager and timer standards written
@@ -127,8 +127,12 @@ Findings from the planning research pass that shaped the decomposition (evidence
 - EP-2 found that `Kiroku.Metrics.Prometheus` calls the global-position-backed
   `kiroku_events_appended_total` “gap-free,” while the public `GlobalPosition` contract
   explicitly says positions need not be dense. The pattern corpus follows the public type
-  contract; EP-3 now owns correcting the stale upstream HELP text so later observability
-  docs do not inherit the contradiction.
+  contract; EP-3 corrected the stale upstream HELP text so later observability docs do not
+  inherit the contradiction.
+- EP-3 verified that Settei 0.2.0.0 is already represented by an annotated upstream tag
+  and eight public Hackage packages, even though its README claimed otherwise. EP-3 fixed
+  the source documents and updated EP-8's planning observation so the configuration
+  standard starts from the published 0.2.0.0 baseline.
 
 
 ## Decision Log
@@ -195,6 +199,14 @@ and relative-link audits, Dhall type-checking, Mori validation, and registry ref
 ADR pass produced no new record; the one upstream stale-description finding was assigned
 to EP-3.
 
+EP-3 is complete. Six Conventional Commits across Keiro, Kiroku, Settei, Danwa, and
+haskell-jitsurei corrected the full stale-doc catalogue and carry parseable MasterPlan,
+ExecPlan, and Intention trailers. Cross-repository phrase checks passed, Keiro built in
+its pinned Nix shell, Danwa's Cabal dry run passed, and the corrected Dhall import
+type-checked after its semantic hash was verified from the pinned mori-schema commit.
+Pre-existing unrelated changes were preserved. No ADR was created because EP-6 owns the
+durable `Generated.*` + `Holes` architecture decision.
+
 
 ## Revision Notes
 
@@ -206,3 +218,7 @@ to EP-3.
   marked EP-2 complete, and cascaded the global-position Prometheus HELP contradiction to
   EP-3. Reason: the pattern corpus must follow the public opaque-cursor contract while the
   stale upstream description is corrected at its source.
+- 2026-07-22 (EP-3 completion): corrected stale runtime, migration, release, module-layout,
+  migration-status, and Dhall-pin statements across five upstream repositories; marked
+  EP-3 complete and cascaded Settei's verified published-release state into EP-8. Reason:
+  downstream standards must begin from authoritative current source and release facts.
