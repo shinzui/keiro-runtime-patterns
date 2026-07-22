@@ -4,6 +4,7 @@ slug: document-settei-configuration-and-kubernetes-operational-standards
 title: "Document settei configuration and Kubernetes operational standards"
 kind: exec-plan
 created_at: 2026-07-22T14:55:29Z
+intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 master_plan: "docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md"
 ---
 

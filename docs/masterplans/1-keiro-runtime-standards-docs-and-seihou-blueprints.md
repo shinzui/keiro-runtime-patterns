@@ -49,7 +49,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Complete |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Complete |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Complete |
-| 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Not Started |
+| 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | In Progress |
 | 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | Not Started |
 
 Status values: Not Started, In Progress, Complete, Cancelled.
