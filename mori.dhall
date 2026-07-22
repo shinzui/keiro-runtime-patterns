@@ -18,6 +18,7 @@ in  Schema.Project::{
       [ "shinzui/keiki"
       , "shinzui/keiro"
       , "shinzui/kiroku"
+      , "shinzui/settei"
       , "shinzui/shibuya"
       , "shinzui/pg-migrate"
       , "shinzui/pgmq-hs"
@@ -489,6 +490,50 @@ in  Schema.Project::{
         , location =
             Schema.DocLocation.LocalFile
               "architecture/worked-example-conversation.md"
+        }
+      , Schema.DocRef::{
+        , key = "config-overview"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Index of settei configuration and Kubernetes operational standards; start here"
+        , location = Schema.DocLocation.LocalFile "config/README.md"
+        }
+      , Schema.DocRef::{
+        , key = "config-settei-service-standard"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Fleet standard for microservice configuration with settei: algebra, secrets, source order, check-config"
+        , location =
+            Schema.DocLocation.LocalFile "config/settei-service-standard.md"
+        }
+      , Schema.DocRef::{
+        , key = "config-settei-cli-standard"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Fleet standard for CLI configuration with settei: four-layer precedence, formats, diagnostics"
+        , location =
+            Schema.DocLocation.LocalFile "config/settei-cli-standard.md"
+        }
+      , Schema.DocRef::{
+        , key = "config-kubernetes-deployment"
+        , kind = Schema.DocKind.Runbook
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
+        , location =
+            Schema.DocLocation.LocalFile "config/kubernetes-deployment.md"
+        }
+      , Schema.DocRef::{
+        , key = "config-settei-gotchas"
+        , kind = Schema.DocKind.Notes
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Settei footgun catalogue: null presence, positional precedence, pinning, redaction edges"
+        , location =
+            Schema.DocLocation.LocalFile "config/settei-gotchas.md"
         }
       ]
     }
