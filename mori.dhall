@@ -251,5 +251,80 @@ in  Schema.Project::{
             "Why the fleet moved from codd to pg-migrate and how persistent databases were imported ledger-only"
         , location = Schema.DocLocation.LocalFile "migrations/codd-transition.md"
         }
+      , Schema.DocRef::{
+        , key = "keiro-overview"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Index of prescriptive Keiro runtime and DSL standards; start here"
+        , location = Schema.DocLocation.LocalFile "keiro/README.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-runtime-assembly"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Store acquisition, validated event streams, resource effects, options, and startup order"
+        , location = Schema.DocLocation.LocalFile "keiro/runtime-assembly.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-two-schema-arrangement"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Separation of Kiroku store, Keiro framework, and application-owned PostgreSQL schemas"
+        , location =
+            Schema.DocLocation.LocalFile "keiro/two-schema-arrangement.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-command-cycle-and-errors"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Command hydration, decision, append, projection, and prescriptive error handling"
+        , location =
+            Schema.DocLocation.LocalFile "keiro/command-cycle-and-errors.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-read-models-and-projections"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
+        , location =
+            Schema.DocLocation.LocalFile "keiro/read-models-and-projections.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-durable-workflows"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Durable workflow journals, capability-based workers, stable steps, and evolution"
+        , location = Schema.DocLocation.LocalFile "keiro/durable-workflows.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-telemetry"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Keiro tracing, metrics, W3C propagation, Kiroku bridging, and logging seams"
+        , location = Schema.DocLocation.LocalFile "keiro/telemetry.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-dsl-adoption"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "When to adopt keiro-dsl, its generated-code firewall, holes, CLI, and evolution gate"
+        , location = Schema.DocLocation.LocalFile "keiro/dsl-adoption.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-gotchas"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Shared-stream, global-lock, resource-effect, and bring-your-own Kafka traps"
+        , location = Schema.DocLocation.LocalFile "keiro/gotchas.md"
+        }
       ]
     }

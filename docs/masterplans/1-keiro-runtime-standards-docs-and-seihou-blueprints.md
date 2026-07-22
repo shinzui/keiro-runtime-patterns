@@ -45,7 +45,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 1 | Rewrite the keiki transducer docs for keiki 0.2 | docs/plans/1-rewrite-the-keiki-transducer-docs-for-keiki-0-2.md | None | None | Complete |
 | 2 | Document kiroku event store and pg-migrate standards | docs/plans/2-document-kiroku-event-store-and-pg-migrate-standards.md | None | None | Complete |
 | 3 | Remediate stale docs across the keiro ecosystem repos | docs/plans/3-remediate-stale-docs-across-the-keiro-ecosystem-repos.md | None | None | Complete |
-| 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | In Progress |
+| 4 | Document the keiro runtime core and keiro-dsl adoption guidance | docs/plans/4-document-the-keiro-runtime-core-and-keiro-dsl-adoption-guidance.md | None | EP-1, EP-2 | Complete |
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Not Started |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Not Started |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Not Started |
@@ -95,8 +95,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-2: pg-migrate standards written (component authoring, service migrations package, cohort upgrade paths) and registered
 - [x] EP-3: Stale statements fixed in keiro repo (why-keiro §7.4, package README status, Keiro.version)
 - [x] EP-3: Stale statements fixed in kiroku, settei, danwa, and haskell-jitsurei repos
-- [ ] EP-4: Keiro runtime core docs written (assembly, command cycle, read models, workflows, telemetry)
-- [ ] EP-4: keiro-dsl adoption guidance written (when to use, when to skip, firewall and holes, evolution gate)
+- [x] EP-4: Keiro runtime core docs written (assembly, command cycle, read models, workflows, telemetry)
+- [x] EP-4: keiro-dsl adoption guidance written (when to use, when to skip, firewall and holes, evolution gate)
 - [ ] EP-5: Process manager and timer standards written
 - [ ] EP-5: Integration event standards written (contract, outbox, inbox, versioning)
 - [ ] EP-5: Messaging transport standards written (shibuya semantics, adapter selection matrix, keiro-pgmq jobs)
@@ -133,6 +133,14 @@ Findings from the planning research pass that shaped the decomposition (evidence
   and eight public Hackage packages, even though its README claimed otherwise. EP-3 fixed
   the source documents and updated EP-8's planning observation so the configuration
   standard starts from the published 0.2.0.0 baseline.
+- EP-4 found three runtime contracts narrower than the planning draft implied. Hand-authored
+  service wiring should handle `mkEventStream` warnings explicitly; snapshots are disposable
+  only while retained history can still hydrate the stream; and workflow GC is optional
+  retention work while resume, timers, and external signals are capability-specific progress
+  mechanisms. EP-5 and later plans must use these qualified glossary definitions.
+- EP-4 also found that `kirokuEventBridge` counts only terminal
+  `KirokuEventSubscriptionDeadLettered` events before calling its delegate synchronously; it
+  is not a generic store-retry observer. Messaging telemetry in EP-5 must preserve that scope.
 
 
 ## Decision Log
@@ -176,6 +184,21 @@ Findings from the planning research pass that shaped the decomposition (evidence
   initiative's discoverability goal is not met until both agree.
   Date: 2026-07-22
 
+- Decision: Keep Kiroku's store schema, Keiro's framework schema, and the application's data
+  schema as separate ownership domains, with cross-schema SQL explicitly qualified.
+  Rationale: Kiroku's schema also selects the LISTEN/NOTIFY channel, while Keiro and application
+  tables have independent migration owners; conflating them breaks notification or hides
+  lifecycle boundaries. Recorded in ADR 0001.
+  Date: 2026-07-22
+
+- Decision: Adopt keiro-dsl when a service spans node families, an integration surface, or
+  expected schema/workflow evolution; permit direct API wiring only for a trivial single
+  aggregate and revisit that exception when the service grows.
+  Rationale: the DSL's value is its checked cross-node and evolution contracts, while the
+  generated-code firewall deliberately leaves domain decisions hand-owned on either path.
+  Recorded in ADR 0002.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -207,6 +230,15 @@ type-checked after its semantic hash was verified from the pinned mori-schema co
 Pre-existing unrelated changes were preserved. No ADR was created because EP-6 owns the
 durable `Generated.*` + `Holes` architecture decision.
 
+EP-4 is complete. The new `keiro/` area contains nine indexed standards covering runtime
+assembly, schema ownership, command errors, read models and projections, durable workflows,
+telemetry, DSL adoption, and cross-cutting gotchas. All nine `keiro-*` DocRefs type-check and
+are visible in Mori after registry refresh. Acceptance passed 48 source-symbol checks against
+the verified 0.3.0.0 release, full index/link/style audits, Dhall type-checking, and Mori
+configuration validation. The implementation seeded ADR 0001 for schema separation and ADR
+0002 for the DSL adoption boundary; EP-5 is now dependency-ready with the core glossary in
+place.
+
 
 ## Revision Notes
 
@@ -222,3 +254,8 @@ durable `Generated.*` + `Holes` architecture decision.
   migration-status, and Dhall-pin statements across five upstream repositories; marked
   EP-3 complete and cascaded Settei's verified published-release state into EP-8. Reason:
   downstream standards must begin from authoritative current source and release facts.
+- 2026-07-22 (EP-4 completion): added and registered nine Keiro runtime and DSL standards,
+  marked EP-4 complete, corrected three planning assumptions from released source, and
+  distilled schema ownership and DSL adoption into the repository's first two ADRs. Reason:
+  EP-5 and the later architecture/blueprint plans need stable, source-verified runtime terms
+  and decision boundaries rather than duplicated prose.
