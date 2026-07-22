@@ -49,7 +49,7 @@ even if it requires splitting a partially completed task into two ("done" vs. "r
 This section must always reflect the actual current state of the work.
 
 - [x] ExecPlan authored from the planning research reports; both blueprints, both registries, and the seihou CLI docs read and drift catalogued (2026-07-22).
-- [ ] M1: Cohort versions re-verified against Hackage; EP-6/EP-8 (and available soft-dep) docs read; the doc-citation table (doc path ↔ mori key) written into this plan.
+- [x] M1: Cohort versions re-verified against Hackage and upstream release tags; EP-6/EP-8 and available soft-dependency docs read; doc-citation and release tables recorded (2026-07-22).
 - [ ] M2: `haskell-keiro-service` blueprint.dhall refreshed (version 0.2.0, description, files list, allowedTools).
 - [ ] M2: `haskell-keiro-service` prompt.md refreshed (pg-migrate, Hackage cohort, validated streams, settei, OTel, health, test layout, doc citations).
 - [ ] M2: `haskell-keiro-service` files/ refreshed (cabal.project, core.cabal, AppConfig.hs) and new reference files added (Migrations.hs, manifest, Telemetry.hs, settei config reference, standards-map.md).
@@ -91,6 +91,15 @@ Findings from plan authoring (2026-07-22), recorded here because they shaped the
   regeneration is part of the seihou-modules flow only.
 - `seihou registry sync-versions` rewrites `seihou-registry.dhall` whole-file, losing hand
   comments. Both current registry files are comment-free, so this is safe today.
+- The planning baseline moved while this plan was being implemented. Hackage now carries
+  `kiroku-store-0.3.1.0` (a compatible resource-runner addition, uploaded 2026-07-22) and
+  `shikumi-0.3.0.1` / `shikumi-cache-0.1.2.1` / `shikumi-trace-0.2.0.1` (uploaded
+  2026-07-21). The scaffold index-state therefore moves to `2026-07-22T18:04:31Z`, one
+  second after the newest selected upload. Keiro's published `>= 0.3 && < 0.4` bound admits
+  the new Kiroku patch/minor release.
+- `hasql-notifications-0.2.5.0` is current on Hackage but the upstream repository's newest
+  release tag is `0.2.4.0`. Hackage is authoritative for the Hackage-only cohort; the missing
+  matching upstream tag is recorded rather than replaced with an invented revision pin.
 
 (More to be added during implementation.)
 
@@ -314,6 +323,60 @@ cite the owning directory plus the mori project key (`shinzui/keiro-runtime-patt
 tightened when the doc lands. This citation discipline is Integration Point 6: the blueprints
 and the docs must not drift apart silently, and doc-path + mori-key citation is the mechanism
 that prevents it.
+
+### Verified doc-citation table
+
+Blueprint reference material must cite these exact local paths and Mori DocRef keys. The
+paths make review direct; the keys keep the same material discoverable when the blueprint is
+applied outside this checkout.
+
+| Standard | Local path | Mori project / DocRef key |
+|---|---|---|
+| Keiki build-time validation | `keiki/build-time-validation.md` | `shinzui/keiro-runtime-patterns` / `keiki-build-time-validation` |
+| Kiroku operational invariants | `kiroku/operational-invariants.md` | `shinzui/keiro-runtime-patterns` / `kiroku-operational-invariants` |
+| pg-migrate model | `migrations/pg-migrate-model.md` | `shinzui/keiro-runtime-patterns` / `migrations-pg-migrate-model` |
+| Migration authoring | `migrations/authoring.md` | `shinzui/keiro-runtime-patterns` / `migrations-authoring` |
+| Migration package | `migrations/service-package.md` | `shinzui/keiro-runtime-patterns` / `migrations-service-package` |
+| Migration operations | `migrations/operations.md` | `shinzui/keiro-runtime-patterns` / `migrations-operations` |
+| Migration testing | `migrations/testing.md` | `shinzui/keiro-runtime-patterns` / `migrations-testing` |
+| Codd transition | `migrations/codd-transition.md` | `shinzui/keiro-runtime-patterns` / `migrations-codd-transition` |
+| Runtime assembly | `keiro/runtime-assembly.md` | `shinzui/keiro-runtime-patterns` / `keiro-runtime-assembly` |
+| Two-schema arrangement | `keiro/two-schema-arrangement.md` | `shinzui/keiro-runtime-patterns` / `keiro-two-schema-arrangement` |
+| Command cycle and errors | `keiro/command-cycle-and-errors.md` | `shinzui/keiro-runtime-patterns` / `keiro-command-cycle-and-errors` |
+| Keiro telemetry | `keiro/telemetry.md` | `shinzui/keiro-runtime-patterns` / `keiro-telemetry` |
+| DSL adoption | `keiro/dsl-adoption.md` | `shinzui/keiro-runtime-patterns` / `keiro-dsl-adoption` |
+| Shibuya processing | `messaging/shibuya-processing.md` | `shinzui/keiro-runtime-patterns` / `messaging-shibuya-processing` |
+| Service packages | `architecture/service-packages.md` | `shinzui/keiro-runtime-patterns` / `architecture-service-packages` |
+| Vertical slices | `architecture/vertical-slice-modules.md` | `shinzui/keiro-runtime-patterns` / `architecture-vertical-slice-modules` |
+| Spec and scaffolding | `architecture/spec-and-scaffolding.md` | `shinzui/keiro-runtime-patterns` / `architecture-spec-and-scaffolding` |
+| Test layout | `architecture/test-layout.md` | `shinzui/keiro-runtime-patterns` / `architecture-test-layout` |
+| Settei service configuration | `config/settei-service-standard.md` | `shinzui/keiro-runtime-patterns` / `config-settei-service-standard` |
+| Kubernetes configuration | `config/kubernetes-deployment.md` | `shinzui/keiro-runtime-patterns` / `config-kubernetes-deployment` |
+| Health endpoints | `api/health-endpoints.md` | `shinzui/haskell-jitsurei` / `api-health-endpoints` |
+| OpenTelemetry integration | `api/opentelemetry-integration.md` | `shinzui/haskell-jitsurei` / `api-opentelemetry-integration` |
+| Request logging | `api/request-logging.md` | `shinzui/haskell-jitsurei` / `api-request-logging` |
+| Servant routes | `api/servant-routes.md` | `shinzui/haskell-jitsurei` / `api-servant-routes` |
+| RFC 7807 errors | `api/rfc7807-problem-details.md` | `shinzui/haskell-jitsurei` / `api-rfc7807-problem-details` |
+
+### Verified release cohort
+
+Hackage `preferred.json` and upstream release tags were checked on 2026-07-22 after locating
+each source tree with Mori. The scaffold is Hackage-only and uses
+`index-state: 2026-07-22T18:04:31Z`.
+
+| Cohort | Versions selected | Upstream release evidence |
+|---|---|---|
+| Keiro | `keiro`, `keiro-core`, `keiro-migrations`, `keiro-pgmq`, `keiro-dsl` `0.3.0.0` | package tags peel to `c68dcc7b9cea8d9c180d1c04254a72aa43804cac` |
+| Keiki | `keiki`, `keiki-codec-json` `0.2.0.0` | `v0.2.0.0` peels to `755a01de8febab5db81537b5235a1ab319017c33` |
+| Kiroku | `kiroku-store` `0.3.1.0`; `kiroku-store-migrations` `0.3.0.0`; `kiroku-metrics` `0.1.0.1`; `kiroku-otel` `0.2.0.1` | store tag peels to `3009dda7238f7d05b1d0c97b04ec5d4c55031304`; migrations tag peels to `58aff77b3a6d6093e3613753a0543aab62db9fac` |
+| pg-migrate | core, CLI, embed, import-codd, test-support `1.1.0.0` | `v1.1.0.0` peels to `f39d64e354818999667d345a1452f33eb4857fc1` |
+| Shibuya | `shibuya-core`, `shibuya-metrics` `0.8.0.1`; `shibuya-pgmq-adapter` `0.12.0.0`; `shibuya-kiroku-adapter` `0.4.0.0` | release tags peel to `172df245f40a454af46dd7f4cde855eaa4414c5a`, `85931b45702faecc035d89bb5cff381e8679f793`, and `876fb66f60508441970211c56de0bfb234ccb3f6` |
+| pgmq-hs | core/config/effectful/hasql/migration `0.4.0.1` | `v0.4.0.1` peels to `f4a101843ea6f5c055277fd84859ece02865eff4` |
+| Settei | core plus env/formats/optparse-applicative/kubernetes adapters `0.2.0.0` | `v0.2.0.0` peels to `1bf62b0af110b4f42fe2528e9d459e0ccf12d626` |
+| OpenTelemetry | API, SDK, OTLP exporter, WAI instrumentation, W3C propagator `1.0.0.0` | Hackage preferred versions and Mori-located `hs-opentelemetry` source agree |
+| Kioku | API/core/migrations `0.1.0.0` | `v0.1.0.0` peels to `a99aa369701a76278ca33d83f8416dee443fa645` |
+| Shikumi | `shikumi` `0.3.0.1`; `shikumi-cache` `0.1.2.1`; `shikumi-trace` `0.2.0.1` | all three release tags peel to `580b6c70a58bc96a8d52502c2e7c9376d2c46a15` |
+| hasql notifications | `hasql-notifications` `0.2.5.0` | Hackage release is current; upstream tags stop at `0.2.4.0` |
 
 ### Drift catalogue: haskell-keiro-service 0.1.0 (what is wrong today)
 
