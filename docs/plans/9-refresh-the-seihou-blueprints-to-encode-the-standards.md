@@ -50,7 +50,7 @@ This section must always reflect the actual current state of the work.
 
 - [x] ExecPlan authored from the planning research reports; both blueprints, both registries, and the seihou CLI docs read and drift catalogued (2026-07-22).
 - [x] M1: Cohort versions re-verified against Hackage and upstream release tags; EP-6/EP-8 and available soft-dependency docs read; doc-citation and release tables recorded (2026-07-22).
-- [x] M2: `haskell-keiro-service` blueprint.dhall refreshed (version 0.2.0, description, files list, allowedTools).
+- [x] M2: `haskell-keiro-service` blueprint.dhall refreshed through corrective version 0.2.2 (description, files list, allowedTools, and scratch-proof fixes).
 - [x] M2: `haskell-keiro-service` prompt.md refreshed (pg-migrate, Hackage cohort, validated streams, settei, OTel, health, test layout, doc citations).
 - [x] M2: `haskell-keiro-service` files/ refreshed; Hackage-only project and 13 reference files include migrations, telemetry, Settei Settings, and standards map.
 - [x] M2: `seihou validate-blueprint` passes for haskell-keiro-service; legacy-engine grep is clean (2026-07-22).
@@ -61,9 +61,10 @@ This section must always reflect the actual current state of the work.
 - [x] M3: `seihou validate-blueprint` passes for migrate-keiro-stack (2026-07-22).
 - [x] M4: Registry sync/check and validation clean in both registries; seihou-modules okf-docs regenerated and `okf validate` passes.
 - [x] M4: Registry commits landed as seihou-modules `fb3ac19` and agent-seihou `52dd09e`, each with MasterPlan, ExecPlan, and Intention trailers.
-- [ ] M5: Scratch apply of haskell-keiro-service completed; tree-diff acceptance script passes; build and tests pass in the scaffold.
-- [ ] M5: migrate-keiro-stack debug render reviewed; danwa-clone rehearsal set up (or explicitly deferred with rationale in the Decision Log).
-- [ ] MasterPlan registry row for EP-9 updated; ADR distillation pass done (create docs/adr/ in this repo if a durable decision emerged).
+- [x] M4: Bootstrap correction commits landed as seihou-modules `75fc87f` (0.2.1 reference-domain repair) and `20e59f6` (0.2.2 released-cohort proof), with the same initiative trailers.
+- [x] M5: Clean 0.2.2 scratch apply completed in `/tmp/keiro-ep9-clean.FBkBPJ`; corrected tree acceptance, six-package build, four-component migration plan, and all six test suites pass (2026-07-22).
+- [x] M5: Both debug renders reviewed end-to-end; the danwa-clone rehearsal is explicitly deferred because it needs an operator-supervised disposable database and destructive-policy confirmation (2026-07-22).
+- [x] MasterPlan registry row for EP-9 updated; ADR distillation pass completed. EP-9 introduced no new durable runtime decision beyond ADRs 0004/0005; the MasterPlan's two remaining cross-plan decisions were recorded as ADRs 0006/0007 (2026-07-22).
 
 
 ## Surprises & Discoveries
@@ -104,8 +105,36 @@ Findings from plan authoring (2026-07-22), recorded here because they shaped the
   seihou-modules, while the migration blueprint already carried uncommitted shared-`haskell-nix`
   integration work. The implementation preserved both baselines, incorporated the `haskell-nix`
   behavior into the 0.2.0 workflow, and left unrelated seihou-modules edits unstaged.
-
-(More to be added during implementation.)
+- The first real bootstrap apply proved that `settei-formats-0.2.0.0` is unsatisfiable in the
+  GHC 9.12.4 cohort: its mandatory Dhall adapter reaches `dhall-json-1.7.12`
+  (`bytestring <0.12`), while GHC and the released YAML/Kubernetes adapters require
+  `bytestring >=0.12`. Version 0.2.2 therefore uses the direct `settei-yaml-0.2.0.0` adapter;
+  the fleet configuration docs record the same boundary instead of relaxing dependency bounds.
+- The WAI OpenTelemetry instrumentation package requires semantic conventions `>=1.40 && <2`.
+  The complete cohort now pins `hs-opentelemetry-semantic-conventions-1.40.0.0` explicitly,
+  verified against Hackage, Mori-located source, and upstream release tags.
+- Nix flakes in an untracked scratch repository reject bare `nix develop` because `flake.nix`
+  is not yet visible through the Git flake source. `nix develop path:. --command ...` (or
+  `path:$PWD`) validates the generated tree without staging it, preserving the blueprint's
+  never-commit rule.
+- The exploratory apply spent too long pre-researching leaf APIs and downloaded temporary
+  dependency copies. The 0.2.2 prompt now requires Mori-located source plus an early complete
+  package skeleton and compiler-driven iteration; scratch dependency copies are explicitly
+  forbidden.
+- Released `keiro-dsl-0.3.0.0` emits the first-class `readmodel widgets` node as
+  `Acme.Widgets.Generated.{ReadModel,ReadModelHarness,ReadModelTable}` plus the create-once
+  `Acme.Widgets.ReadModelHoles`; the plan's predicted singular `Acme.Widget.ReadModel` path
+  was stale. The clean scaffold follows the generator's contract, and the acceptance script
+  now checks all four actual files.
+- Generated modules can put LANGUAGE pragmas before the `-- @generated` banner, and the
+  generated projection currently has an explanatory comment containing “codd” while importing
+  no Codd API. Structural acceptance now finds the banner anywhere in the generated module and
+  rejects Codd package/import surfaces rather than prose, which preserves the intended engine
+  check without producing false failures on released generator output.
+- The clean service proves the strong-read coupling rather than hiding it: inline projection
+  writes are immediately listable, but a keyed `Strong` read returns the structured retryable
+  503 until the worker advances the declared subscription cursor. The server suite exercises
+  that real behavior against an ephemeral fully migrated PostgreSQL database.
 
 
 ## Decision Log
@@ -161,6 +190,28 @@ Record every decision made while working on the plan.
   acceptance check despite the agent being nondeterministic.
   Date: 2026-07-22
 
+- Decision: Use direct released Settei adapters in the GHC 9.12 service cohort, normally
+  `settei-yaml`, rather than the 0.2.0.0 `settei-formats` umbrella.
+  Rationale: the umbrella's unconditional Dhall branch creates a real, authoritative-bound
+  conflict; selecting only the format a service consumes is narrower and solvable. Reconsider
+  the umbrella only after a complete later release cohort is verified.
+  Date: 2026-07-22
+
+- Decision: Defer the full `migrate-keiro-stack` danwa rehearsal beyond this plan.
+  Rationale: the debug render, fail-closed guard, phase order, references, and registry validation
+  are database-free and complete, while the real rehearsal deliberately requires an operator to
+  attest that a database is disposable before destructive migration work. This implementation
+  has no authority to manufacture that attestation.
+  Date: 2026-07-22
+
+- Decision: Treat the released DSL's plural `Widgets` read-model vertical as authoritative and
+  update the living acceptance contract instead of hand-editing generated output into the
+  singular path predicted during planning.
+  Rationale: `keiro-dsl scaffold` is the ownership boundary established by ADR 0004. Its
+  generated files compile, re-scaffold cleanly, and preserve both create-once Holes modules;
+  renaming them after generation would make the blueprint immediately stale.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -169,7 +220,30 @@ Compare the result against the original purpose. Before marking the plan complet
 distill durable project context from the Decision Log, Surprises & Discoveries, and
 this section into docs/adr/. Keep task-local execution details here.
 
-(To be filled during and after implementation.)
+Both blueprints now encode the completed standards corpus. `haskell-keiro-service` 0.2.2 in
+seihou-modules scaffolds a Hackage-only GHC 9.12 service with six packages, the released
+keiro-dsl generated/Holes firewall, pg-migrate composition, direct Settei adapters, real
+OpenTelemetry, health probes, graceful runtime assembly, and standards citations. The
+corrective 0.2.1 and 0.2.2 releases turned the initial prompt/reference refresh into a proven
+cohort. `migrate-keiro-stack` 0.2.0 in agent-seihou retains its fail-closed database policy and
+adds vertical-structure and Settei phases, current migration provenance, Kiroku's prebuilt Codd
+history mapping, and restored-clone `cohort-migrate` guidance.
+
+The clean 0.2.2 apply produced the complete Acme Widget service in
+`/tmp/keiro-ep9-clean.FBkBPJ`. The corrected tree audit exited 0 with no output;
+`nix develop path:. --command cabal build all` built every package and executable;
+`acme-migrate plan` printed `kiroku(8) -> keiro(18) -> pgmq(2) -> acme(2)` without a database;
+and `cabal test all` passed the domain (7 cases), diagrams (2), PostgreSQL (1), migrations (4),
+workers (3), and server (6) suites. Configuration diagnostics also proved usage/source/
+resolution exit codes and structural secret redaction during the apply. Re-scaffolding
+overwrote all eight generated modules while leaving both Holes modules byte-identical.
+
+Registry version sync/check, blueprint validation, generated OKF validation, and both debug
+render reviews are complete. The only deferred proof is a live danwa migration rehearsal,
+which intentionally remains operator-supervised because its destructive database policy needs
+an explicit disposability attestation. No EP-9-specific ADR was needed: the actual read-model
+namespace is generated-contract detail under ADR 0004, and the direct Settei adapter is a
+release-cohort compatibility choice under ADR 0005.
 
 
 ## Context and Orientation
@@ -184,9 +258,9 @@ Four repositories matter, all on this workstation:
   home. It holds this plan, the parent MasterPlan
   (`docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md`), the standards
   docs written by sibling plans, and `mori.dhall`, which registers every doc with a stable key
-  so agents can discover it via the `mori` CLI. `docs/adr/` does **not** exist here yet; there
-  are no ADRs in this repository to consult. This plan edits **nothing** here except this plan
-  file itself (and, at completion, possibly a first ADR).
+  so agents can discover it via the `mori` CLI. Earlier plans created `docs/adr/`; ADR 0004 owns
+  the generated/Holes vertical and ADR 0005 owns Settei fleet adoption. EP-9 edits its living
+  plan here, while the final MasterPlan audit also updates the parent and distills ADRs 0006/0007.
 - `/Users/shinzui/Keikaku/bokuno/seihou-modules` — a seihou registry repository ("registry"
   means: a repo whose `seihou-registry.dhall` lists installable scaffolding artifacts). It owns
   the `haskell-keiro-service` blueprint at `blueprints/haskell-keiro-service/`. It also carries
@@ -221,7 +295,7 @@ blueprints/<name>` checks well-formedness (Dhall evaluates, files resolve, vars 
 non-empty; exit 0 clean); `seihou registry sync-versions` copies each item's declared version
 into `seihou-registry.dhall` (whole-file rewrite, idempotent second run); `seihou registry
 validate` additionally checks structure. The okf-docs bundle in seihou-modules is regenerated
-with `seihou-okf-extension docs --dir . --out okf-docs --force` (per
+with `seihou extension run okf -- docs --force` (per
 `/Users/shinzui/Keikaku/bokuno/seihou-project/seihou/docs/cli/okf-docs.md`); it is derived
 documentation — never hand-edit it.
 
@@ -234,7 +308,7 @@ depth but must not be load-bearing; variable validation patterns other than the 
 `[a-z][a-z0-9-]*` are not enforced by seihou v0.4, so prompts keep their own exact-value guards
 (migrate-keiro-stack's `database.policy` guard is exactly this); and debug renders are not
 worktree-neutral. Every edit this plan makes to `migrate-keiro-stack` must preserve these
-properties. No relevant ADR exists in keiro-runtime-patterns (the directory is absent).
+properties. Local ADRs 0004 and 0005 govern the scaffold's structure and configuration choices.
 
 ### The standards the blueprints must encode
 
@@ -247,10 +321,14 @@ A service is six flat-root cabal packages, `<name>-core`, `<name>-api`, `<name>-
 domain concept: everything for one concept lives under `<Namespace>.<Concept>.*` regardless of
 package. Per concept, `keiro-dsl scaffold` (with `layout collocated` declared in the `.keiro`
 spec) emits a `.Generated` leaf — `<Ns>.<Concept>.Generated.{Domain,Codec,EventStream,
-Projection,Harness}`, each carrying a `-- @generated` first-line banner and overwritten on
-every re-scaffold — plus a create-once, never-overwritten `<Ns>.<Concept>.Holes` module holding
-the hand-written keiki transducer and the read-model apply fold. Hand modules sit flat beside
-it: `<Ns>.<Concept>.ReadModel` (core), `.Api` (api), `.Handler` (server), `.Worker` (workers).
+Projection,Harness}`, each carrying a `-- @generated` banner (after any LANGUAGE pragmas) and
+overwritten on every re-scaffold — plus a create-once, never-overwritten
+`<Ns>.<Concept>.Holes` module holding the hand-written keiki transducer and inline-projection
+apply fold. First-class `readmodel <name>` nodes additionally emit
+`<Ns>.<ReadModel>.Generated.{ReadModel,ReadModelHarness,ReadModelTable}` plus a create-once
+`<Ns>.<ReadModel>.ReadModelHoles`; the released generator's node name determines that vertical.
+Other hand modules sit flat beside their concept: `.Api` (api), `.Handler` (server), and
+`.Worker` (workers).
 Only cross-cutting infrastructure keeps technical-layer names (Prelude, App.Config,
 Postgres.{Pool,Runner}, Migrations, Workers.{Subscription,Registry}, Server.{Config,App,Seam,
 Boot}, the Api umbrella). EP-6's doc (owned directory `architecture/` in this repo) is the
@@ -654,15 +732,15 @@ Scope: registry files and git in both repos. In each registry root run `seihou
 validate-blueprint` (again), `seihou registry sync-versions` (updates the blueprint's version
 in `seihou-registry.dhall`; expect "1 entry updated" the first time, "0 entries updated" on
 re-run), then `seihou registry validate` (exit 0). In seihou-modules only, regenerate the okf
-bundle: `seihou-okf-extension docs --dir . --out okf-docs --force` and, if the `okf` CLI is on
+bundle: `seihou extension run okf -- docs --force` and, if the `okf` CLI is on
 PATH, `okf validate okf-docs`. Verify the regenerated
-`okf-docs/blueprints/haskell-keiro-service.md` shows `version: 0.2.0` and the new
+`okf-docs/blueprints/haskell-keiro-service.md` shows `version: 0.2.2` and the new
 description/prompt. Commit per repo with Conventional Commits and the initiative trailers —
 trailer paths are **relative to keiro-runtime-patterns**, the coordination repo, even though
 these commits land elsewhere:
 
 ```text
-feat(blueprints): refresh haskell-keiro-service for the keiro 0.3 standards (0.2.0)
+fix(blueprints): prove the Keiro service cohort (0.2.2)
 
 Scaffold pg-migrate migrations, Hackage cohort pins, validated event
 streams, settei configuration, OpenTelemetry, health endpoints, and the
@@ -749,15 +827,15 @@ Expected `sync-versions` transcript the first time (seihou-modules shown; agent-
 analogous):
 
 ```text
-haskell-keiro-service  0.1.0 -> 0.2.0  (stale)
+haskell-keiro-service  0.2.1 -> 0.2.2  (stale)
 1 entry updated
 ```
 
 In seihou-modules additionally, before the commit:
 
 ```bash
-seihou-okf-extension docs --dir . --out okf-docs --force
-grep -n "version: 0.2.0" okf-docs/blueprints/haskell-keiro-service.md
+seihou extension run okf -- docs --force
+grep -n "version: 0.2.2" okf-docs/blueprints/haskell-keiro-service.md
 ```
 
 **M5 — debug renders** (working directory: a fresh `$SCRATCH/render`; debug renders write
@@ -766,7 +844,7 @@ grep -n "version: 0.2.0" okf-docs/blueprints/haskell-keiro-service.md
 ```bash
 seihou install /Users/shinzui/Keikaku/bokuno/seihou-modules --module haskell-keiro-service
 seihou install /Users/shinzui/Keikaku/bokuno/agent-seihou --module migrate-keiro-stack
-seihou list   # confirm both show 0.2.0
+seihou list   # confirm bootstrap 0.2.2 and migration 0.2.0
 seihou agent --debug run haskell-keiro-service \
   --var project.name=acme --var project.namespace=Acme \
   --var "project.description=Scratch verification service" --var keiro.context=acme \
@@ -833,7 +911,10 @@ required=(
   acme-core/src/Acme/Widget/Generated/Projection.hs
   acme-core/src/Acme/Widget/Generated/Harness.hs
   acme-core/src/Acme/Widget/Holes.hs
-  acme-core/src/Acme/Widget/ReadModel.hs
+  acme-core/src/Acme/Widgets/Generated/ReadModel.hs
+  acme-core/src/Acme/Widgets/Generated/ReadModelHarness.hs
+  acme-core/src/Acme/Widgets/Generated/ReadModelTable.hs
+  acme-core/src/Acme/Widgets/ReadModelHoles.hs
   acme-api/src/Acme/Api.hs
   acme-api/src/Acme/Widget/Api.hs
   acme-migrations/migrations/application/manifest
@@ -844,16 +925,18 @@ required=(
 for p in "${required[@]}"; do
   [ -e "$p" ] || { echo "MISSING: $p"; missing=1; }
 done
-head -1 acme-core/src/Acme/Widget/Generated/Domain.hs | grep -q '@generated' \
+rg -q '^-- @generated' acme-core/src/Acme/Widget/Generated/Domain.hs \
   || { echo "MISSING @generated banner"; missing=1; }
-grep -rq embedMigrationManifest acme-migrations/src || { echo "MISSING pg-migrate embed"; missing=1; }
-grep -rqi 'source-repository-package' cabal.project && { echo "FORBIDDEN: git pins"; missing=1; }
-grep -rqi codd . --include='*.hs' --include='*.cabal' --include='cabal.project' \
-  && { echo "FORBIDDEN: codd"; missing=1; }
-grep -rq mkEventStreamUnchecked . --include='*.hs' && { echo "FORBIDDEN: unchecked stream"; missing=1; }
-grep -rq logStdoutDev . --include='*.hs' && { echo "FORBIDDEN: logStdoutDev"; missing=1; }
-grep -rq settei . --include='*.cabal' || { echo "MISSING settei dependency"; missing=1; }
-grep -rq hs-opentelemetry . --include='*.cabal' || { echo "MISSING OTel dependency"; missing=1; }
+rg -q embedMigrationManifest acme-migrations/src || { echo "MISSING pg-migrate embed"; missing=1; }
+rg -qi '^[[:space:]]*source-repository-package' cabal.project \
+  && { echo "FORBIDDEN: git pins"; missing=1; }
+rg -qi '^[[:space:]]*(build-depends:.*\bcodd\b|,[[:space:]]*codd\b|package[[:space:]]+codd\b|import[[:space:]].*\bcodd\b)' \
+  -g '*.hs' -g '*.cabal' -g 'cabal.project' . \
+  && { echo "FORBIDDEN: codd dependency or import"; missing=1; }
+rg -q mkEventStreamUnchecked -g '*.hs' . && { echo "FORBIDDEN: unchecked stream"; missing=1; }
+rg -q logStdoutDev -g '*.hs' . && { echo "FORBIDDEN: logStdoutDev"; missing=1; }
+rg -q settei -g '*.cabal' . || { echo "MISSING settei dependency"; missing=1; }
+rg -q hs-opentelemetry -g '*.cabal' . || { echo "MISSING OTel dependency"; missing=1; }
 exit $missing
 ```
 
@@ -861,13 +944,13 @@ Expected output: nothing but exit code 0. Any `MISSING:`/`FORBIDDEN:` line is a 
 — fix the blueprint (not the scratch output), commit, reinstall, re-apply. The exact
 `migrations/application/` location and the health/settei module names must be reconciled in M1
 against what EP-6/EP-7/EP-8 prescribe; update this script in the same edit if they differ.
-Additionally confirm a health route exists (`grep -ri health acme-api/src acme-server/src`
+Additionally confirm a health route exists (`rg -i health acme-api/src acme-server/src`
 returns at least one route definition) and then prove behavior beyond structure:
 
 ```bash
-nix develop -c cabal build all
-nix develop -c cabal run acme-migrate -- plan   # renders kiroku -> keiro -> acme without a database
-nix develop -c cabal test all                   # harness, diagrams, postgres, migrations, server, workers suites
+nix develop path:. --command cabal build all
+nix develop path:. --command cabal run acme-migrate -- plan   # renders kiroku -> keiro -> acme without a database
+nix develop path:. --command cabal test all                   # harness, diagrams, postgres, migrations, server, workers suites
 ```
 
 All three must succeed; `cabal test all` failing on the diagrams or harness suite means the
@@ -893,7 +976,7 @@ plan, record that explicitly in the Decision Log and the handoff — do not sile
 **Registry acceptance.** In both registry roots: `seihou registry sync-versions --check`
 exits 0; `seihou registry validate` exits 0; `git log -1` shows the Conventional Commit with
 both trailers. In seihou-modules: `okf-docs/blueprints/haskell-keiro-service.md` frontmatter
-says `version: 0.2.0` and its embedded prompt contains "pg-migrate" and not "codd".
+says `version: 0.2.2` and its embedded prompt contains "pg-migrate" and not "codd".
 
 
 ## Idempotence and Recovery
@@ -924,7 +1007,7 @@ saving.
 
 **Tools that must be on PATH:** `seihou` (v0.4-line or later; check `seihou --version` — the
 debug-render provenance and lenient variable-pattern behaviors this plan works around are the
-v0.4 behaviors documented in agent-seihou ADR 1), `seihou-okf-extension` (for the okf-docs
+v0.4 behaviors documented in agent-seihou ADR 1), Seihou's `okf` extension (for the okf-docs
 regeneration; optional `okf` for bundle validation), `mori` (dependency and doc discovery),
 `git`, `cabal`, `nix`, and the `claude` CLI (authenticated) for the real apply.
 

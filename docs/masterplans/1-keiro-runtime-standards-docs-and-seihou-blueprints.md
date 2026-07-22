@@ -50,7 +50,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Complete |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Complete |
 | 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Complete |
-| 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | In Progress |
+| 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | Complete |
 
 Status values: Not Started, In Progress, Complete, Cancelled.
 Hard Deps and Soft Deps reference other rows by their # prefix (e.g., EP-1, EP-3).
@@ -83,7 +83,7 @@ Parallelism: EP-1, EP-2, and EP-3 can run fully in parallel (different files, di
 
 **7. ADR numbering.** Several child plans seed `docs/adr/` (EP-5 the transport-selection ADR, EP-6 the vertical-slice-convention ADR, EP-8 the settei-as-fleet-standard ADR). ADR numbers are allocated at implementation time — take the next free number in `docs/adr/` when the ADR is actually written; no plan may hard-code a number.
 
-Cross-plan decisions that should become ADRs during implementation: the role boundary between the three documentation repos (keiro-runtime-patterns = terse agent-facing patterns; keiro-runtime-docs = product website; haskell-jitsurei = general Haskell standards); the authoritative `Generated.*` + `Holes` module convention and the rejection of the earlier flat layout; the pgmq-versus-Kafka transport selection rationale; settei as the fleet configuration standard (superseding raw Dhall `FromDhall` wiring as used in danwa); and the deliberate exclusion of kioku from the runtime standards.
+Cross-plan decisions distilled during implementation: ADR 0006 records the role boundary between the three documentation repos (keiro-runtime-patterns = terse agent-facing patterns; keiro-runtime-docs = product website; haskell-jitsurei = general Haskell standards); ADR 0004 records the authoritative `Generated.*` + `Holes` module convention and rejection of the earlier flat layout; ADR 0003 records the pgmq-versus-Kafka transport selection rationale; ADR 0005 records settei as the fleet configuration standard (superseding raw Dhall `FromDhall` wiring as used in danwa); and ADR 0007 records the deliberate exclusion of kioku from the runtime standards.
 
 
 ## Progress
@@ -105,8 +105,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
 - [x] EP-8: Settei configuration standard written (layering, secrets, bindings)
 - [x] EP-8: Kubernetes operational standard written (overlays, downward API, check-config gate, no-reload rollouts)
-- [ ] EP-9: haskell-keiro-service blueprint refreshed to scaffold the standards
-- [ ] EP-9: migrate-keiro-stack blueprint refreshed for the current cohort; registries version-synced
+- [x] EP-9: haskell-keiro-service 0.2.2 refreshed and clean-scratch proven to scaffold the standards
+- [x] EP-9: migrate-keiro-stack 0.2.0 refreshed for the current cohort; registries version-synced and validated
 
 
 ## Surprises & Discoveries
@@ -170,12 +170,26 @@ Findings from the planning research pass that shaped the decomposition (evidence
   `--explain-config-json`, that services must opt into `RejectUnknownKeys`, and that Warp
   3.4.14's graceful timeout defaults to an unbounded `Nothing`. The fleet standard makes all
   three choices explicit rather than copying planning shorthand or library defaults.
+- EP-9 found that released `keiro-dsl-0.3.0.0` derives a first-class read-model vertical from
+  the DSL node name: `readmodel widgets` emits `Acme.Widgets.Generated.*` and
+  `Acme.Widgets.ReadModelHoles`, not the singular aggregate-adjacent path predicted by the
+  planning draft. ADR 0004 and the EP-9 acceptance contract now reflect the generator-owned
+  namespace and its separate create-once hole.
+- EP-9's real apply exposed two cohort boundaries: `settei-formats-0.2.0.0` is unsatisfiable
+  with GHC 9.12 because its unconditional Dhall branch constrains `bytestring <0.12`, and WAI
+  instrumentation requires semantic conventions `>=1.40 && <2`. The proven Hackage-only
+  service therefore uses direct `settei-yaml-0.2.0.0` and pins
+  `hs-opentelemetry-semantic-conventions-1.40.0.0` with the rest of the cohort.
+- EP-9 also proved that an untracked scratch flake must be addressed as `path:.` (or
+  `path:$PWD`) for Nix to see its files before a first commit. The acceptance commands retain
+  that explicit path so clean blueprint output can be built without violating the never-commit
+  rule.
 
 
 ## Decision Log
 
 - Decision: Cover kiroku (the event store), not kioku (agent memory); treat "kioku" in the original request as a typo.
-  Rationale: kiroku is foundational to every service; the user confirmed via the scope question. kioku remains out of scope.
+  Rationale: kiroku is foundational to every service; the user confirmed via the scope question. kioku remains out of scope. Recorded in ADR 0007.
   Date: 2026-07-22
 
 - Decision: Give process managers and integration events their own child plan (EP-5) combined with the messaging transports, rather than folding them into the runtime plan.
@@ -196,6 +210,13 @@ Findings from the planning research pass that shaped the decomposition (evidence
 
 - Decision: All child plans live in this repository's `docs/plans/`, including the ones whose work happens in haskell-jitsurei or the seihou registries.
   Rationale: this repo is the coordination home for the keiro-runtime standards initiative; plans name absolute paths for cross-repo work. Commits in other repos still carry the MasterPlan/ExecPlan trailers pointing at this repo's plan files.
+  Date: 2026-07-22
+
+- Decision: Keep terse runtime implementation standards in keiro-runtime-patterns, polished
+  product documentation in keiro-runtime-docs, and generally applicable Haskell standards in
+  haskell-jitsurei; cite across those boundaries rather than duplicating normative prose.
+  Rationale: each rule needs one maintenance owner, while the three repositories serve
+  materially different audiences and discovery mechanisms. Recorded in ADR 0006.
   Date: 2026-07-22
 
 - Decision: The settei standard (EP-8) is written as the fleet-wide adoption target for both microservices and CLIs, explicitly superseding the raw Dhall `FromDhall` wiring used in danwa and the layered-Dhall CLI pattern documented in haskell-jitsurei's `cli/hierarchical-config.md` (which gets a supersession note).
@@ -339,6 +360,22 @@ blast-radius, and Mori registry audits; all five `config-*` DocRefs are discover
 haskell-jitsurei layered-Dhall guide now redirects new work, and ADR 0005 records settei as the
 fleet standard. EP-9 can now consume every prerequisite standards area.
 
+EP-9 is complete. Seihou-modules now ships `haskell-keiro-service` 0.2.2 and agent-seihou
+ships `migrate-keiro-stack` 0.2.0, with synchronized registries, validated prompts and
+references, and regenerated OKF documentation where supported. The bootstrap blueprint was
+installed from committed 0.2.2 state and applied to a clean scratch repository. Its six
+packages build on GHC 9.12.4, its database-free migration plan prints
+`kiroku(8) -> keiro(18) -> pgmq(2) -> acme(2)`, and all domain, diagram, PostgreSQL,
+migration, worker, and server suites pass. The migration blueprint's live danwa rehearsal is
+deliberately deferred to an operator who can attest that its database is disposable; its
+database-free debug render and fail-closed policy checks are complete.
+
+The MasterPlan is complete and matches the original vision: this repository now carries the
+source-verified, Mori-discoverable runtime corpus; haskell-jitsurei owns the completed general
+API/operations guidance; the catalogued stale upstream statements are corrected; and both new
+and refactored-service blueprints encode the same standards. ADRs 0001–0007 preserve every
+cross-plan architecture, transport, configuration, documentation-ownership, and scope decision.
+
 
 ## Revision Notes
 
@@ -379,3 +416,9 @@ fleet standard. EP-9 can now consume every prerequisite standards area.
   planning shorthand against released source, and distilled fleet adoption into ADR 0005.
   Reason: EP-9 now has a strict, discoverable configuration and deployment contract and must
   preserve its qualified shutdown guarantees.
+- 2026-07-22 (EP-9 and MasterPlan completion): refreshed and version-synced both Seihou
+  blueprints, corrected the bootstrap through 0.2.2, proved it with a clean six-package build,
+  migration plan, and complete test run, and reconciled the released DSL's read-model vertical
+  with ADR 0004. Distilled documentation ownership and the Kiroku/Kioku scope boundary into
+  ADRs 0006/0007. Reason: close the initiative with executable scaffold evidence and leave no
+  cross-plan durable decision only in coordination prose.
