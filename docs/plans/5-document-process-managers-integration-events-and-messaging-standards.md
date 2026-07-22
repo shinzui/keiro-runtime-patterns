@@ -48,7 +48,7 @@ Concrete Steps section gives the exact grep commands and expected hits).
 ## Progress
 
 - [x] (2026-07-22T18:14:45Z) M1: `messaging/` directory created; `messaging/glossary.md` written; `messaging/README.md` stub written.
-- [ ] M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
+- [x] (2026-07-22T18:18:23Z) M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
 - [ ] M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
 - [ ] M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
 - [ ] M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
@@ -104,6 +104,11 @@ sources); the implementer should confirm they still hold and record anything new
   at-least-once subscription wiring and stable outbox/message identities instead of
   attributing checkpoint atomicity to the helper. Evidence:
   `keiro-0.3.0.0:keiro/src/Keiro/Outbox.hs` and a repository-wide symbol search.
+- `deterministicCommandId` covers the manager-state append and target-command appends,
+  not durable timers. `TimerRequest.timerId` is supplied by the caller, so the pure
+  reaction must derive it from stable business facts or redelivery can create a second
+  deadline. Evidence: `keiro-0.3.0.0:keiro/src/Keiro/ProcessManager.hs` and
+  `keiro/src/Keiro/Timer.hs`.
 
 
 ## Decision Log
@@ -183,6 +188,13 @@ sources); the implementer should confirm they still hold and record anything new
   Rationale: the released public API has no subscription runner. An application must
   supply at-least-once source consumption and stable identities so replayed enqueue
   attempts coalesce.
+  Date: 2026-07-22
+
+- Decision: Require caller-derived deterministic timer ids in process-manager
+  reactions; do not imply Keiro generates them alongside command ids.
+  Rationale: `TimerRequest` owns its `timerId`, and `scheduleTimerTx` upserts by that
+  value. Stable ids turn source-event replay into a timer upsert instead of a duplicate
+  deadline.
   Date: 2026-07-22
 
 
