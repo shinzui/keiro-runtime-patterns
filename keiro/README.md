@@ -9,8 +9,11 @@ Use this area as the fleet standard for application wiring and operating boundar
 - [Runtime assembly](runtime-assembly.md) — acquire resources, validate event streams, and configure options.
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.
 - [Command cycle and errors](command-cycle-and-errors.md) — classify command failures and reject ambiguity as a definition bug.
+- [Read models and projections](read-models-and-projections.md) — register consistency contracts, honor async fences, and rebuild safely.
+- [Durable workflows](durable-workflows.md) — journal side effects and deploy the progress mechanisms each workflow uses.
+- [Telemetry](telemetry.md) — connect tracing, metrics, propagation, and application logging hooks.
 
-The remaining projection, workflow, telemetry, DSL, and gotcha guides will be added as this documentation plan advances.
+The remaining DSL adoption and gotcha guides will be added as this documentation plan advances.
 
 ## Related Patterns
 
