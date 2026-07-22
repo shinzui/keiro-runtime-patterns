@@ -49,7 +49,7 @@ Research grounding: nine parallel research reports were produced during planning
 | 5 | Document process managers, integration events, and messaging standards | docs/plans/5-document-process-managers-integration-events-and-messaging-standards.md | None | EP-4 | Complete |
 | 6 | Codify the DDD vertical module structure standard | docs/plans/6-codify-the-ddd-vertical-module-structure-standard.md | None | EP-4, EP-5 | Complete |
 | 7 | Complete the servant API standards in haskell-jitsurei | docs/plans/7-complete-the-servant-api-standards-in-haskell-jitsurei.md | None | None | Complete |
-| 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | In Progress |
+| 8 | Document settei configuration and Kubernetes operational standards | docs/plans/8-document-settei-configuration-and-kubernetes-operational-standards.md | None | EP-7 | Complete |
 | 9 | Refresh the seihou blueprints to encode the standards | docs/plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md | EP-6 | EP-1, EP-2, EP-4, EP-5, EP-7, EP-8 | Not Started |
 
 Status values: Not Started, In Progress, Complete, Cancelled.
@@ -103,8 +103,8 @@ Cross-plan decisions that should become ADRs during implementation: the role bou
 - [x] EP-6: Vertical module structure standard written and reconciled against danwa and keiro-runtime-jitsurei
 - [x] EP-7: OpenTelemetry and request-logging API docs written in haskell-jitsurei
 - [x] EP-7: relay-pagination standard and Kubernetes probe guidance written in haskell-jitsurei
-- [ ] EP-8: Settei configuration standard written (layering, secrets, bindings)
-- [ ] EP-8: Kubernetes operational standard written (overlays, downward API, check-config gate, no-reload rollouts)
+- [x] EP-8: Settei configuration standard written (layering, secrets, bindings)
+- [x] EP-8: Kubernetes operational standard written (overlays, downward API, check-config gate, no-reload rollouts)
 - [ ] EP-9: haskell-keiro-service blueprint refreshed to scaffold the standards
 - [ ] EP-9: migrate-keiro-stack blueprint refreshed for the current cohort; registries version-synced
 
@@ -161,6 +161,15 @@ Findings from the planning research pass that shaped the decomposition (evidence
   0.1 pins the OpenAPI libraries to their 4.1.* cohort even though the current standalone pair
   is openapi-hs 5.0.0 plus servant-openapi-hs 5.1.0. EP-9 must respect the consuming package's
   coherent cohort instead of forcing the newest pair or adding obsolete git pins.
+- EP-8 found that the PGMQ shutdown guarantee depends on prefetch. Released
+  shibuya-pgmq-adapter 0.12.0.0 promptly releases an undispatched non-prefetch batch, but
+  prefetched buffered messages remain invisible until their visibility timeout; they are
+  redelivered and not lost. EP-9 must not scaffold a blanket “prefetch buffers are released”
+  claim and should keep prefetch disabled where prompt handoff matters.
+- EP-8 also found that settei's actual explain flags are `--explain-config` and
+  `--explain-config-json`, that services must opt into `RejectUnknownKeys`, and that Warp
+  3.4.14's graceful timeout defaults to an unbounded `Nothing`. The fleet standard makes all
+  three choices explicit rather than copying planning shorthand or library defaults.
 
 
 ## Decision Log
@@ -246,6 +255,15 @@ Findings from the planning research pass that shaped the decomposition (evidence
   Recorded in ADR 0004.
   Date: 2026-07-22
 
+- Decision: Adopt settei 0.2.0.0 as the fleet configuration standard for new and materially
+  refactored services and CLIs, with explicit source orders, strict unknown-key rejection for
+  services, a Kubernetes `--check-config` init gate, and rollout-based changes instead of
+  in-process reload.
+  Rationale: this replaces two ad hoc Dhall patterns with one inspectable, provenance-aware,
+  structurally redacted contract and makes deployment validation exercise the real startup
+  inputs. Recorded in ADR 0005.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -313,6 +331,14 @@ shell-syntax, whitespace, prototype, and registry checks passed. No ADR was adde
 four general Haskell standards are the canonical durable records and no coordination-level
 runtime boundary was introduced.
 
+EP-8 is complete. The new `config/` area contains five indexed documents covering service and
+CLI settei configuration, Kubernetes overlays and mounted inputs, the `--check-config` rollout
+gate, restart-based configuration changes, bounded Warp and Shibuya shutdown, and cross-cutting
+gotchas. Acceptance passed released-source symbol and version checks, Dhall, style, link,
+blast-radius, and Mori registry audits; all five `config-*` DocRefs are discoverable. The
+haskell-jitsurei layered-Dhall guide now redirects new work, and ADR 0005 records settei as the
+fleet standard. EP-9 can now consume every prerequisite standards area.
+
 
 ## Revision Notes
 
@@ -348,3 +374,8 @@ runtime boundary was introduced.
   Reason: EP-8 can now cross-reference stable probe semantics, and EP-9 can scaffold verified
   telemetry, logging, pagination, and health contracts without inheriting the two stale
   dependency assumptions.
+- 2026-07-22 (EP-8 completion): added and registered the five settei/Kubernetes standards,
+  redirected the layered-Dhall guide, corrected the prefetch shutdown and diagnostic-flag
+  planning shorthand against released source, and distilled fleet adoption into ADR 0005.
+  Reason: EP-9 now has a strict, discoverable configuration and deployment contract and must
+  preserve its qualified shutdown guarantees.

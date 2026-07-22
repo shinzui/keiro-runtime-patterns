@@ -30,17 +30,17 @@ Use a checklist to summarize granular steps. Every stopping point must be docume
 even if it requires splitting a partially completed task into two ("done" vs. "remaining").
 This section must always reflect the actual current state of the work.
 
-- [ ] Milestone 1: `config/settei-service-standard.md` written (Config algebra rules, Setting declarations, canonical service source order, env bindings, `--check-config` + exit codes, provenance/redaction, migration posture from raw Dhall).
-- [ ] Milestone 1: every symbol named in the service standard verified against the settei source tree.
-- [ ] Milestone 2: `config/settei-cli-standard.md` written (four-layer order, `--config FORMAT:PATH`, `--set`, diagnostic modes, redaction in CLI output).
-- [ ] Milestone 2: every symbol named in the CLI standard verified against the settei source tree.
-- [ ] Milestone 3: `config/kubernetes-deployment.md` written (one image many namespaces, kustomize overlays, downward API posture, mounted directories, check-config initContainer gate, no-reload rollouts, offline validation, placeholder secrets, graceful shutdown).
-- [ ] Milestone 3: shibuya `stopAppGracefully` and warp shutdown facts re-verified against their sources via mori before the shutdown section is finalized.
-- [ ] Milestone 4: `config/settei-gotchas.md` written (the six-plus footgun catalogue).
-- [ ] Milestone 4: `config/README.md` index written; every `config/*.md` file listed with a one-line description.
-- [ ] Milestone 5: `mori.dhall` updated — five `config-*` DocRefs appended, `shinzui/settei` added to dependencies; `dhall type --file mori.dhall` passes.
-- [ ] Milestone 5: supersession note added to `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei/cli/hierarchical-config.md` (the only edit outside this repository).
-- [ ] Final: cross-links between the config docs verified; validation transcript captured in this plan; Outcomes & Retrospective written; ADR distillation pass done (see Context and Orientation on `docs/adr/`).
+- [x] Milestone 1: `config/settei-service-standard.md` written (Config algebra rules, Setting declarations, canonical service source order, env bindings, `--check-config` + exit codes, provenance/redaction, migration posture from raw Dhall).
+- [x] Milestone 1: every symbol named in the service standard verified against the released settei 0.2.0.0 source tree.
+- [x] Milestone 2: `config/settei-cli-standard.md` written (four-layer order, `--config FORMAT:PATH`, `--set`, diagnostic modes, redaction in CLI output).
+- [x] Milestone 2: every symbol named in the CLI standard verified against the released settei 0.2.0.0 source tree.
+- [x] Milestone 3: `config/kubernetes-deployment.md` written (one image many namespaces, kustomize overlays, downward API posture, mounted directories, check-config initContainer gate, no-reload rollouts, offline validation, placeholder secrets, graceful shutdown).
+- [x] Milestone 3: shibuya `stopAppGracefully`, PGMQ adapter shutdown, and warp shutdown facts re-verified through mori and authoritative released tags before the shutdown section was finalized.
+- [x] Milestone 4: `config/settei-gotchas.md` written (the six-plus footgun catalogue).
+- [x] Milestone 4: `config/README.md` index written; every `config/*.md` file listed with a one-line description.
+- [x] Milestone 5: `mori.dhall` updated — five `config-*` DocRefs appended, `shinzui/settei` added to dependencies; `dhall type --file mori.dhall` passes.
+- [x] Milestone 5: supersession note added to `/Users/shinzui/Keikaku/bokuno/haskell-jitsurei/cli/hierarchical-config.md` (the only edit outside this repository).
+- [x] Final: cross-links and style verified, Mori refreshed, acceptance transcript captured, Outcomes & Retrospective written, and ADR 0005 added.
 
 
 ## Surprises & Discoveries
@@ -48,7 +48,12 @@ This section must always reflect the actual current state of the work.
 Document unexpected behaviors, bugs, optimizations, or insights discovered during
 implementation. Provide concise evidence.
 
-(None yet. Planning-stage observations that shaped this plan: settei has zero ecosystem consumers — even danwa uses raw Dhall — so these docs define an intended adoption surface, not a description of current practice. EP-3 subsequently aligned settei's README and compatibility matrix with the annotated, Hackage-published 0.2.0.0 release; EP-8 therefore treats 0.2.0.0 as the current published baseline.)
+- Settei's actual reusable flag is `--explain-config` (and `--explain-config-json`), not the planning shorthand `--explain`. `Settei.Optparse.diagnosticModeOptions` is the source of truth. `CheckConfig` emits a success marker after resolution; explain mode is the provenance-report mode.
+- Warp 3.4.14 exports `setInstallShutdownHandler` and `setGracefulShutdownTimeout` from `Network.Wai.Handler.Warp`, not from the `Settings` module path suggested by the planning grep. Its default graceful timeout is `Nothing`, so the fleet standard requires an explicit bound.
+- Released `shibuya-pgmq-adapter` 0.12.0.0 distinguishes shutdown paths: a non-prefetch batch that was read but not dispatched is released immediately, while opt-in prefetch may leave up to `bufferSize * batchSize` messages invisible until their visibility timeout. The latter is delayed redelivery, not loss, and the Kubernetes standard says so rather than promising prompt release.
+- `defaultResolveOptions` uses `WarnUnknownKeys`; fleet services need the explicit `RejectUnknownKeys` override. The reference applications intentionally show the library default, so the fleet layer must be stricter than the upstream example at this point.
+- `Settei.Prelude` remains technically exposed for intra-family compilation, and some upstream guides import it, but the 0.2.0.0 compatibility contract marks it family-internal. The adoption docs name it only in the gotcha that excludes it.
+- Release verification on 2026-07-22 found settei and all seven public adapters at Hackage 0.2.0.0 with annotated tag `v0.2.0.0`, shibuya-core at 0.8.0.1, warp at 3.4.14, and shibuya-pgmq-adapter at 0.12.0.0.
 
 
 ## Decision Log
@@ -75,6 +80,18 @@ Record every decision made while working on the plan.
   Rationale: MasterPlan EP-3 owns stale-doc remediation in the settei repo; duplicating the fix would collide.
   Date: 2026-07-22
 
+- Decision: Fleet services use `defaultResolveOptions {unknownKeyPolicy = RejectUnknownKeys}` even though the library default and reference example warn.
+  Rationale: a misspelled production key must block the rollout gate; accepting it with a warning would make `--check-config` a false success.
+  Date: 2026-07-22
+
+- Decision: Document PGMQ prefetch shutdown as bounded delayed redelivery, and recommend leaving prefetch disabled where prompt handoff matters.
+  Rationale: released 0.12.0.0 source promptly releases only the current non-prefetch chunk; prefetched buffered messages remain leased until visibility timeout, though pgmq never deletes them before acknowledgement.
+  Date: 2026-07-22
+
+- Decision: Follow the MasterPlan implementation protocol's focused Conventional Commits despite this child plan's authoring-time “do not commit” sentence.
+  Rationale: the explicitly invoked master-plan skill requires child implementation commits with coordination trailers; the stale child sentence described standalone plan authoring, not MasterPlan execution.
+  Date: 2026-07-22
+
 
 ## Outcomes & Retrospective
 
@@ -83,14 +100,16 @@ Compare the result against the original purpose. Before marking the plan complet
 distill durable project context from the Decision Log, Surprises & Discoveries, and
 this section into docs/adr/. Keep task-local execution details here.
 
-(To be filled during and after implementation.)
+EP-8 is complete. The repository now has five `config/` documents defining the settei service and CLI adoption surfaces, Kubernetes rollout and shutdown operations, a footgun catalogue, and a start-here index. Five `config-*` DocRefs and the `shinzui/settei` dependency type-check in `mori.dhall`; `mori validate`, `mori register`, and `mori registry docs shinzui/keiro-runtime-patterns` make all five visible. ADR 0005 records the durable fleet-standard decision, and haskell-jitsurei's layered-Dhall guide now redirects new work without changing its historical content.
+
+Acceptance passed the complete settei symbol battery, the settei-kubernetes binding and exact-pin checks, released shibuya/PGMQ/Warp shutdown checks, Dhall type-checking, relative-link and style audits, `git diff --check`, the exact five-file index check, and the one-file haskell-jitsurei blast-radius check. No application or cluster mutation was required. The important correction from implementation is that PGMQ prefetch is at-least-once safe but not promptly released on shutdown; EP-9 must preserve that qualified statement if it scaffolds worker comments or operational guidance.
 
 
 ## Context and Orientation
 
-This repository, `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns`, is a terse, agent-facing corpus of best-practice docs for the keiro runtime. Today it contains one doc area, `keiki/` (eight files on typed state-machine transducers), a `mori.dhall` registry at the root that makes each doc discoverable by tooling, and `docs/` holding the MasterPlan and ExecPlans. This plan (EP-8 of the MasterPlan at `docs/masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md`) creates the second doc area, `config/`, owned exclusively by this plan per the MasterPlan's integration points.
+This repository, `/Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns`, is a terse, agent-facing corpus of best-practice docs for the keiro runtime. EP-8 adds the `config/` area to the existing package, runtime, messaging, migration, and architecture areas. The root `mori.dhall` makes each document discoverable, and `docs/` holds the MasterPlan, ExecPlans, and ADRs. The `config/` area is owned exclusively by this plan per the MasterPlan's integration points.
 
-`docs/adr/` does not exist in this repository yet — there are no ADRs to consult. The MasterPlan explicitly names "settei as the fleet configuration standard (superseding raw Dhall `FromDhall` wiring as used in danwa)" as an ADR candidate; the final ADR-distillation pass of this plan should seed it if no earlier plan has.
+At implementation time, ADRs 0001–0004 already occupied the repository. This plan therefore allocated the next free number, ADR 0005, to “settei as the fleet configuration standard,” superseding raw Dhall `FromDhall` wiring for new and refactored work.
 
 **What settei is.** Settei is a provenance-aware configuration library family at `/Users/shinzui/Keikaku/bokuno/settei` — eleven packages, all version 0.2.0.0 in lockstep, GHC 9.12 / GHC2024. "Provenance-aware" means every resolved configuration value carries a record of which source supplied it, which sources were shadowed, and whether the value is secret. The packages that matter for this plan:
 
