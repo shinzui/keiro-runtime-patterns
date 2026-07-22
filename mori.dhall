@@ -326,5 +326,93 @@ in  Schema.Project::{
             "Shared-stream, global-lock, resource-effect, and bring-your-own Kafka traps"
         , location = Schema.DocLocation.LocalFile "keiro/gotchas.md"
         }
+      , Schema.DocRef::{
+        , key = "messaging-overview"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Index of messaging standards for keiro services: process managers, integration events, transports; start here"
+        , location = Schema.DocLocation.LocalFile "messaging/README.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-glossary"
+        , kind = Schema.DocKind.Reference
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Shared messaging vocabulary: domain vs integration events, outbox, inbox, ack decisions, at-least-once plus idempotency"
+        , location = Schema.DocLocation.LocalFile "messaging/glossary.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-process-managers"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
+        , location = Schema.DocLocation.LocalFile "messaging/process-managers.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-integration-events"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The integration event contract: envelope, identity and dedupe rules, topic versioning, trace continuation"
+        , location = Schema.DocLocation.LocalFile "messaging/integration-events.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-outbox"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
+        , location = Schema.DocLocation.LocalFile "messaging/outbox.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-inbox"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Consuming integration events idempotently: runInboxTransaction variants and disposition completeness"
+        , location = Schema.DocLocation.LocalFile "messaging/inbox.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-shibuya-processing"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown"
+        , location = Schema.DocLocation.LocalFile "messaging/shibuya-processing.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-transport-selection"
+        , kind = Schema.DocKind.Pattern
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Choosing a transport: the pgmq vs Kafka vs kiroku-subscription matrix and rule of thumb"
+        , location = Schema.DocLocation.LocalFile "messaging/transport-selection.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-pgmq-jobs"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
+        , location = Schema.DocLocation.LocalFile "messaging/pgmq-jobs.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-kiroku-subscriptions"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
+        , location = Schema.DocLocation.LocalFile "messaging/kiroku-subscriptions.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-gotchas"
+        , kind = Schema.DocKind.Notes
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Consolidated messaging gotcha catalogue across shibuya, pgmq, Kafka, kiroku, and keiro"
+        , location = Schema.DocLocation.LocalFile "messaging/gotchas.md"
+        }
       ]
     }

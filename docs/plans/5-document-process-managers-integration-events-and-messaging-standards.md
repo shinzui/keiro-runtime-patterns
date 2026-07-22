@@ -51,7 +51,7 @@ Concrete Steps section gives the exact grep commands and expected hits).
 - [x] (2026-07-22T18:18:23Z) M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
 - [x] (2026-07-22T18:20:51Z) M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
 - [x] (2026-07-22T18:24:32Z) M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
-- [ ] M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
+- [x] (2026-07-22T18:27:21Z) M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
 - [ ] M5 validation: symbol cross-check greps all pass; `dhall type` passes; README index check passes; DocRef location check passes.
 - [ ] ADR distillation: `docs/adr/` seeded with the pgmq-versus-Kafka transport selection ADR (or deferral recorded in the Decision Log with rationale).
 - [ ] MasterPlan registry row for EP-5 flipped to Complete; Outcomes & Retrospective written.

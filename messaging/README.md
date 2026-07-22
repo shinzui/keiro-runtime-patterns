@@ -16,7 +16,7 @@ Use this area for process managers, public integration contracts, transactional 
 
 - [Integration events](integration-events.md) — the public envelope, identity, versioning, ordering, and trace propagation contract.
 - [Transactional outbox](outbox.md) — safely record and publish outbound integration events.
-- [Transactional inbox](inbox.md) — deduplicate inbound integration events with their local effects.
+- [Idempotent inbox](inbox.md) — deduplicate inbound integration events with their local effects.
 
 ## The Processing Substrate
 
@@ -33,4 +33,3 @@ Use this area for process managers, public integration contracts, transactional 
 
 - [Keiki transducer patterns](../keiki/README.md) — the durable state-machine layer under aggregates and manager streams.
 - [Keiro runtime patterns](../keiro/README.md) — assembly, schemas, command errors, read models, workflows, telemetry, and DSL adoption.
-

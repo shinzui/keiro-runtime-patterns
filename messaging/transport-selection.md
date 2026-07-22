@@ -36,7 +36,9 @@ Use the Kiroku adapter for projections, reactors, and process managers driven by
 
 ## Rule Of Thumb
 
-**Use PGMQ for in-context jobs and anything needing DLQ, retry caps, leases, or ordered groups without a broker. Use Kafka for cross-context event streaming where a cluster exists and you can guarantee serial consumption and supply your own DLQ and retry bookkeeping. Use Kiroku subscriptions only for reactions to the local event log.**
+**PGMQ for in-context jobs and anything needing DLQ, retry caps, leases, or ordered groups without a broker; Kafka for cross-context event streaming where a cluster exists and you can guarantee serial consumption and supply your own DLQ/retry bookkeeping.**
+
+Use Kiroku subscriptions only for reactions to the local event log.
 
 Keiro currently ships Kafka codecs for integration outbox and inbox boundaries. PGMQ as an integration-event transport is roadmap status, not scheduled. If that case is implemented, build it on `Keiro.PGMQ.Runtime`, never on the background-job `Keiro.PGMQ.Job` abstraction.
 
