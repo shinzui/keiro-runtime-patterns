@@ -43,11 +43,11 @@ Update this checklist at every stopping point. Split partially completed items i
 - [x] Milestone 2: `migrations/testing.md` written
 - [x] Milestone 2: `migrations/codd-transition.md` written
 - [x] Milestone 2: `migrations/README.md` index written; every migrations doc linked
-- [ ] Milestone 3: fifteen DocRef entries appended to `mori.dhall`
-- [ ] Milestone 3: `shinzui/pg-migrate` and `shinzui/pgmq-hs` appended to the `dependencies` list
-- [ ] Milestone 3: symbol cross-check script runs with zero `MISS` lines
-- [ ] Milestone 3: `dhall --file mori.dhall` type-checks and `mori validate` prints `Configuration is valid.`
-- [ ] Milestone 3: link check over both README indexes reports no broken links
+- [x] Milestone 3: fifteen DocRef entries appended to `mori.dhall`
+- [x] Milestone 3: `shinzui/pg-migrate` and `shinzui/pgmq-hs` appended to the `dependencies` list
+- [x] Milestone 3: symbol cross-check script runs with zero `MISS` lines
+- [x] Milestone 3: `dhall --file mori.dhall` type-checks and `mori validate` prints `Configuration is valid.`
+- [x] Milestone 3: link check over both README indexes reports no broken links
 - [ ] Completion: ADR distillation pass performed (create `docs/adr/` and seed records only if durable decisions emerged)
 
 
@@ -61,6 +61,7 @@ Document unexpected behaviors, bugs, optimizations, or insights discovered durin
 - `Kiroku.Metrics.Prometheus` describes `kiroku_events_appended_total` as a “gap-free global position,” but `Kiroku.Store.Types.GlobalPosition` explicitly promises only a strictly increasing total order and says positions need not be dense. The fleet docs follow the public type contract and name the metric without repeating the misleading HELP text.
 - The released Kiroku native manifest now contains an eighth migration, while `Kiroku.Store.Migrations.History.Codd` intentionally retains seven mappings because only the seven historical Codd files need import evidence. `migrations/codd-transition.md` must describe the history map as seven entries without implying the native component stopped growing.
 - pg-migrate derives the durable local migration name from the manifest filename without `.sql`; renaming the file therefore changes identity. The model and authoring docs state this explicitly rather than preserving the Plan of Work's ambiguous phrase “stable even if the file is renamed.”
+- As found during EP-1, editing `mori.dhall` does not update Mori's indexed registry automatically. After validation, `mori register --local --path /Users/shinzui/Keikaku/bokuno/keiro-runtime-patterns --no-seihou-discovery` refreshed it; `mori registry docs shinzui/keiro-runtime-patterns` then listed all 27 registered documents (12 Keiki plus this plan's 15).
 - (Implementation discoveries go here.)
 
 
