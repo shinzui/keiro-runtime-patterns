@@ -34,10 +34,10 @@ Plan authored 2026-07-22. Implementation began 2026-07-22. Every stopping point 
 - [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/vertical-slice-modules.md` (the per-concept module table, naming rules, firewall, authoritative-convention ruling) written.
 - [x] (2026-07-22T18:38:50Z) Milestone 1: `architecture/cross-cutting-modules.md` (the closed allowlist + division heuristic) written.
 - [x] (2026-07-22T18:38:50Z) Milestone 1: verification loop run against the danwa checkout; output was `CHECKED` with zero missing paths.
-- [ ] Milestone 2: `architecture/extended-node-verticals.md` (read models, process managers, workflows, routers, publishers, inboxes, queues, contracts; integration-as-a-vertical rule) written.
-- [ ] Milestone 2: `architecture/spec-and-scaffolding.md` (`.keiro` placement, `context`/`layout` clauses, scaffold invocation, idempotent re-scaffold workflow) written.
-- [ ] Milestone 2: `architecture/test-layout.md` (danwa four-suite core split, per-package suites, vertical `*Spec` layout, `test-support` sublibrary, jitsurei six-suite superset) written.
-- [ ] Milestone 2: Milestone 2 verification loop run against the keiro-runtime-jitsurei checkout; zero missing paths.
+- [x] (2026-07-22T18:41:40Z) Milestone 2: `architecture/extended-node-verticals.md` (read models, process managers, workflows, routers, publishers, inboxes, queues, contracts; integration-as-a-vertical rule) written.
+- [x] (2026-07-22T18:41:40Z) Milestone 2: `architecture/spec-and-scaffolding.md` (`.keiro` placement, `context`/`layout` clauses, scaffold invocation, idempotent re-scaffold workflow) written.
+- [x] (2026-07-22T18:41:40Z) Milestone 2: `architecture/test-layout.md` (danwa four-suite core split, per-package suites, vertical `*Spec` layout, `test-support` sublibrary, jitsurei six-suite superset) written.
+- [x] (2026-07-22T18:41:40Z) Milestone 2: verification loop run against the keiro-runtime-jitsurei checkout; output was `CHECKED`, zero paths were missing, and the hospital-capacity cabal file reported six test suites.
 - [ ] Milestone 3: `architecture/worked-example-conversation.md` (full Conversation slice file listing) written.
 - [ ] Milestone 3: eight `Schema.DocRef` entries appended to `mori.dhall`; file type-checks with `dhall`.
 - [ ] Milestone 3: cross-links between the eight docs and to `keiki/` verified; forward links to `keiro/` and `messaging/` noted if those areas do not exist yet.
@@ -62,6 +62,7 @@ Findings from the plan-authoring research pass (2026-07-22), verified directly a
 - The two repos disagree on spec placement: danwa keeps the spec at `domain/danwa.keiro`; keiro-runtime-jitsurei keeps it at `services/hospital-capacity/spec/hospital-capacity.keiro`. A ruling is required (made below: `domain/` wins for the six-package shape).
 - `danwa-core` ships two cross-cutting modules the task's allowlist did not mention: `Danwa.Diagrams` (library support for the `danwa-diagrams` executable at `danwa-core/app/Diagrams.hs` and the drift-check test suite) and `Danwa.Core` (a dead placeholder). Rulings recorded in the Decision Log: `Diagrams` is admitted to the allowlist; `Core`-style placeholders are excluded from the standard.
 - jitsurei's first-class read-model node directories keep the DSL node's snake_case spelling as a module path segment, e.g. `HospitalCapacity/Hospital_readiness/Generated/ReadModel.hs` — a naming wrinkle the extended-nodes doc must state explicitly, because it looks like a typo to a Haskell reader.
+- Released keiro-dsl reports modules that a changed specification no longer emits as stale, but deliberately never deletes them. The re-scaffold standard must therefore include a human review and explicit-removal step; otherwise an apparently successful regeneration can leave obsolete generated or hand-owned modules in the cabal surface.
 
 
 ## Decision Log
@@ -92,6 +93,10 @@ Findings from the plan-authoring research pass (2026-07-22), verified directly a
 
 - Decision: DocRef kinds are `Guide` for the index, `BestPractice` for the five prescriptive rule docs, and `Pattern` for the extended-node-verticals and worked-example docs; all eight use audience `Module` and keys `architecture-<file-slug>`.
   Rationale: matches the parenthetical in the MasterPlan mission (BestPractice/Pattern, audience Module) while following the `keiki-overview` precedent that an index README registers as a `Guide`.
+  Date: 2026-07-22
+
+- Decision: Treat the scaffolder's stale-path report as an explicit cleanup review, not as deletion performed by keiro-dsl.
+  Rationale: `Keiro.Dsl.ScaffoldRun` and the released typed-spec documentation guarantee that stale paths are reported but never removed. Keeping deletion human-reviewed protects hand-owned files while preventing obsolete generated modules from silently remaining in the service tree.
   Date: 2026-07-22
 
 
