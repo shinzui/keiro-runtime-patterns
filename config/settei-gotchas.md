@@ -28,6 +28,12 @@ The module remains exposed so packages in the settei family can share vocabulary
 
 Released settei adapters pin the core family exactly; mixed family versions are unsupported. If the solver reports an exact-bound conflict, update all settei packages together instead of relaxing one adapter's bound. The verified current family release is 0.2.0.0.
 
+## The 0.2.0.0 Formats Umbrella Does Not Fit the GHC 9.12 Cohort
+
+`settei-formats-0.2.0.0` always pulls `settei-dhall-0.2.0.0`, which pins `dhall-json-1.7.12`. That released `dhall-json` requires `bytestring <0.12`, while GHC 9.12.4 supplies `bytestring-0.12.2.0` and the released Settei YAML and Kubernetes adapters require `bytestring >=0.12`. The result is an unsatisfiable dependency graph, not permission to relax a bound.
+
+Services and single-format CLIs in this cohort depend directly on the adapter they use, normally `settei-yaml-0.2.0.0`. Reconsider `settei-formats` only after its complete released dependency graph solves against the fleet compiler and index-state.
+
 ## Mounted Files Strip One Newline
 
 `readMountedDirectorySource` strips exactly one trailing line-feed by default, matching ordinary Kubernetes Secret files. It does not trim arbitrary whitespace. Use `keepTrailingNewline` for byte-faithful material and see [Kubernetes Deployment Standard](./kubernetes-deployment.md) for the mounted-directory rules.

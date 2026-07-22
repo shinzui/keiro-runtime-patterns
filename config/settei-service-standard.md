@@ -160,7 +160,7 @@ Dhall import normalization cannot preserve leaf-level file attribution across an
 
 ## Dependency Posture
 
-Pin the released 0.2.0.0 settei family together while the family remains experimental. A typical service uses `settei`, `settei-env`, `settei-formats`, `settei-optparse-applicative`, and `settei-kubernetes`, all at `==0.2.0.0`. Import documented modules such as `Settei`, `Settei.Env`, and `Settei.Kubernetes`; see the gotcha catalogue for the excluded family-internal surface.
+Pin the released 0.2.0.0 settei family together while the family remains experimental. For the GHC 9.12.4 runtime cohort, a typical single-format service uses `settei`, `settei-env`, `settei-yaml`, `settei-optparse-applicative`, and `settei-kubernetes`, all at `==0.2.0.0`. Import documented modules such as `Settei`, `Settei.Env`, `Settei.Yaml`, and `Settei.Kubernetes`; see the gotcha catalogue for the excluded family-internal surface and the current `settei-formats` solver incompatibility.
 
 ## Related Patterns
 

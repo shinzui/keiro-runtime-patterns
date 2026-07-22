@@ -52,7 +52,7 @@ tool --config yaml:config/base.yaml \
 
 `loadConfigInput defaultLoadOptions` dispatches to the selected adapter. Dhall uses `NoImports` by default; opt into `LocalImportsWithin` only for a named trusted root.
 
-A single-format CLI should depend directly on that format adapter and accept `--config PATH`; use the `settei-formats` umbrella only when the explicit format tag is part of the CLI contract.
+A single-format CLI should depend directly on that format adapter and accept `--config PATH`. Use the `settei-formats` umbrella only when the explicit format tag is part of the CLI contract **and** the complete released compiler cohort solves together. The released 0.2.0.0 umbrella does not solve in the GHC 9.12.4 cohort because its Dhall path reaches `dhall-json-1.7.12` (`bytestring <0.12`); use a direct adapter such as `settei-yaml` until a later released cohort is verified.
 
 ## Compose the Parser from Public Modules
 
