@@ -50,7 +50,7 @@ Concrete Steps section gives the exact grep commands and expected hits).
 - [x] (2026-07-22T18:14:45Z) M1: `messaging/` directory created; `messaging/glossary.md` written; `messaging/README.md` stub written.
 - [x] (2026-07-22T18:18:23Z) M2: `messaging/process-managers.md` written (record anatomy, atomicity and idempotency, worker policies, durable timers, decision ladder).
 - [x] (2026-07-22T18:20:51Z) M3: `messaging/integration-events.md`, `messaging/outbox.md`, `messaging/inbox.md` written.
-- [ ] M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
+- [x] (2026-07-22T18:24:32Z) M4: `messaging/shibuya-processing.md`, `messaging/transport-selection.md`, `messaging/pgmq-jobs.md`, `messaging/kiroku-subscriptions.md` written.
 - [ ] M5: `messaging/gotchas.md` written; `messaging/README.md` finalized as a complete index; eleven `messaging-*` DocRefs appended to `mori.dhall`.
 - [ ] M5 validation: symbol cross-check greps all pass; `dhall type` passes; README index check passes; DocRef location check passes.
 - [ ] ADR distillation: `docs/adr/` seeded with the pgmq-versus-Kafka transport selection ADR (or deferral recorded in the Decision Log with rationale).
@@ -118,6 +118,19 @@ sources); the implementer should confirm they still hold and record anything new
 - `outboxMaintenancePass` reclaims stale publishing rows and samples backlog, but does
   not call `garbageCollectSent`. Retention must be scheduled independently. Evidence:
   `keiro-0.3.0.0:keiro/src/Keiro/Outbox.hs`.
+- The current shibuya-pgmq-adapter direct/topic DLQ path sends the DLQ copy and
+  deletes the source row in one transaction. Keiro-pgmq's one-shot drain still performs
+  those effects separately, and the keiro-pgmq 0.3.0.0 module introduction describes
+  the older non-atomic adapter behavior. The standards distinguish the worker and
+  one-shot paths. Evidence: shibuya-pgmq-adapter v0.12.0.0
+  `Shibuya.Adapter.Pgmq.Internal.deadLetterTransactionally` and keiro-pgmq 0.3.0.0
+  `runJobOnceWithContext`.
+- The shibuya-kiroku-adapter 0.4.0.0 module introduction still warns that a thrown
+  handler leaves the reply unfinalized, but its supported Shibuya 0.8.0.1 runner now
+  catches the exception and finalizes `AckRetry 0`. The version-cohort behavior wins;
+  `guardKirokuHandler` remains the preferred one-second retry policy. Evidence:
+  `Shibuya.Internal.Runner.Supervised.processOne` and
+  `Shibuya.Adapter.Kiroku.guardKirokuHandler`.
 
 
 ## Decision Log
@@ -212,6 +225,13 @@ sources); the implementer should confirm they still hold and record anything new
   stable replayed message id, and the maintenance pass owns no garbage collection.
   The standard must describe the public behavior rather than the stronger guarantees
   in the planning draft.
+  Date: 2026-07-22
+
+- Decision: Document PGMQ DLQ atomicity per execution path and use current Shibuya
+  runner behavior when adapter prose conflicts with the supported core release.
+  Rationale: the supervised PGMQ adapter and Keiro's direct one-shot drain implement
+  different transaction boundaries, while the Kiroku adapter's older warning no longer
+  describes Shibuya 0.8.0.1. Version-cohort source behavior is the actionable contract.
   Date: 2026-07-22
 
 
