@@ -25,8 +25,8 @@ You can see it working by opening `keiro/README.md`, following any link, and cro
 ## Progress
 
 - [x] Milestone 1: `keiro/` directory created; `keiro/two-schema-arrangement.md` (core glossary entry) written; `keiro/README.md` stub index created. (2026-07-22 17:45Z)
-- [ ] Milestone 2: `keiro/runtime-assembly.md` written.
-- [ ] Milestone 2: `keiro/command-cycle-and-errors.md` written.
+- [x] Milestone 2: `keiro/runtime-assembly.md` written. (2026-07-22 17:47Z)
+- [x] Milestone 2: `keiro/command-cycle-and-errors.md` written. (2026-07-22 17:47Z)
 - [ ] Milestone 3: `keiro/read-models-and-projections.md` written.
 - [ ] Milestone 3: `keiro/durable-workflows.md` written.
 - [ ] Milestone 3: `keiro/telemetry.md` written.
