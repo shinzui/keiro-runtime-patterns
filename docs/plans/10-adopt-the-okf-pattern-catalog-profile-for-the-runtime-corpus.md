@@ -70,6 +70,9 @@ repository check passes from a clean checkout.
       generated-index, and update-policy decisions into
       `docs/adr/0008-adopt-okf-for-the-runtime-pattern-corpus.md` and updated every affected
       ADR link after the directory move.
+- [x] (2026-07-23T04:19:14Z) Re-ran the pinned repository check, `mori validate`,
+      `dhall freeze --check`, `git diff --check`, and worktree cleanliness from a detached
+      clean checkout at implementation commit `05e55b4`; every acceptance command exited zero.
 
 
 ## Surprises & Discoveries
@@ -242,7 +245,9 @@ The repository check proved all required behavior. Its positive path prints
 `OK: 61 concepts`; a concept-only change fails with the exact missing-nearest-log diagnostic;
 adding that log makes the same change pass; and a hand-edited generated index fails while
 restoring canonical output for the next run. The workflow is pinned to the verified OKF Git
-tag and has passed `actionlint`; the script has passed `shellcheck`.
+tag and has passed `actionlint`; the script has passed `shellcheck`. A detached clean worktree
+at implementation commit `05e55b4` also passed the pinned script with `HEAD^`, `mori
+validate`, `dhall freeze --check`, `git diff --check`, and `git status --short`.
 
 Two dependency limitations required explicit handling. OKF treats a link to reserved
 `index.md` as a missing concept, so concept prose uses an external URL for the generated root
