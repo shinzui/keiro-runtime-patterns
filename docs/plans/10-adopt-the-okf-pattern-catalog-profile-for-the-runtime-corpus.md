@@ -58,8 +58,10 @@ repository check passes from a clean checkout.
 - [x] (2026-07-23T04:10:31Z) Created eight deterministic `index.md` files and eight scoped
       `log.md` files; strict core, enforced profile, and enforced log validation prints
       `OK: 61 concepts`, while the graph contains 61 nodes and 292 edges.
-- [ ] Upgrade the Mori schema pin, declare the `runtime-patterns` OKF bundle, refresh the local
-      registry, and verify bundle and concept discovery.
+- [x] (2026-07-23T04:14:14Z) Upgraded the Mori schema pin, declared the
+      `runtime-patterns` OKF bundle, refreshed the local registry through the approved targeted
+      re-registration workaround, and verified one canonical bundle, 61 live concepts, and 61
+      stable DocRefs with no old paths.
 - [ ] Add human and agent discovery instructions, a repeatable validation script, and a pinned
       GitHub Actions check for metadata, links, indexes, and logs.
 - [ ] Distill the durable OKF ownership, layout, and update-policy decisions into the next
@@ -128,6 +130,16 @@ repository check passes from a clean checkout.
   Evidence: all eight generated indexes ended in `0a 0a`, `git diff --check` reported only
   those files, and pre/post SHA-256 inventories proved the second generator run was unchanged.
 
+- Discovery: Mori `v1.0.0.0` parses `okfBundles` from the upgraded manifest but omits that
+  field from the existing-project diff in `Mori.Modules.Project.Domain.Decider`. Consequently,
+  `mori register --local` updates DocRefs and dependencies but cannot add a first OKF bundle to
+  an already registered project.
+  Evidence: `mori show --json` returned the declared `runtime-patterns` value while
+  `mori registry bundles` returned none; the current authoritative source at commit `021ff66`
+  passes `okfBundles` into `UpdateProjectData` but its `decide (UpdateProject d)` list contains
+  no `diffOkfBundles` operation. A remove dry-run shows the project can be re-created from this
+  manifest, but `shinzui/kikan` currently depends on its stable qualified name.
+
 
 ## Decision Log
 
@@ -194,6 +206,14 @@ repository check passes from a clean checkout.
   Rationale: generated indexes must remain exact OKF output and must also be accepted by the
   repository-wide `git diff --check` gate. All other whitespace rules and all non-generated
   files remain covered.
+  Date: 2026-07-22
+
+- Decision: Work around Mori's missing existing-project `okfBundles` diff with one approved,
+  targeted `mori registry remove shinzui/keiro-runtime-patterns --force` followed immediately
+  by `mori register --local`.
+  Rationale: the manifest and profile already validated, the dry run showed the exact local
+  projection to be recreated, canonical references are based on the stable qualified name, and
+  the workaround produced one bundle, 61 concepts, 61 DocRefs, and no stale DocRef paths.
   Date: 2026-07-22
 
 

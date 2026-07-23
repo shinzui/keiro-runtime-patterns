@@ -1,6 +1,6 @@
 let Schema =
-      https://raw.githubusercontent.com/shinzui/mori-schema/026ae74331e5c516542af1dd96f041c658ed4621/package.dhall
-        sha256:18258ef583580a897f4af3e7c86db0342afb42fb40efc535b217ba1089230141
+      https://raw.githubusercontent.com/shinzui/mori-schema/93104153ecf8817547229a867302a70a25c4b3d8/package.dhall
+        sha256:5e00bba267f27069df1d3caadfec2ec6a8c4e797ce652d78c09528f981b71b42
 
 in  Schema.Project::{
     , project = Schema.ProjectIdentity::{
@@ -22,6 +22,17 @@ in  Schema.Project::{
       , "shinzui/shibuya"
       , "shinzui/pg-migrate"
       , "shinzui/pgmq-hs"
+      , "shinzui/okf"
+      ]
+    , okfBundles =
+      [ Schema.OkfBundle::{
+        , name = "runtime-patterns"
+        , path = "runtime-patterns"
+        , profile = Some "okf/runtime-patterns.dhall"
+        , okfVersion = "0.1"
+        , description = Some
+            "Prescriptive Keiro runtime standards, patterns, guides, and runbooks"
+        }
       ]
     , docs =
       [ Schema.DocRef::{
@@ -67,7 +78,7 @@ in  Schema.Project::{
             "Modeling collections without losing solver verification through opaque guards"
         , location =
             Schema.DocLocation.LocalFile
-              "keiki/collections-and-opaque-guards.md"
+              "runtime-patterns/keiki/collections-and-opaque-guards.md"
         }
       , Schema.DocRef::{
         , key = "keiki-operator-conflicts"
@@ -101,7 +112,7 @@ in  Schema.Project::{
             "Diagnosing hydration failures with reconstituteEither, replayEvents, and ReplayFailure"
         , location =
             Schema.DocLocation.LocalFile
-              "keiki/structured-replay-and-hydration.md"
+              "runtime-patterns/keiki/structured-replay-and-hydration.md"
         }
       , Schema.DocRef::{
         , key = "keiki-event-schema-evolution"
@@ -440,7 +451,7 @@ in  Schema.Project::{
             "The authoritative Generated.* + Holes vertical-slice module convention per domain concept"
         , location =
             Schema.DocLocation.LocalFile
-              "architecture/vertical-slice-modules.md"
+              "runtime-patterns/architecture/vertical-slice-modules.md"
         }
       , Schema.DocRef::{
         , key = "architecture-cross-cutting-modules"
@@ -450,7 +461,7 @@ in  Schema.Project::{
             "The closed allowlist of technical-layer modules and the domain-vs-technology division heuristic"
         , location =
             Schema.DocLocation.LocalFile
-              "architecture/cross-cutting-modules.md"
+              "runtime-patterns/architecture/cross-cutting-modules.md"
         }
       , Schema.DocRef::{
         , key = "architecture-extended-node-verticals"
@@ -460,7 +471,7 @@ in  Schema.Project::{
             "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
         , location =
             Schema.DocLocation.LocalFile
-              "architecture/extended-node-verticals.md"
+              "runtime-patterns/architecture/extended-node-verticals.md"
         }
       , Schema.DocRef::{
         , key = "architecture-spec-and-scaffolding"
@@ -470,7 +481,7 @@ in  Schema.Project::{
             "Placing the .keiro spec at domain/<service>.keiro and running keiro-dsl scaffold idempotently"
         , location =
             Schema.DocLocation.LocalFile
-              "architecture/spec-and-scaffolding.md"
+              "runtime-patterns/architecture/spec-and-scaffolding.md"
         }
       , Schema.DocRef::{
         , key = "architecture-test-layout"
@@ -489,7 +500,7 @@ in  Schema.Project::{
             "Complete file listing of danwa's Conversation slice across all six packages"
         , location =
             Schema.DocLocation.LocalFile
-              "architecture/worked-example-conversation.md"
+              "runtime-patterns/architecture/worked-example-conversation.md"
         }
       , Schema.DocRef::{
         , key = "config-overview"
