@@ -33,7 +33,7 @@ Keiro integration events use the outbox and inbox contracts with the current Kaf
 
 ## Related Guidance
 
-- [Transport selection](../../messaging/transport-selection.md)
-- [Typed PGMQ jobs](../../messaging/pgmq-jobs.md)
-- [Integration event contracts](../../messaging/integration-events.md)
-- [Kiroku subscriptions](../../messaging/kiroku-subscriptions.md)
+- [Transport selection](../../runtime-patterns/messaging/transport-selection.md)
+- [Typed PGMQ jobs](../../runtime-patterns/messaging/pgmq-jobs.md)
+- [Integration event contracts](../../runtime-patterns/messaging/integration-events.md)
+- [Kiroku subscriptions](../../runtime-patterns/messaging/kiroku-subscriptions.md)

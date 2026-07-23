@@ -30,7 +30,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of Keiki transducer patterns for Keiro services; start here"
-        , location = Schema.DocLocation.LocalFile "keiki/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiki/overview.md"
         }
       , Schema.DocRef::{
         , key = "keiki-transducer-best-practices"
@@ -39,7 +39,7 @@ in  Schema.Project::{
         , description = Some
             "Core rules for authoring Keiki transducers with the builder DSL"
         , location =
-            Schema.DocLocation.LocalFile "keiki/transducer-best-practices.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/transducer-best-practices.md"
         }
       , Schema.DocRef::{
         , key = "keiki-build-time-validation"
@@ -48,7 +48,7 @@ in  Schema.Project::{
         , description = Some
             "Asserting transducers are well-formed in CI with validateTransducer"
         , location =
-            Schema.DocLocation.LocalFile "keiki/build-time-validation.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/build-time-validation.md"
         }
       , Schema.DocRef::{
         , key = "keiki-diagnosing-rejected-commands"
@@ -57,7 +57,7 @@ in  Schema.Project::{
         , description = Some
             "Using stepEither and StepFailure to learn why a command was rejected"
         , location =
-            Schema.DocLocation.LocalFile "keiki/diagnosing-rejected-commands.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/diagnosing-rejected-commands.md"
         }
       , Schema.DocRef::{
         , key = "keiki-collections-and-opaque-guards"
@@ -75,7 +75,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Resolving the lens / generic-lens (.>) operator clash three ways"
-        , location = Schema.DocLocation.LocalFile "keiki/operator-conflicts.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiki/operator-conflicts.md"
         }
       , Schema.DocRef::{
         , key = "keiki-json-event-codecs"
@@ -83,7 +83,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Deriving kind-discriminated JSON codecs with keiki-codec-json"
-        , location = Schema.DocLocation.LocalFile "keiki/json-event-codecs.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiki/json-event-codecs.md"
         }
       , Schema.DocRef::{
         , key = "keiki-diagram-docs"
@@ -91,7 +91,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Generating Mermaid diagrams, atlas sections, and edge inspectors from transducers"
-        , location = Schema.DocLocation.LocalFile "keiki/diagram-docs.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiki/diagram-docs.md"
         }
       , Schema.DocRef::{
         , key = "keiki-structured-replay-and-hydration"
@@ -110,7 +110,7 @@ in  Schema.Project::{
         , description = Some
             "Evolving persisted event JSON with in-band versions, pinned kinds, and upcaster chains"
         , location =
-            Schema.DocLocation.LocalFile "keiki/event-schema-evolution.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/event-schema-evolution.md"
         }
       , Schema.DocRef::{
         , key = "keiki-checked-composition"
@@ -118,7 +118,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Wiring transducers with composeChecked, alternative, and the feedback1 stateless-only trap"
-        , location = Schema.DocLocation.LocalFile "keiki/checked-composition.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiki/checked-composition.md"
         }
       , Schema.DocRef::{
         , key = "keiki-upgrading-to-keiki-0-2"
@@ -127,7 +127,7 @@ in  Schema.Project::{
         , description = Some
             "Migration notes for keiki 0.2: noEmit, new validation warnings, snapshot-hash change, Decider removal"
         , location =
-            Schema.DocLocation.LocalFile "keiki/upgrading-to-keiki-0-2.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/upgrading-to-keiki-0-2.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-overview"
@@ -135,7 +135,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of kiroku event-store standards for keiro services; start here"
-        , location = Schema.DocLocation.LocalFile "kiroku/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/overview.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-append-and-read"
@@ -143,7 +143,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "ExpectedVersion semantics, idempotent retries via supplied event ids, and streaming reads"
-        , location = Schema.DocLocation.LocalFile "kiroku/append-and-read.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/append-and-read.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-transactions-and-projections"
@@ -152,7 +152,7 @@ in  Schema.Project::{
         , description = Some
             "Atomic append plus projection with runTransactionAppendingResource, and why the other combinators are traps"
         , location =
-            Schema.DocLocation.LocalFile "kiroku/transactions-and-projections.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/kiroku/transactions-and-projections.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-connection-settings"
@@ -160,7 +160,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Store schema and NOTIFY channel, extraSearchPath seam, timeouts, and synchronous handler discipline"
-        , location = Schema.DocLocation.LocalFile "kiroku/connection-settings.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/connection-settings.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-subscriptions"
@@ -168,7 +168,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "At-least-once subscriptions, per-batch checkpoints, overflow policies, and Serial consumer groups"
-        , location = Schema.DocLocation.LocalFile "kiroku/subscriptions.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/subscriptions.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-operational-invariants"
@@ -177,7 +177,7 @@ in  Schema.Project::{
         , description = Some
             "The ten invariants every kiroku-backed service must respect in production"
         , location =
-            Schema.DocLocation.LocalFile "kiroku/operational-invariants.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/kiroku/operational-invariants.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-observability"
@@ -185,7 +185,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Wiring kiroku-metrics and kiroku-otel: collector composition, spans, Prometheus names, health probes"
-        , location = Schema.DocLocation.LocalFile "kiroku/observability.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/observability.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-lifecycle-and-deletion"
@@ -194,7 +194,7 @@ in  Schema.Project::{
         , description = Some
             "Soft and hard deletion, the advisory hard-delete GUC, truncateBefore compaction, and provisional linkToStream"
         , location =
-            Schema.DocLocation.LocalFile "kiroku/lifecycle-and-deletion.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/kiroku/lifecycle-and-deletion.md"
         }
       , Schema.DocRef::{
         , key = "migrations-overview"
@@ -202,7 +202,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of pg-migrate migration standards for keiro services; start here"
-        , location = Schema.DocLocation.LocalFile "migrations/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/overview.md"
         }
       , Schema.DocRef::{
         , key = "migrations-pg-migrate-model"
@@ -210,7 +210,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "The pg-migrate model: components, manifests, exact-byte embedding, the ledger, and the RecompilePlugin"
-        , location = Schema.DocLocation.LocalFile "migrations/pg-migrate-model.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/pg-migrate-model.md"
         }
       , Schema.DocRef::{
         , key = "migrations-authoring"
@@ -218,7 +218,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Authoring rules: append-only migrations, the no-transaction directive, and manifest v1 strictness"
-        , location = Schema.DocLocation.LocalFile "migrations/authoring.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/authoring.md"
         }
       , Schema.DocRef::{
         , key = "migrations-service-package"
@@ -226,7 +226,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "The <service>-migrations package pattern composing kiroku, keiro, pgmq, and service components into one plan"
-        , location = Schema.DocLocation.LocalFile "migrations/service-package.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/service-package.md"
         }
       , Schema.DocRef::{
         , key = "migrations-operations"
@@ -234,7 +234,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Operating verify, status, and repair; verify is ledger-versus-plan; Running after a crash needs audited repair"
-        , location = Schema.DocLocation.LocalFile "migrations/operations.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/operations.md"
         }
       , Schema.DocRef::{
         , key = "migrations-testing"
@@ -242,7 +242,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-        , location = Schema.DocLocation.LocalFile "migrations/testing.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/testing.md"
         }
       , Schema.DocRef::{
         , key = "migrations-codd-transition"
@@ -250,7 +250,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Why the fleet moved from codd to pg-migrate and how persistent databases were imported ledger-only"
-        , location = Schema.DocLocation.LocalFile "migrations/codd-transition.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/migrations/codd-transition.md"
         }
       , Schema.DocRef::{
         , key = "keiro-overview"
@@ -258,7 +258,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of prescriptive Keiro runtime and DSL standards; start here"
-        , location = Schema.DocLocation.LocalFile "keiro/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/overview.md"
         }
       , Schema.DocRef::{
         , key = "keiro-runtime-assembly"
@@ -266,7 +266,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Store acquisition, validated event streams, resource effects, options, and startup order"
-        , location = Schema.DocLocation.LocalFile "keiro/runtime-assembly.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/runtime-assembly.md"
         }
       , Schema.DocRef::{
         , key = "keiro-two-schema-arrangement"
@@ -275,7 +275,7 @@ in  Schema.Project::{
         , description = Some
             "Separation of Kiroku store, Keiro framework, and application-owned PostgreSQL schemas"
         , location =
-            Schema.DocLocation.LocalFile "keiro/two-schema-arrangement.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/two-schema-arrangement.md"
         }
       , Schema.DocRef::{
         , key = "keiro-command-cycle-and-errors"
@@ -284,7 +284,7 @@ in  Schema.Project::{
         , description = Some
             "Command hydration, decision, append, projection, and prescriptive error handling"
         , location =
-            Schema.DocLocation.LocalFile "keiro/command-cycle-and-errors.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/command-cycle-and-errors.md"
         }
       , Schema.DocRef::{
         , key = "keiro-read-models-and-projections"
@@ -293,7 +293,7 @@ in  Schema.Project::{
         , description = Some
             "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
         , location =
-            Schema.DocLocation.LocalFile "keiro/read-models-and-projections.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/read-models-and-projections.md"
         }
       , Schema.DocRef::{
         , key = "keiro-durable-workflows"
@@ -301,7 +301,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Durable workflow journals, capability-based workers, stable steps, and evolution"
-        , location = Schema.DocLocation.LocalFile "keiro/durable-workflows.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/durable-workflows.md"
         }
       , Schema.DocRef::{
         , key = "keiro-telemetry"
@@ -309,7 +309,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Keiro tracing, metrics, W3C propagation, Kiroku bridging, and logging seams"
-        , location = Schema.DocLocation.LocalFile "keiro/telemetry.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/telemetry.md"
         }
       , Schema.DocRef::{
         , key = "keiro-dsl-adoption"
@@ -317,15 +317,15 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "When to adopt keiro-dsl, its generated-code firewall, holes, CLI, and evolution gate"
-        , location = Schema.DocLocation.LocalFile "keiro/dsl-adoption.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/dsl-adoption.md"
         }
       , Schema.DocRef::{
         , key = "keiro-gotchas"
-        , kind = Schema.DocKind.BestPractice
+        , kind = Schema.DocKind.Notes
         , audience = Schema.DocAudience.Module
         , description = Some
             "Shared-stream, global-lock, resource-effect, and bring-your-own Kafka traps"
-        , location = Schema.DocLocation.LocalFile "keiro/gotchas.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/gotchas.md"
         }
       , Schema.DocRef::{
         , key = "messaging-overview"
@@ -333,7 +333,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of messaging standards for keiro services: process managers, integration events, transports; start here"
-        , location = Schema.DocLocation.LocalFile "messaging/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/overview.md"
         }
       , Schema.DocRef::{
         , key = "messaging-glossary"
@@ -341,7 +341,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Shared messaging vocabulary: domain vs integration events, outbox, inbox, ack decisions, at-least-once plus idempotency"
-        , location = Schema.DocLocation.LocalFile "messaging/glossary.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/glossary.md"
         }
       , Schema.DocRef::{
         , key = "messaging-process-managers"
@@ -349,7 +349,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
-        , location = Schema.DocLocation.LocalFile "messaging/process-managers.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/process-managers.md"
         }
       , Schema.DocRef::{
         , key = "messaging-integration-events"
@@ -357,7 +357,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "The integration event contract: envelope, identity and dedupe rules, topic versioning, trace continuation"
-        , location = Schema.DocLocation.LocalFile "messaging/integration-events.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/integration-events.md"
         }
       , Schema.DocRef::{
         , key = "messaging-outbox"
@@ -365,7 +365,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
-        , location = Schema.DocLocation.LocalFile "messaging/outbox.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/outbox.md"
         }
       , Schema.DocRef::{
         , key = "messaging-inbox"
@@ -373,7 +373,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Consuming integration events idempotently: runInboxTransaction variants and disposition completeness"
-        , location = Schema.DocLocation.LocalFile "messaging/inbox.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/inbox.md"
         }
       , Schema.DocRef::{
         , key = "messaging-shibuya-processing"
@@ -381,7 +381,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown"
-        , location = Schema.DocLocation.LocalFile "messaging/shibuya-processing.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/shibuya-processing.md"
         }
       , Schema.DocRef::{
         , key = "messaging-transport-selection"
@@ -389,7 +389,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Choosing a transport: the pgmq vs Kafka vs kiroku-subscription matrix and rule of thumb"
-        , location = Schema.DocLocation.LocalFile "messaging/transport-selection.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/transport-selection.md"
         }
       , Schema.DocRef::{
         , key = "messaging-pgmq-jobs"
@@ -397,7 +397,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
-        , location = Schema.DocLocation.LocalFile "messaging/pgmq-jobs.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/pgmq-jobs.md"
         }
       , Schema.DocRef::{
         , key = "messaging-kiroku-subscriptions"
@@ -405,7 +405,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
-        , location = Schema.DocLocation.LocalFile "messaging/kiroku-subscriptions.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/kiroku-subscriptions.md"
         }
       , Schema.DocRef::{
         , key = "messaging-gotchas"
@@ -413,7 +413,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Consolidated messaging gotcha catalogue across shibuya, pgmq, Kafka, kiroku, and keiro"
-        , location = Schema.DocLocation.LocalFile "messaging/gotchas.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/gotchas.md"
         }
       , Schema.DocRef::{
         , key = "architecture-overview"
@@ -421,7 +421,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of the keiro service architecture standard: packages, vertical slices, tests, scaffolding; start here"
-        , location = Schema.DocLocation.LocalFile "architecture/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/architecture/overview.md"
         }
       , Schema.DocRef::{
         , key = "architecture-service-packages"
@@ -430,7 +430,7 @@ in  Schema.Project::{
         , description = Some
             "The six-package split standard for deployed keiro services and its dependency rules"
         , location =
-            Schema.DocLocation.LocalFile "architecture/service-packages.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/architecture/service-packages.md"
         }
       , Schema.DocRef::{
         , key = "architecture-vertical-slice-modules"
@@ -479,7 +479,7 @@ in  Schema.Project::{
         , description = Some
             "The per-package test-suite standard: four core suites, vertical Spec modules, migrations test-support"
         , location =
-            Schema.DocLocation.LocalFile "architecture/test-layout.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/architecture/test-layout.md"
         }
       , Schema.DocRef::{
         , key = "architecture-worked-example-conversation"
@@ -497,7 +497,7 @@ in  Schema.Project::{
         , audience = Schema.DocAudience.Module
         , description = Some
             "Index of settei configuration and Kubernetes operational standards; start here"
-        , location = Schema.DocLocation.LocalFile "config/README.md"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/config/overview.md"
         }
       , Schema.DocRef::{
         , key = "config-settei-service-standard"
@@ -506,7 +506,7 @@ in  Schema.Project::{
         , description = Some
             "Fleet standard for microservice configuration with settei: algebra, secrets, source order, check-config"
         , location =
-            Schema.DocLocation.LocalFile "config/settei-service-standard.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/config/settei-service-standard.md"
         }
       , Schema.DocRef::{
         , key = "config-settei-cli-standard"
@@ -515,7 +515,7 @@ in  Schema.Project::{
         , description = Some
             "Fleet standard for CLI configuration with settei: four-layer precedence, formats, diagnostics"
         , location =
-            Schema.DocLocation.LocalFile "config/settei-cli-standard.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/config/settei-cli-standard.md"
         }
       , Schema.DocRef::{
         , key = "config-kubernetes-deployment"
@@ -524,7 +524,7 @@ in  Schema.Project::{
         , description = Some
             "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
         , location =
-            Schema.DocLocation.LocalFile "config/kubernetes-deployment.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/config/kubernetes-deployment.md"
         }
       , Schema.DocRef::{
         , key = "config-settei-gotchas"
@@ -533,7 +533,16 @@ in  Schema.Project::{
         , description = Some
             "Settei footgun catalogue: null presence, positional precedence, pinning, redaction edges"
         , location =
-            Schema.DocLocation.LocalFile "config/settei-gotchas.md"
+            Schema.DocLocation.LocalFile "runtime-patterns/config/settei-gotchas.md"
+        }
+      , Schema.DocRef::{
+        , key = "runtime-patterns-getting-started"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Task-oriented routes into the prescriptive Keiro runtime standards"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/getting-started.md"
         }
       ]
     }

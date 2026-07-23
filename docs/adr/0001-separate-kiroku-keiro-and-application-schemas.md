@@ -25,6 +25,6 @@ Construct connections with `keiroConnectionSettings connString appSchema`. Appli
 
 ## Related Guidance
 
-- [The two-schema arrangement](../../keiro/two-schema-arrangement.md)
-- [Kiroku connection settings](../../kiroku/connection-settings.md)
-- [Service migration packages](../../migrations/service-package.md)
+- [The two-schema arrangement](../../runtime-patterns/keiro/two-schema-arrangement.md)
+- [Kiroku connection settings](../../runtime-patterns/kiroku/connection-settings.md)
+- [Service migration packages](../../runtime-patterns/migrations/service-package.md)

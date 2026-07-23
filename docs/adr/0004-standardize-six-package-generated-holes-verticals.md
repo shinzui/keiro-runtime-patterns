@@ -34,8 +34,8 @@ Reject the earlier flat generated layout and reject parallel hand-written `Trans
 
 ## Related Guidance
 
-- [Vertical-slice modules](../../architecture/vertical-slice-modules.md)
-- [Service packages](../../architecture/service-packages.md)
-- [Specification and scaffolding](../../architecture/spec-and-scaffolding.md)
-- [Extended node verticals](../../architecture/extended-node-verticals.md)
+- [Vertical-slice modules](../../runtime-patterns/architecture/vertical-slice-modules.md)
+- [Service packages](../../runtime-patterns/architecture/service-packages.md)
+- [Specification and scaffolding](../../runtime-patterns/architecture/spec-and-scaffolding.md)
+- [Extended node verticals](../../runtime-patterns/architecture/extended-node-verticals.md)
 - [ADR 0002: adopt keiro-dsl](0002-adopt-keiro-dsl-for-contracts-and-evolution.md)

@@ -25,6 +25,6 @@ Never edit a `Generated.*` module. Change the `.keiro` specification and scaffol
 
 ## Related Guidance
 
-- [Keiro-dsl adoption](../../keiro/dsl-adoption.md)
-- [Runtime assembly](../../keiro/runtime-assembly.md)
-- [Command cycle and errors](../../keiro/command-cycle-and-errors.md)
+- [Keiro-dsl adoption](../../runtime-patterns/keiro/dsl-adoption.md)
+- [Runtime assembly](../../runtime-patterns/keiro/runtime-assembly.md)
+- [Command cycle and errors](../../runtime-patterns/keiro/command-cycle-and-errors.md)

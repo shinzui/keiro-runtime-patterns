@@ -32,5 +32,5 @@ This documentation scope does not remove Kioku support from tools that operate o
 ## Related Guidance
 
 - [Keiro runtime standards MasterPlan](../masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md)
-- [Kiroku event-store patterns](../../kiroku/README.md)
+- [Kiroku event-store patterns](../../runtime-patterns/kiroku/overview.md)
 - [Seihou blueprint refresh](../plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md)

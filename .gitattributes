@@ -1,0 +1,2 @@
+runtime-patterns/index.md whitespace=-blank-at-eof
+runtime-patterns/**/index.md whitespace=-blank-at-eof

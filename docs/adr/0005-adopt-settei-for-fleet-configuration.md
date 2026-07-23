@@ -39,7 +39,7 @@ Raw or layered Dhall remains supported for existing applications during migratio
 
 ## Related Guidance
 
-- [Settei service configuration standard](../../config/settei-service-standard.md)
-- [Settei CLI configuration standard](../../config/settei-cli-standard.md)
-- [Kubernetes deployment standard](../../config/kubernetes-deployment.md)
-- [Settei gotchas](../../config/settei-gotchas.md)
+- [Settei service configuration standard](../../runtime-patterns/config/settei-service-standard.md)
+- [Settei CLI configuration standard](../../runtime-patterns/config/settei-cli-standard.md)
+- [Kubernetes deployment standard](../../runtime-patterns/config/kubernetes-deployment.md)
+- [Settei gotchas](../../runtime-patterns/config/settei-gotchas.md)
