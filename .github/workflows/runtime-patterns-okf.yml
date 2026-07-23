@@ -1,0 +1,42 @@
+name: Runtime patterns OKF
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v17
+
+      - name: Validate the runtime pattern catalog
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          base_ref=""
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base_ref="$PULL_REQUEST_BASE_SHA"
+          elif [[ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+            base_ref="$PUSH_BEFORE_SHA"
+          fi
+
+          nix shell \
+            github:shinzui/okf/v0.1.2.0#okf-cli \
+            nixpkgs#dhall \
+            nixpkgs#ripgrep \
+            nixpkgs#jq \
+            -c scripts/check-runtime-patterns "$base_ref"

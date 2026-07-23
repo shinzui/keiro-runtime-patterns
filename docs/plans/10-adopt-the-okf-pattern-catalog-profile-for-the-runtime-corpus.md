@@ -62,10 +62,14 @@ repository check passes from a clean checkout.
       `runtime-patterns` OKF bundle, refreshed the local registry through the approved targeted
       re-registration workaround, and verified one canonical bundle, 61 live concepts, and 61
       stable DocRefs with no old paths.
-- [ ] Add human and agent discovery instructions, a repeatable validation script, and a pinned
-      GitHub Actions check for metadata, links, indexes, and logs.
-- [ ] Distill the durable OKF ownership, layout, and update-policy decisions into the next
-      available ADR and update every affected ADR link after the directory move.
+- [x] (2026-07-23T04:18:04Z) Added human and agent discovery instructions,
+      `scripts/check-runtime-patterns`, and a pinned GitHub Actions workflow; positive,
+      missing-log, repaired-log, and stale-index cases behave as specified, while
+      `shellcheck` and `actionlint` pass.
+- [x] (2026-07-23T04:18:04Z) Distilled durable OKF ownership, layout, resource,
+      generated-index, and update-policy decisions into
+      `docs/adr/0008-adopt-okf-for-the-runtime-pattern-corpus.md` and updated every affected
+      ADR link after the directory move.
 
 
 ## Surprises & Discoveries
@@ -219,12 +223,37 @@ repository check passes from a clean checkout.
 
 ## Outcomes & Retrospective
 
-Summarize outcomes, gaps, and lessons learned at major milestones or at completion.
-Compare the result against the original purpose. Before marking the plan complete,
-distill durable project context from the Decision Log, Surprises & Discoveries, and
-this section into docs/adr/. Keep task-local execution details here.
+The intended runtime catalog now exists as one isolated, reusable-profile-backed OKF bundle.
+The reusable `documentation.patternCatalog` contract and three-concept fixture were published
+from `shinzui/okf-profiles` commit
+`611a79bf1f478bbd5ccd8a9a7cdcb9123d52a35f` under immutable tag `v0.2.0`.
+This repository consumes that tag through a Dhall semantic hash, contains 61 validated
+concepts, and exposes a 61-node, 292-edge graph. The seven subject overviews preserve their
+curated reading paths, eight generated indexes provide exhaustive progressive disclosure, and
+eight scoped logs establish the authoring audit trail.
 
-(To be filled during and after implementation.)
+Human and agent discovery now converge on the same corpus. `README.md` and
+`runtime-patterns/getting-started.md` offer task-oriented entry points; `AGENTS.md` directs
+agents through Mori and focused `okf show` queries. Mori registration exposes one canonical
+bundle, 61 live concepts, and 61 stable DocRefs, all beneath `runtime-patterns/`. Existing
+DocRef keys and `mori://` resource identities survived the directory migration.
+
+The repository check proved all required behavior. Its positive path prints
+`OK: 61 concepts`; a concept-only change fails with the exact missing-nearest-log diagnostic;
+adding that log makes the same change pass; and a hand-edited generated index fails while
+restoring canonical output for the next run. The workflow is pinned to the verified OKF Git
+tag and has passed `actionlint`; the script has passed `shellcheck`.
+
+Two dependency limitations required explicit handling. OKF treats a link to reserved
+`index.md` as a missing concept, so concept prose uses an external URL for the generated root
+index. Mori `v1.0.0.0` cannot add `okfBundles` through its existing-project update diff, so an
+approved targeted local remove/re-register was needed once. Neither limitation weakened the
+bundle's strict profile, link, graph, log, or index checks.
+
+Durable decisions and lessons are recorded in
+`docs/adr/0008-adopt-okf-for-the-runtime-pattern-corpus.md`. The only remaining operational
+event is for GitHub Actions to execute after these commits are pushed; its exact command has
+already passed locally in the same pinned Nix shell.
 
 
 ## Context and Orientation
@@ -736,6 +765,14 @@ docs(okf): adopt the runtime pattern catalog
 ExecPlan: docs/plans/10-adopt-the-okf-pattern-catalog-profile-for-the-runtime-corpus.md
 Intention: intention_01ky5agv9gehqa8dbw03cdcpwv
 ```
+
+
+## Revision Note
+
+2026-07-22: Implemented all milestones, recorded validation evidence and dependency
+workarounds, completed the retrospective, and distilled durable policy into ADR 0008. The
+revision keeps the plan restartable from the final working tree and explains the observed OKF
+and Mori behavior that differed from the planning assumptions.
 
 
 ## Validation and Acceptance

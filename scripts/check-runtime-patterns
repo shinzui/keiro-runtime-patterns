@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+base_ref="${1:-}"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(git -C "$script_dir/.." rev-parse --show-toplevel)"
+bundle_dir="runtime-patterns"
+profile_file="okf/runtime-patterns.dhall"
+
+cd "$repo_root"
+
+for required_command in okf dhall rg jq git shasum; do
+  if ! command -v "$required_command" >/dev/null 2>&1; then
+    printf 'error: required command not found: %s\n' "$required_command" >&2
+    exit 1
+  fi
+done
+
+if ! okf validate --help 2>&1 | rg -q -- '--profile'; then
+  printf 'error: okf lacks profile validation; use okf-cli >= 0.1.1.0\n' >&2
+  exit 1
+fi
+
+if ! okf log --help 2>&1 | rg -q -- '--since'; then
+  printf 'error: okf lacks log drift checks; use okf-cli >= 0.1.1.0\n' >&2
+  exit 1
+fi
+
+dhall freeze --check "$profile_file"
+dhall type --file "$profile_file" >/dev/null
+dhall type --file mori.dhall >/dev/null
+
+okf validate "$bundle_dir" \
+  --strict \
+  --profile "$profile_file" \
+  --profile-enforce \
+  --log-enforce
+
+before_indexes="$(mktemp)"
+after_indexes="$(mktemp)"
+log_stderr="$(mktemp)"
+trap 'rm -f "$before_indexes" "$after_indexes" "$log_stderr"' EXIT
+
+find "$bundle_dir" -type f -name index.md -print0 \
+  | sort -z \
+  | xargs -0 shasum -a 256 >"$before_indexes"
+
+okf index "$bundle_dir" --write >/dev/null
+
+find "$bundle_dir" -type f -name index.md -print0 \
+  | sort -z \
+  | xargs -0 shasum -a 256 >"$after_indexes"
+
+if ! cmp -s "$before_indexes" "$after_indexes"; then
+  printf '%s\n' \
+    'error: generated indexes were stale or manually edited; review the regenerated files and rerun the check' \
+    >&2
+  diff -u "$before_indexes" "$after_indexes" >&2 || true
+  exit 1
+fi
+
+okf graph "$bundle_dir" --json \
+  | jq -e '
+      (.nodes | length) == 61
+      and (.edges | length) > 0
+      and ([.edges[] as $edge
+            | ([.nodes[].id] | index($edge.source)) != null
+              and ([.nodes[].id] | index($edge.target)) != null]
+           | all)
+    ' >/dev/null
+
+if [[ -n "$base_ref" ]]; then
+  if git rev-parse --verify --quiet "${base_ref}^{commit}" >/dev/null; then
+    okf log "$bundle_dir" --since "$base_ref" > /dev/null 2>"$log_stderr"
+    if rg -n '^git:' "$log_stderr" >&2; then
+      printf 'error: changed concepts require a change to their nearest log.md\n' >&2
+      exit 1
+    fi
+  else
+    printf 'skip: base ref %s does not exist; diff-aware log check skipped\n' "$base_ref"
+  fi
+else
+  printf '%s\n' 'skip: no base ref supplied; diff-aware log check skipped'
+fi
+
+printf '%s\n' 'runtime-patterns checks passed'

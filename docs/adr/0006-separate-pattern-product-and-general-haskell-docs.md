@@ -34,5 +34,6 @@ Cross-link or cite the owning document instead of duplicating its normative cont
 
 ## Related Guidance
 
+- [OKF runtime corpus adoption](0008-adopt-okf-for-the-runtime-pattern-corpus.md)
 - [Keiro runtime standards MasterPlan](../masterplans/1-keiro-runtime-standards-docs-and-seihou-blueprints.md)
 - [Seihou blueprint refresh](../plans/9-refresh-the-seihou-blueprints-to-encode-the-standards.md)
