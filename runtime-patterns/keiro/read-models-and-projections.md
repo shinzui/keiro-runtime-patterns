@@ -2,7 +2,7 @@
 type: Standard
 title: "Read models and projections"
 description: "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
-timestamp: 2026-07-22T10:49:54-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -48,6 +48,20 @@ The glossary rule is normative: snapshots accelerate hydration but do not define
 
 The exception is history truncation. Once Kiroku hides a per-stream prefix, a valid snapshot must cover that prefix; deleting it produces `HydrationGapDetected`. Restore visibility with the store's truncation controls or install a covering snapshot before resuming commands.
 
+## Match all three snapshot discriminator components
+
+An aggregate snapshot is loaded only when three independent components agree:
+
+1. `stateCodecVersion`, owned manually by the service;
+2. `shapeHash`, the register-layout identity;
+3. `stateShapeHash`, the control-state and replay-fold identity.
+
+`defaultStateCodec` derives the third through keiki's `CanonicalStateShape`, so register-layout and control-state changes invalidate stale seeds automatically. Generated codecs compose a spec-derived fold fingerprint as `<state-hash>;fold=<fingerprint>` through `withFoldFingerprint`; hand-written services may supply and maintain their own token the same way.
+
+The manual clause is still load-bearing. **A fold or guard change the derivation cannot see — hand-written update logic, or logic living only in a generated service's hand-owned Holes module — must bump `stateCodecVersion`.** Nothing else will catch it: an unbumped invisible change presents identical discriminators by construction. As a backstop, one accepted seed in 1000 is verified against a full replay, and a mismatch increments `keiro.snapshot.seed.divergence`; alert on that metric.
+
+Rows written before the discriminator gained its third component carry an empty sentinel. They miss once, full-replay, and may then be replaced with a current seed, so expect a one-time replay cost per stream after the upgrade.
+
 For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `docs/user/snapshots.md`, and `docs/guides/project-read-models.md`.
 
 ## Related Patterns
@@ -55,3 +69,4 @@ For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `doc
 - [Runtime assembly](runtime-assembly.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [The two-schema arrangement](two-schema-arrangement.md)
+- [Evolution gates and rollout ordering](evolution-and-rollout.md)

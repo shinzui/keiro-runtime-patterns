@@ -2,7 +2,7 @@
 type: Guide
 title: "Structured Replay and Hydration"
 description: "Diagnosing hydration failures with reconstituteEither, replayEvents, and ReplayFailure"
-timestamp: 2026-07-22T09:39:08-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-structured-replay-and-hydration
 tags: [keiki, structured-replay-and-hydration]
 status: current
@@ -78,6 +78,14 @@ This explains the head-event rule. Edge selection and command inversion happen b
 - `ReplayQueueMismatch s co [co]` means an in-flight event differs from the next expected event; the list is the remaining queue.
 
 These diagnostics deliberately carry no register values. They summarize state-machine structure without dumping durable application state. Events are included only where they identify the failed comparison, because the event log is already observable data.
+
+## Account For Replay-Only Edges When Reading A Failure
+
+From keiki 0.3, an `Edge` carries an `EdgeMode` of `Live` or `ReplayOnly`. A replay-only edge is never taken by forward stepping; it exists so events emitted under a retired rule keep an inverting edge, and its update defines how that history folds today.
+
+Inversion is two-phase. Candidates are sought among `Live` edges first, and `ReplayOnly` edges are tried only when no live edge matches. Ambiguity is judged within the phase that produced the candidates, so a live edge and its replay-only twin cannot conflict with each other — an overlap yields a deterministic live-first preference instead.
+
+This changes how to read a failure. A `ReplayNoInvertingEdge` after a guard tightening usually means the required replay-only twin was never added, or was deleted before every affected stream was terminal or truncated. Add or restore the twin; do not loosen the live guard to make replay succeed. See [evolution gates and rollout ordering](../keiro/evolution-and-rollout.md).
 
 ## Diagnose Whole-Log Failures
 

@@ -2,7 +2,7 @@
 type: Guide
 title: "Event Schema Evolution"
 description: "Evolving persisted event JSON with in-band versions, pinned kinds, and upcaster chains"
-timestamp: 2026-07-22T09:39:08-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-event-schema-evolution
 tags: [keiki, event-schema-evolution]
 status: current
@@ -98,19 +98,34 @@ codecOptions =
 
 For `currentVersion = n`, the splice requires the source versions to be exactly `[1 .. n - 1]`. Gaps, duplicates, zero, and out-of-range rungs fail at compile time. The generated decoder looks up the stored version, runs every required rung in order, then dispatches on the migrated kind and decodes current payload fields. Application code normally does not call `lookupVersion` or `migrateEnvelope` directly.
 
+A chain defect that survives compilation is now caught at the runtime boundary too: keiro's validated event-stream construction rejects a codec whose schema version, event tags, or upcaster chain fail `mkCodec`. Restore the missing rung or deduplicate the conflicting sources rather than reaching for the unchecked constructor.
+
+When several event kinds bump at the same source version, they lower into one rung that dispatches by event type and passes unrelated kinds through byte-for-byte. One kind's upcaster can no longer rewrite another kind's payload at the same version.
+
 An upcaster maps one envelope to one envelope. Splitting one historical event into several current events belongs in the application's event-store adapter, where ordering and write-back policy can be explicit.
 
 ## Removing A Field Still Requires Replay Review
 
 Event decoding ignores unknown object keys, so a current payload may omit a field that remains in historical objects. That is decode-compatible, but not automatically replay-safe. If a transition guard or register update consumed the removed value, the private event still needs to expose it for inversion. Check the transducer's emit-every-field rule and replay round trips before deleting persisted data.
 
+## Retire An Event In Two Stages
+
+Deleting the transition that emitted an event breaks hydration for every stream that still contains it. Decode compatibility is irrelevant here: the event decodes fine and then has no inverting edge.
+
+The sanctioned shape is a **replay-only** transition — an edge never taken by forward stepping, retained so historical events stay invertible and keep a defined fold. Retirement is therefore two-stage: first mark the event `retiring` while its live emitting transition stays, then at cutover mark it `deprecated` and change that transition to `replay-only`.
+
+Keep the replay-only edge until every affected stream is terminal, truncated, or has passed a real-log replay audit. Deleting it earlier recreates exactly the break it fixed. This supersedes the older guarded-but-inert pattern for retained edges.
+
 ## Verify Every Evolution Against Historical Bytes
 
 Keep literal pre-change JSON fixtures. For additive changes, prove an old object decodes with the intended default. For a constructor rename, prove the encoder still emits the old wire kind and the decoder accepts it. For an upcaster, prove each historical version reaches the current type and that a future version is rejected rather than guessed.
+
+Capture goldens in the same change that bumps the version, while the old shape is still recoverable from the previous specification. A decode golden proves decode compatibility **only** — never describe it as proof that an old event still inverts or folds identically. That question belongs to the replay audit.
 
 ## Related Patterns
 
 - [Deriving JSON Codecs](./json-event-codecs.md) documents the complete generated surface and all eight options.
 - [Keiki Transducer Best Practices](./transducer-best-practices.md) distinguishes replay-oriented private events from public integration contracts.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) explains why removing a replay-critical field is unsafe even when JSON decoding succeeds.
+- [Evolution gates and rollout ordering](../keiro/evolution-and-rollout.md) places these checks in the full gate ladder and rollout sequence.
 - [Upgrading to Keiki 0.2](./upgrading-to-keiki-0-2.md) calls out the codec changes that affect existing code.

@@ -2,7 +2,7 @@
 type: Overview
 title: "Migration Standards"
 description: "Index of pg-migrate migration standards for keiro services; start here"
-timestamp: 2026-07-22T09:54:51-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-overview
 tags: [migrations, overview]
 status: current
@@ -14,6 +14,8 @@ status: current
 
 This area is the fleet’s prescriptive guide to database evolution for Keiro services. It covers compile-time plans, immutable SQL authoring, service packaging, deployment, testing, and the completed Codd transition.
 
+Integrity is layered on purpose: compile-time embedding, a review-time lockfile and body lint, a boot-time startup handshake, and two deploy-time gates — `verify` for the ledger and `verify-schema` for live objects. No layer substitutes for another.
+
 ## Start here
 
 1. [The pg-migrate Model](./pg-migrate-model.md) — components, manifests, embedding, execution, and the ledger.
@@ -22,8 +24,8 @@ This area is the fleet’s prescriptive guide to database evolution for Keiro se
 
 ## Test and operate
 
-- [Migration Testing](./testing.md) — pure construction checks, ephemeral PostgreSQL, and nested results.
-- [Migration Operations](./operations.md) — inspect, apply, verify, and repair.
+- [Migration Testing](./testing.md) — default-build integrity gates, pure construction checks, ephemeral PostgreSQL, and nested results.
+- [Migration Operations](./operations.md) — inspect, apply, verify ledger and live schema, and repair.
 - [Codd Transition](./codd-transition.md) — why persistent fleets imported history ledger-only.
 
 ## Related Patterns

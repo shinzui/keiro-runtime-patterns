@@ -2,7 +2,7 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, its generated-code firewall, holes, CLI, and evolution gate"
-timestamp: 2026-07-22T10:52:30-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -31,6 +31,8 @@ The grammar covers aggregates and upcasters, projections and snapshots, process 
 - complete intake and work-queue disposition tables, including dangerous retry/ack inversions;
 - FIFO group-key requirements and captured opaque derivations;
 - snapshot codec identity, live shape hashes, status-map totality, and contiguous upcasters;
+- duplicate and incomplete aggregate upcaster chains, and the mutually exclusive `retiring event` marker;
+- event retirement discipline: a deprecated event with no replay-only emitter, and a replay-only transition that emits nothing or has no live sibling;
 - workflow signal/await matching, unique labels, and terminal `continueAsNew`;
 - resolved cross-node references and rejection handling that never marks `CommandAmbiguous` benign.
 
@@ -70,22 +72,27 @@ keiro-dsl new KIND
 keiro-dsl parse FILE
 keiro-dsl check FILE [--emit]
 keiro-dsl scaffold FILE --out DIR \
-  [--module-root PREFIX] [--collocate] [--force-generated-overwrite]
-keiro-dsl diff FILE --since GIT-REF
+  [--module-root PREFIX] [--collocate] [--force-generated-overwrite] \
+  [--goldens DIR]
+keiro-dsl diff FILE --since GIT-REF \
+  [--emit-goldens DIR] [--replay-impact-out FILE]
 ```
 
 - `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
 - `parse` parses and pretty-prints a normalized specification.
 - `check` exits non-zero on errors and optionally emits the normalized spec.
-- `scaffold` validates, then emits generated modules and creates missing typed holes.
-- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING`.
+- `scaffold` validates, then emits generated modules and creates missing typed holes. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes.
+- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING`. `--emit-goldens` captures old-shape fixtures for event version bumps while both specifications still exist, never overwriting an existing file. `--replay-impact-out` writes the machine-readable replay verdict that drives the audit.
 
-`diff` resolves the prior file with `git show`, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command.
+`diff` resolves the prior file with `git show`, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, and `ProcessTimerPayloadChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
+
+Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data.
 
 For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-toolchain.md`.
 
 ## Related Patterns
 
+- [Evolution gates and rollout ordering](evolution-and-rollout.md)
 - [Runtime assembly](runtime-assembly.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Durable workflows](durable-workflows.md)

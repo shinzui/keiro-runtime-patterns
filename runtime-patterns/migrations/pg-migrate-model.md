@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "The pg-migrate Model"
-description: "The pg-migrate model: components, manifests, exact-byte embedding, the ledger, and the RecompilePlugin"
-timestamp: 2026-07-22T09:54:51-07:00
+description: "The pg-migrate model: components, manifests, exact-byte embedding, the ledger, the RecompilePlugin, and its layered integrity gates"
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-pg-migrate-model
 tags: [migrations, pg-migrate-model]
 status: current
@@ -34,6 +34,20 @@ Every embedding module on GHC 9.12 must carry the plugin pragma so adding an unl
 ```
 
 Production binaries execute embedded bytes. They do not discover migration files at runtime.
+
+## Layer the integrity gates
+
+The plugin has an explicit limit: it reruns the membership check whenever Cabal invokes GHC, and it can do nothing when Cabal decides the package is already up to date and never invokes the compiler. Do not treat it as the only defense.
+
+Three independent layers cover the gap, each at a different time:
+
+| When | Gate | What it proves |
+| --- | --- | --- |
+| Compile | `embedMigrationManifest` plus `RecompilePlugin` | Order, directory membership, and exact SQL payloads — whenever GHC actually runs. |
+| Review | Default test suite reading the lockfile and directory | The lockfile, manifest, membership, and every SHA-256 payload agree, independent of build staleness. |
+| Deploy | The `pgmigrate` ledger | Applied history is keyed by checksum and fails closed on divergence. |
+
+No layer replaces another. See [Migration Testing](./testing.md) for the review-time suite and [Migration Operations](./operations.md) for the deploy-time gates.
 
 ## Run the complete plan under one lock
 

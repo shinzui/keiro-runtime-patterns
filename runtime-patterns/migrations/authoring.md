@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Migration Authoring"
-description: "Authoring rules: append-only migrations, the no-transaction directive, and manifest v1 strictness"
-timestamp: 2026-07-22T09:54:51-07:00
+description: "Authoring rules: append-only migrations, the three-file review diff, the no-transaction directive, and manifest v1 strictness"
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-authoring
 tags: [migrations, authoring]
 status: current
@@ -28,6 +28,12 @@ my-service-migrate new \
 ```
 
 Review and fill in the SQL, run `check`, rebuild the embedding module, then inspect `plan` and `list`.
+
+## Review all three files together
+
+A component that maintains a lockfile makes every new migration a **three-file review diff**: the immutable SQL file, its appended `manifest` line, and its appended lockfile SHA-256 line — in the same order. Reject a change where the three disagree. The test suite names which of the three is at fault, so a mismatch is a fast fix rather than a hunt.
+
+Qualify every object as `<schema>.<object>` and never manipulate `search_path` inside a migration; a body lint enforces both in the default build.
 
 ## Prefer transactional SQL
 

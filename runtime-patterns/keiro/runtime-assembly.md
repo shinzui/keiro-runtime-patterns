@@ -2,7 +2,7 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams, resource effects, options, and startup order"
-timestamp: 2026-07-22T10:48:06-07:00
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -50,7 +50,9 @@ validatedOrderStream <-
 
 Warnings—including head-recoverability, inversion ambiguity, unguarded input reads, and state-changing silent edges—mean the transducer must be corrected. `mkEventStreamOrThrow` is reserved for generated definitions or fixtures with a colocated validation proof. `mkEventStreamUnchecked` skips the durable boundary entirely and is permitted only in tests or emergency forensics, never production wiring.
 
-See [build-time validation](../keiki/build-time-validation.md) for the transducer checks.
+Validation now covers the **event codec** as well as the transducer. Construction is refused when the codec's schema version, event tags, or upcaster chain fail `mkCodec`, so a missing rung or a pair of conflicting sources is caught at startup rather than at the first hydration of an old stream. Hand-written streams get the same fail-fast treatment as generated ones; the generator's own checks are defense in depth, not the only gate.
+
+See [build-time validation](../keiki/build-time-validation.md) for the transducer checks and [evolution gates and rollout ordering](evolution-and-rollout.md) for how this boundary relates to the specification-level gates.
 
 ## Extend defaults through lenses
 
@@ -70,9 +72,22 @@ Apply the same pattern to subscription, projection, and workflow options.
 
 ## Startup order
 
-The rule is one sentence: migrate, acquire the store, validate event streams, register read models, then start only the workers the service uses.
+The rule is one sentence: migrate as a deployment job, prove the migration handshake in every replica, acquire the store, validate event streams, register read models, then start only the workers the service uses.
 
-Run `keiro-migrate up` before accepting traffic. Registration and worker startup should fail the process rather than leave a partially assembled runtime alive.
+Applying migrations from a deployment job keeps schema ownership deterministic, but it does not stop a replica from starting before that job reaches its database. Close the gap by refusing to serve until the handshake passes:
+
+```haskell
+guardMigrations provider plan = do
+  result <- missingMigrations defaultRunOptions provider plan
+  case result of
+    Right handshake | handshakePassed handshake -> pure ()
+    Right handshake -> fail ("refusing startup: " <> show handshake)
+    Left err -> fail ("migration handshake failed: " <> show err)
+```
+
+`missingMigrations` is a read-only status query, so every replica may call it at boot. `StartupHandshake` reports `pendingMigrations` and `ledgerIssues`; `handshakePassed` requires both to be empty. Open Kiroku with schema initialization disabled afterwards.
+
+Registration and worker startup should fail the process rather than leave a partially assembled runtime alive.
 
 ## Related Patterns
 
@@ -80,3 +95,4 @@ Run `keiro-migrate up` before accepting traffic. Registration and worker startup
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Keiro gotchas](gotchas.md)
 - [Read models and projections](read-models-and-projections.md)
+- [Migration Operations](../migrations/operations.md)

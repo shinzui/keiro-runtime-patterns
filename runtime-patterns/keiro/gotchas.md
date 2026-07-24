@@ -1,8 +1,8 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, resource-effect, and bring-your-own Kafka traps"
-timestamp: 2026-07-22T10:52:30-07:00
+description: "Shared-stream, global-lock, resource-effect, silent-workflow-failure, and bring-your-own Kafka traps"
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -10,7 +10,7 @@ status: current
 
 # Keiro gotchas
 
-**Four traps that cost real debugging time.**
+**Six traps that cost real debugging time.**
 
 This checklist captures cross-cutting runtime constraints that are easy to miss when reading one subsystem at a time.
 
@@ -32,6 +32,18 @@ Capacity-plan for the ceiling. In particular, keep `runCommandWithSql`, `runComm
 
 See [runtime assembly](runtime-assembly.md).
 
+## A terminally failed workflow stops retrying and stays silent
+
+Once a workflow exhausts `maxAttempts`, the runtime appends `WorkflowFailed`, marks the instance `failed`, and removes it from resume discovery. No worker will ever touch it again. There is no log line at the moment it *stops* being retried, only the crash that pushed it over the ceiling.
+
+Alert on `ResumeSummary.failed` and recover with `resurrectFailedWorkflow`, never with hand-written SQL against the instance and step-index tables. See [workflow reliability and recovery](workflow-reliability.md).
+
+## Unvalidated stream construction now skips more than transducer checks
+
+`mkEventStream` validates the event *codec* as well as the transducer: a bad schema version, duplicate event tags, or a broken upcaster chain now fails construction. That makes `mkEventStreamUnchecked` a bigger hole than it used to be — it bypasses the codec gate too.
+
+Restore the missing rung or deduplicate the conflicting sources instead. `mkEventStreamUnchecked` is for tests and emergency forensics, never for getting a deployment out the door.
+
 ## Kafka is bring-your-own
 
 Keiro deliberately has no `hw-kafka-client` dependency. `outboxRowToKafkaRecord` and `integrationEventToKafkaRecord` in `Keiro.Outbox.Kafka` produce a transport-neutral `KafkaProducerRecord`; the application owns the actual producer, consumer, and broker/group configuration.
@@ -43,3 +55,4 @@ Keep transport configuration in keiro-dsl hole kind 8. The forthcoming messaging
 - [Runtime assembly](runtime-assembly.md)
 - [Keiro-dsl adoption](dsl-adoption.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
+- [Workflow reliability and recovery](workflow-reliability.md)

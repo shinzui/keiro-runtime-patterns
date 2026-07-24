@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "Migration Testing"
-description: "Ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-timestamp: 2026-07-22T09:54:51-07:00
+description: "Integrity gates in the default suite, ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-testing
 tags: [migrations, testing]
 status: current
@@ -13,6 +13,26 @@ status: current
 **Apply the complete composed plan to a fresh PostgreSQL instance and inspect both layers of every nested result.**
 
 Use this guide for service migration tests. It covers pure construction checks, the ephemeral-database harness, its nested `Either` shape, and the fleet wrapper convention.
+
+## Keep the integrity gates in the default build
+
+The rule is one sentence: a gate behind an opt-in cabal flag is a gate nobody runs.
+
+Every integrity check belongs in the normal test components so a regression cannot depend on someone remembering to enable a flag:
+
+- a **body lint** rejecting unqualified DDL targets and any migration that manipulates `search_path`;
+- a **lockfile gate** reading the lockfile and the migrations directory at test runtime and requiring the lockfile, manifest, directory membership, and every SHA-256 payload to agree;
+- an **expected-schema comparison** against a fresh database.
+
+Regenerate an expected-schema snapshot only after an intentional schema change, explicitly, and review the resulting diff:
+
+```bash
+KEIRO_REGENERATE_EXPECTED_SCHEMA=1 \
+  cabal test keiro-migrations-test \
+  --test-options='--match "checked-in snapshot"'
+```
+
+The default suite never regenerates the file. It fails on drift, which is the point.
 
 ## Check construction before PostgreSQL
 
@@ -52,6 +72,8 @@ Left migrationError -> assertFailure (show migrationError)
 Each service exports a `with<Service>MigratedDatabase` test helper. The wrapper constructs the service’s complete Kiroku, Keiro, optional pgmq, and application plan; calls `withMigratedDatabase`; unwraps the outer result; and fails loudly on `Left`. Tests still inspect any application-level or Hasql `Either` returned by their callback.
 
 Assert fresh apply, idempotent rerun with `AlreadyApplied`, strict verification, and behavior that depends on every component. For data changes, also apply the old released plan, insert representative data, upgrade with the new plan, and assert the transformed state.
+
+Cover the negative paths too. A gate that has never been observed failing is not known to work: assert that a tampered payload, an unlisted sibling file, and a drifted live object each produce their named failure.
 
 ## Related Patterns
 

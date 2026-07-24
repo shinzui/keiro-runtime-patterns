@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Service Migration Packages"
-description: "The <service>-migrations package pattern composing kiroku, keiro, pgmq, and service components into one plan"
-timestamp: 2026-07-22T09:54:51-07:00
+description: "The <service>-migrations package pattern composing kiroku, keiro, pgmq, and service components into one plan, plus the startup handshake"
+timestamp: 2026-07-23T16:55:16-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-service-package
 tags: [migrations, service-package]
 status: current
@@ -65,8 +65,25 @@ outcome <- runMigrationCommand environment parsedCommand
 
 `pg-migrate-cli` is a library, not a generic binary. The application owns `DATABASE_URL`, secrets, precedence, rendering, logging, and process exit codes. The executable must carry the exact embedded plan shipped with the service artifact.
 
+## Guard startup with the same plan
+
+The rule is one sentence: the service binary refuses to serve until the database carries the complete plan that binary expects.
+
+The deployment job and the service share one plan value, so the boot check is a two-line addition:
+
+```haskell
+result <- missingMigrations defaultRunOptions provider servicePlan
+case result of
+  Right handshake | handshakePassed handshake -> startService
+  Right handshake -> fail ("refusing startup: " <> show handshake)
+  Left err -> fail ("migration handshake failed: " <> show err)
+```
+
+`missingMigrations` is a read-only status query, so every replica may call it. `StartupHandshake` carries `pendingMigrations` in plan order and `ledgerIssues` for checksum, position, kind, gap, status, and unknown-row problems; `handshakePassed` requires both empty. This is what closes the window where a replica starts before the deployment job reaches its database.
+
 ## Related Patterns
 
 - [The pg-migrate Model](./pg-migrate-model.md)
 - [Migration Authoring](./authoring.md)
 - [Migration Operations](./operations.md)
+- [Runtime assembly](../keiro/runtime-assembly.md)
