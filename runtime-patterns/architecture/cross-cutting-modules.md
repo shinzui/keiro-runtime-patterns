@@ -2,7 +2,7 @@
 type: Standard
 title: "Cross-Cutting Module Allowlist"
 description: "The closed allowlist of technical-layer modules and the domain-vs-technology division heuristic"
-timestamp: 2026-07-22T11:39:26-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-cross-cutting-modules
 tags: [architecture, cross-cutting-modules]
 status: current
@@ -23,6 +23,8 @@ Most code belongs to a domain-concept vertical. The modules below are the narrow
 `<Service>.Migrations` composes the service migration plan, and `<Service>.Migrations.New` implements the migration-file scaffold. They live in `<service>-migrations`, not in core.
 
 `<Service>.Diagrams` renders Mermaid lifecycle diagrams from the domain transducers. It backs the diagrams executable and its drift-check suite; it is real shared infrastructure, not a placeholder namespace.
+
+`<Service>.DomainBindings` is permitted only when a consumer-owned mapped type genuinely spans several domain concepts. A concept-owned mapping stays in `<Service>.<Concept>.Bindings`. Both modules are hand-owned and live in core; generated `Structural.Shape.*` and `StructuralProjections` modules remain below the generated root. Do not create `<Service>.KeiroBindings` as a catch-all for unrelated types.
 
 ## Deployable-Role Allowlist
 
@@ -60,3 +62,4 @@ The allowlist is closed by design. Adding another technical namespace is an arch
 - [Vertical-slice modules](vertical-slice-modules.md)
 - [Extended node verticals](extended-node-verticals.md)
 - [Messaging patterns](../messaging/overview.md)
+- [Brownfield Keiro adoption](../keiro/brownfield-adoption.md)

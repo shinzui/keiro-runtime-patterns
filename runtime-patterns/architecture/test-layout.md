@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Test Layout"
-description: "The per-package test-suite standard: four core suites, vertical Spec modules, migrations test-support"
-timestamp: 2026-07-22T11:42:26-07:00
+description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -19,6 +19,8 @@ The baseline comes from danwa's six-package structure; services using keiro-dsl'
 `<service>-core-test`, under `test/`, is the ordinary core smoke and unit suite.
 
 `<service>-core-domain`, under `test-domain/`, is a deliberately small executable driver rather than a Tasty tree. It concatenates every aggregate's generated `harnessAssertions`, prints each result, and exits with failure if any assertion is false. Its only dependencies are `base` and `<service>-core`, so domain validation never waits for PostgreSQL.
+
+When structural mappings exist, those harness assertions also cover both `StructuralBinding` laws, deterministic fixture labels and branch coverage, declared missing/default/null/unknown-field policy, generated field-witness agreement, and forward-versus-replay equality over the final vertex and every register. Opaque mappings receive boundary round trips only; never label them structurally covered.
 
 `<service>-core-diagrams`, under `test-diagrams/`, uses Tasty to assert that the generated Mermaid lifecycle documentation has no stale diagrams and that every rendered diagram passes keiki's structural validation. This suite keeps documentation derived from transducers in sync with executable behavior.
 
@@ -58,6 +60,12 @@ Keiro-runtime-jitsurei's hospital-capacity package demonstrates six focused suit
 
 Use the service name as the cabal prefix, for example `<service>-dsl-test` and `<service>-contract-test`. Specialized suites augment the four core baselines and the package suites; they do not justify collapsing the six package boundaries.
 
+## Keep Brownfield Codec Evidence Out Of Production Modules
+
+A brownfield migration adds a temporary or retained `<service>-codec-migration` test or executable owned by core. Generate its comparison module explicitly with `--codec-comparison TYPE --comparison-out FILE`, compile it beside an explicit historical codec, and feed it sanitized production goldens. Require canonical JSON parity, matching decode outcomes, and complete historical/typed branch coverage; otherwise add a schema version and upcaster.
+
+The comparison module is excluded from ordinary production manifests and scaffold records. It proves only the sampled historical corpus and must not become a runtime codec selector or fallback. Keep the captured goldens and report provenance as long-lived compatibility evidence even if the executable is later retired.
+
 ## Database Isolation Rule
 
 No test opens a developer or shared database. Core, server, and worker integration suites receive their connection string only from `<service>-migrations:test-support`, which installs the same complete migration plan used by the service. This makes schema ownership executable and ensures tests fail when the runtime and migration package disagree.
@@ -69,3 +77,4 @@ No test opens a developer or shared database. Core, server, and worker integrati
 - [Migration testing](../migrations/testing.md)
 - [Keiki build-time validation](../keiki/build-time-validation.md)
 - [Kiroku transactions and projections](../kiroku/transactions-and-projections.md)
+- [Brownfield Keiro adoption](../keiro/brownfield-adoption.md)

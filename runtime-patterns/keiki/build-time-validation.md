@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "Build-Time Validation of Keiki Transducers"
-description: "Asserting transducers are well-formed in CI with validateTransducer"
-timestamp: 2026-07-22T09:35:21-07:00
+description: "Asserting transducers and typed field projections are well-formed in CI with validateTransducer"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-build-time-validation
 tags: [keiki, build-time-validation]
 status: current
@@ -16,7 +16,7 @@ Keiki can prove important replay and transition properties before any event is s
 
 ## Start With `validateTransducer`
 
-`validateTransducer` runs seven default-on checks over the `HsPred` carrier without starting z3. A well-formed aggregate or orchestrator returns no warnings:
+`validateTransducer` runs seven configurable default-on checks plus unconditional typed-projection checks over the `HsPred` carrier without starting z3. A well-formed aggregate or orchestrator returns no warnings:
 
 ```haskell
 import Keiki.Core (defaultValidationOptions, validateTransducer)
@@ -58,7 +58,7 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 
 ## Repair Each Structured Warning
 
-`TransducerValidationWarning` has eight constructors. The first seven participate in the default contract; `OpaqueGuard` appears only when its audit is enabled.
+`TransducerValidationWarning` has eleven constructors in Keiki 0.4. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
 
 - `HiddenInput { tvwEdge, tvwInCtor, tvwMissingSlots, tvwDetail }` means an edge consumes command information that its output does not emit. Add the missing fields to the private event or stop reading them.
 - `HeadUnrecoverable { tvwEdge, tvwInCtor, tvwTailOnlySlots, tvwDetail }` means a later event in a multi-event edge carries a consumed field that the first event lacks. Streaming replay inverts only the head event, so move every replay-critical field onto that event.
@@ -68,6 +68,9 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 - `NondeterministicPair { tvwSource, tvwEdgeA, tvwEdgeB, tvwInCtor, tvwDetail }` means two outgoing guards can hold for one command. Make them mutually exclusive; the runtime witness of this defect is `AmbiguousEdges`.
 - `PossiblyDeadEdge { tvwEdge, tvwDetail }` means the source vertex is structurally unreachable or the guard is statically unsatisfiable. Remove the edge or repair its source and guard.
 - `OpaqueGuard { tvwEdge, tvwDetail }` means the guard contains a `TApp` closure the symbolic analyses cannot inspect. Review and replace it with structural predicates, scalar facts, or an application-layer invariant.
+- `ProjectionResultUnsupported { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionResultType, tvwDetail }` means a projected result lacks symbolic equality support. Expose a supported scalar or keep the predicate outside the transducer.
+- `ProjectionOrderingUnsupported { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionResultType, tvwDetail }` means the projected field supports equality but not ordered comparison. Use equality, expose an orderable scalar, or move the ordering decision outward.
+- `ProjectionOutsideGuard { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionLocation, tvwDetail }` means a projection appears in an update or output. Copy the whole owner or an ordinary scalar term there; projections are guard-only.
 
 ## Know What The Pure Determinism Pass Proves
 
@@ -77,7 +80,7 @@ This direction has no false positives: every `NondeterministicPair` it reports i
 
 ## Audit Opaque Guards Explicitly
 
-Turning on `warnOpaqueGuards` does not run an isolated check; it adds the advisory audit to the same seven defaults. Filter for `OpaqueGuard` when you want only that inventory:
+Turning on `warnOpaqueGuards` does not run an isolated check; it adds the advisory audit to the same default and unconditional checks. Filter for `OpaqueGuard` when you want only that inventory:
 
 ```haskell
 opaqueGuards =
@@ -90,6 +93,12 @@ opaqueGuards =
 ```
 
 See [Collections and Opaque Guards](./collections-and-opaque-guards.md) for the sound alternatives to collection-content closures.
+
+## Treat Field Projections As Structural, Not Opaque
+
+A valid `TFieldProj` is visible to the symbolic translator, so the opt-in opaque audit does not flag it. An input-based projection still counts as an input read and requires the matching constructor guard. Keiki constrains projection variables from concrete owners when checking a supplied execution, but a satisfiable symbolic result is not proof that an arbitrary consumer-owned record can be reconstructed.
+
+Generated Keiro witnesses add schema provenance and agreement tests; hand-written witnesses must be checked with `fieldWitnessAgrees`. See [Typed Field Projections](typed-field-projections.md).
 
 ## Escalate To The Solver For Exact Answers
 
@@ -136,3 +145,4 @@ describe "Keiki well-formedness" do
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) shows the runtime failure surface the replay-safety checks prevent.
 - [Diagnosing Rejected Commands](./diagnosing-rejected-commands.md) covers the forward-execution counterpart to build-time determinism.
 - [Collections and Opaque Guards](./collections-and-opaque-guards.md) explains how to eliminate or audit opaque predicates.
+- [Typed Field Projections](./typed-field-projections.md) defines the guard-only projection boundary and witness laws.

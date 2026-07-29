@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Vertical-Slice Modules"
-description: "The authoritative Generated.* + Holes vertical-slice module convention per domain concept"
-timestamp: 2026-07-22T11:39:26-07:00
+description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -33,6 +33,19 @@ An aggregate is one event-sourced consistency boundary. Its standard module ring
 
 The generated ring describes checked structure. `Holes` contains decisions: for danwa's Conversation aggregate, that is the keiki transducer plus `applyConversations`, the transaction that folds recorded events into query tables. `ReadModel` owns persistence shapes and statements without hiding domain decisions in generated code.
 
+## Shared Structural Mapping Modules
+
+Consumer-owned mapped types add context-wide modules in the core package:
+
+| Module | Owner | Purpose |
+|---|---|---|
+| `<GeneratedRoot>.Structural.Shape.<Type>` | generated | private wire representation derived from the checked mapping |
+| `<GeneratedRoot>.StructuralProjections` | generated | canonical Keiki 0.4 `FieldWitness` values for eligible scalar fields |
+| the binding module named by the declaration | hand, create-once | total `StructuralBinding`, deterministic fixtures, and any mapped-register initial |
+| `<GeneratedRoot>.Structural.CodecCompare.<Type>` | generated, migration tests only | explicit historical-codec comparison runner requested during brownfield migration |
+
+These modules are shared by every aggregate that uses the mapped type, so do not duplicate them inside one concept ring. The hand-owned binding module may sit under a domain concept when that concept owns the type or under a service-level domain namespace when several concepts share it. It stays in core and never inside the generated namespace.
+
 ## The Generated-Code Firewall
 
 Every generated module lives below a `Generated` path segment. Its module header contains this exact banner immediately before the `module` line, after any language pragmas:
@@ -44,7 +57,7 @@ module Danwa.Conversation.Generated.Domain where
 
 The scaffolder uses the banner as an overwrite guard. Never remove it from a generated module, never add it to a hand-owned module, and never edit the generated module directly. Change `domain/<service>.keiro` and scaffold again.
 
-There is exactly one create-once, hand-owned `Holes` module per aggregate. The scaffolder creates it only when absent and does not replace it on later runs. Other hand-owned modules sit directly below `<Service>.<Concept>` without another layer.
+There is exactly one create-once, hand-owned `Holes` module per aggregate. The scaffolder creates it only when absent and does not replace it on later runs. Structural binding modules are also create-once, but they are declared type owners rather than extra aggregate holes. Other hand-owned modules sit directly below `<Service>.<Concept>` without another layer.
 
 ```haskell
 -- CORRECT: domain decisions live in the one hand-owned hole.
@@ -77,3 +90,4 @@ The parallel hand modules retained by keiro-runtime-jitsurei—such as `Transduc
 - [Cross-cutting modules](cross-cutting-modules.md)
 - [Worked Conversation example](worked-example-conversation.md)
 - [Keiro-dsl adoption](../keiro/dsl-adoption.md)
+- [Brownfield Keiro adoption](../keiro/brownfield-adoption.md)

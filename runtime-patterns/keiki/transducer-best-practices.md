@@ -2,7 +2,7 @@
 type: Standard
 title: "Keiki Transducer Best Practices"
 description: "Core rules for authoring Keiki transducers with the builder DSL"
-timestamp: 2026-07-22T09:45:46-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-transducer-best-practices
 tags: [keiki, transducer-best-practices]
 status: current
@@ -169,10 +169,27 @@ are only equality-checked against the remaining expected queue. Tail-only covera
 `HeadUnrecoverable`. See [Structured Replay and Hydration](./structured-replay-and-hydration.md)
 for `reconstituteEither`, `replayEvents`, and the structured failure surface.
 
+## Project Decision Scalars Without Flattening Rich Values
+
+Keiki 0.4 can inspect an eligible scalar inside a consumer-owned record with a typed
+`FieldWitness`. Use `regProj` for a record stored directly in a register and `inpProj` for a
+record carried directly by the matched command constructor. Prefer Keiro-dsl's generated
+`StructuralProjections` witnesses when the owner comes from a `mapped structural` declaration.
+
+This is a guard-only feature. Copy the whole value in register updates and private events so
+replay keeps its ordinary invertible contract. A projection must be total, have a supported
+symbolic result type, and start at a direct owner; it cannot represent a nested chain,
+collection query, partial getter, or arbitrary computed base.
+
+Keep an explicit scalar register instead when the fact drives much of the lifecycle or a solver
+must reconstruct a complete witness. See [Typed Field Projections](typed-field-projections.md)
+for the choice, generated-witness workflow, and composition boundary.
+
 ## Add Build-Time Validation Tests For Every Transducer
 
 Every service test suite should assert that each aggregate is well-formed. Prefer the
-umbrella check `validateTransducer`, which runs seven default-on checks and is pure (no z3):
+umbrella check `validateTransducer`, which runs seven configurable default-on checks plus
+unconditional projection-integrity checks and is pure (no z3):
 
 ```haskell
 import Keiki.Core (validateTransducer, defaultValidationOptions)
@@ -184,10 +201,10 @@ testKeikiValidation = do
 ```
 
 Each entry in the result is a structured `TransducerValidationWarning s` you can
-pattern-match on. The eight constructors are `HiddenInput`, `HeadUnrecoverable`,
-`InversionAmbiguity`, `UnguardedInputRead`, `StateChangingEpsilon`, `NondeterministicPair`,
-`PossiblyDeadEdge`, and the opt-in `OpaqueGuard`; each names the offending edge or edge pair.
-Fix the model rather than suppressing a warning.
+pattern-match on. Keiki 0.4 has eleven constructors: the original seven default warning
+families, opt-in `OpaqueGuard`, and `ProjectionResultUnsupported`,
+`ProjectionOrderingUnsupported`, and `ProjectionOutsideGuard`. Each names the offending edge
+or edge pair. Fix the model rather than suppressing a warning.
 
 Keiro's `mkEventStream` runs this same umbrella at service startup and returns `Left warnings`
 for any finding. It force-enables the head-recoverability and state-changing-epsilon checks at
@@ -414,8 +431,10 @@ timers around a keiki transducer. The complete hosted pattern will be documented
 - Use readable Keiki predicate and arithmetic operators (and the `B.requireGt`-style verbs
   to dodge any lens operator clash).
 - Ensure emitted private events carry every command field read by guards or updates.
-- Add a `validateTransducer defaultValidationOptions transducer == []` test covering all seven
-  default-on checks.
+- Add a `validateTransducer defaultValidationOptions transducer == []` test covering every
+  default and unconditional check.
+- When a rich consumer-owned value stays whole, use a generated typed field projection only
+  for eligible guard scalars; keep updates and outputs whole-value structural terms.
 - If the aggregate guards on collection contents through a `TApp`, run the
   `warnOpaqueGuards = True` audit and confirm you understand each `OpaqueGuard`.
 - Add command tests for rejected guards and accepted transitions.
@@ -428,6 +447,7 @@ timers around a keiki transducer. The complete hosted pattern will be documented
 ## Related Patterns
 
 - [Build-Time Validation](./build-time-validation.md) is the complete warning and solver guide.
+- [Typed Field Projections](./typed-field-projections.md) keeps decisions over consumer-owned values structural.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) turns replay failures into actionable diagnostics.
 - [Checked Composition](./checked-composition.md) defines safe aggregate and orchestrator boundaries.
 - [Event Schema Evolution](./event-schema-evolution.md) keeps persisted private-event JSON compatible.

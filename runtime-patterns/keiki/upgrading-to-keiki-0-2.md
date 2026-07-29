@@ -2,7 +2,7 @@
 type: Guide
 title: "Upgrading to Keiki 0.2"
 description: "Migration notes for keiki 0.2: noEmit, new validation warnings, snapshot-hash change, Decider removal"
-timestamp: 2026-07-22T09:39:08-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-upgrading-to-keiki-0-2
 tags: [keiki, upgrading-to-keiki-0-2]
 status: current
@@ -80,7 +80,7 @@ The release facts in this guide match keiki `0.2.0.0`, released 2026-07-13 and t
 ## Related Patterns
 
 - [Keiki Transducer Best Practices](./transducer-best-practices.md) is the post-migration authoring standard.
-- [Build-Time Validation](./build-time-validation.md) documents all eight warning constructors and the solver contract.
+- [Build-Time Validation](./build-time-validation.md) documents the current warning vocabulary and solver contract.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) replaces opaque hydration failure with exact diagnostics.
 - [Event Schema Evolution](./event-schema-evolution.md) covers the new codec options and compatible evolution moves.
 - [Checked Composition](./checked-composition.md) covers the 0.2 alignment and poison-provenance checks.

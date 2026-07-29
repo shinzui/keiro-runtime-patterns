@@ -11,7 +11,7 @@
 
 - [Cross-Cutting Module Allowlist](cross-cutting-modules.md) - The closed allowlist of technical-layer modules and the domain-vs-technology division heuristic
 - [Six Packages Per Deployed Service](service-packages.md) - The six-package split standard for deployed keiro services and its dependency rules
-- [Specification And Scaffolding](spec-and-scaffolding.md) - Placing the .keiro spec at domain/<service>.keiro and running keiro-dsl scaffold idempotently
-- [Test Layout](test-layout.md) - The per-package test-suite standard: four core suites, vertical Spec modules, migrations test-support
-- [Vertical-Slice Modules](vertical-slice-modules.md) - The authoritative Generated.* + Holes vertical-slice module convention per domain concept
+- [Specification And Scaffolding](spec-and-scaffolding.md) - Placing the .keiro source of truth, declaring consumer mappings, and running check/scaffold/conformance idempotently
+- [Test Layout](test-layout.md) - The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence
+- [Vertical-Slice Modules](vertical-slice-modules.md) - The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention
 

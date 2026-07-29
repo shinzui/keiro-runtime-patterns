@@ -1,8 +1,8 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, resource-effect, silent-workflow-failure, and bring-your-own Kafka traps"
-timestamp: 2026-07-23T16:55:16-07:00
+description: "Shared-stream, global-lock, structural-mapping, codec-authority, silent-workflow-failure, and bring-your-own Kafka traps"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -10,7 +10,7 @@ status: current
 
 # Keiro gotchas
 
-**Six traps that cost real debugging time.**
+**Eight traps that cost real debugging time.**
 
 This checklist captures cross-cutting runtime constraints that are easy to miss when reading one subsystem at a time.
 
@@ -44,11 +44,23 @@ Alert on `ResumeSummary.failed` and recover with `resurrectFailedWorkflow`, neve
 
 Restore the missing rung or deduplicate the conflicting sources instead. `mkEventStreamUnchecked` is for tests and emergency forensics, never for getting a deployment out the door.
 
+## Structural Does Not Mean Fallible Validation
+
+A `StructuralBinding domain shape` must convert every valid generated shape to the consumer type and back. If construction can reject, normalize away information, or depend on an invariant absent from the shape, the declaration is not structural. Model the invariant in the checked shape or declare the boundary `mapped opaque`.
+
+Finite fixture laws are evidence against mistakes, not a way to bless a partial conversion. See [brownfield Keiro adoption](brownfield-adoption.md).
+
+## Generated Event Codecs Do Not Own Snapshot JSON
+
+For a structural mapping, the `.keiro` declaration and generated codec are the only authority for current private-event JSON. Do not retain the consumer codec as a runtime fallback. Mapped register snapshots are different: they remain a consumer-JSON cache boundary whose mapping and fold fingerprints decide reuse.
+
+Conflating the two either creates dual event interpretations or overstates what the generated mapping proves. Event history is durable truth; a snapshot miss should fall back to replay.
+
 ## Kafka is bring-your-own
 
 Keiro deliberately has no `hw-kafka-client` dependency. `outboxRowToKafkaRecord` and `integrationEventToKafkaRecord` in `Keiro.Outbox.Kafka` produce a transport-neutral `KafkaProducerRecord`; the application owns the actual producer, consumer, and broker/group configuration.
 
-Keep transport configuration in keiro-dsl hole kind 8. The forthcoming messaging standards define the publication and consumption topology.
+Keep transport configuration in keiro-dsl hole kind 8. The [messaging standards](../messaging/overview.md) define the publication and consumption topology.
 
 ## Related Patterns
 
@@ -56,3 +68,4 @@ Keep transport configuration in keiro-dsl hole kind 8. The forthcoming messaging
 - [Keiro-dsl adoption](dsl-adoption.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Workflow reliability and recovery](workflow-reliability.md)
+- [Brownfield Keiro adoption](brownfield-adoption.md)

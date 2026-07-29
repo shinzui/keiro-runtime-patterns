@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — 2026-07-22
+Accepted — 2026-07-22; broadened for structural mapping modules — 2026-07-28
 
 ## Context
 
@@ -12,7 +12,7 @@ The service fleet needs one structure that keeps generated contracts replaceable
 
 Use exactly six packages for a deployed keiro service: `<service>-core`, `-api`, `-server`, `-workers`, `-migrations`, and `-client`. Colocate all code for a domain concept under `<Service>.<Concept>.*` across those packages.
 
-Within core, keiro-dsl owns an aggregate's `<Concept>.Generated.*` ring and a developer owns one `<Concept>.Holes` module. Each first-class extended node follows its released scaffold contract: for example, a read model owns `<ReadModel>.Generated.{ReadModel,ReadModelHarness,ReadModelTable}` and the developer owns `<ReadModel>.ReadModelHoles`. Preserve the generator's node-derived namespace rather than relocating those files into the aggregate vertical.
+Within core, keiro-dsl owns an aggregate's `<Concept>.Generated.*` ring and a developer owns one `<Concept>.Holes` module. Structural consumer mappings add generated context-wide `Structural.Shape.*` and `StructuralProjections` modules plus create-once hand-owned binding, fixture, and initial modules at the declared type owner. Each first-class extended node follows its released scaffold contract: for example, a read model owns `<ReadModel>.Generated.{ReadModel,ReadModelHarness,ReadModelTable}` and the developer owns `<ReadModel>.ReadModelHoles`. Preserve the generator's node-derived namespace rather than relocating those files into the aggregate vertical.
 
 Reject the earlier flat generated layout and reject parallel hand-written `Transducer`, `Projection`, `EventStream`, or `CommandProcessor` modules that duplicate the generated ring. A one-package service remains acceptable only for explicitly labeled teaching and example repositories.
 
@@ -22,6 +22,7 @@ Reject the earlier flat generated layout and reject parallel hand-written `Trans
 - First-class DSL nodes remain independently navigable and keep their node-specific generated/hand-owned firewall.
 - Core, API, server, workers, migrations, and client retain separate dependency budgets.
 - A concept remains navigable across packages, while the closed cross-cutting allowlist prevents technical-layer sprawl.
+- Shared mapped types may use one `<Service>.DomainBindings` module; concept-owned mappings stay in the owning vertical, and catch-all technology binding namespaces are rejected.
 - The service blueprint must emit this structure and must not copy the legacy alternatives from either reference repository.
 
 ## Alternatives Considered
@@ -39,3 +40,4 @@ Reject the earlier flat generated layout and reject parallel hand-written `Trans
 - [Specification and scaffolding](../../runtime-patterns/architecture/spec-and-scaffolding.md)
 - [Extended node verticals](../../runtime-patterns/architecture/extended-node-verticals.md)
 - [ADR 0002: adopt keiro-dsl](0002-adopt-keiro-dsl-for-contracts-and-evolution.md)
+- [Brownfield Keiro adoption](../../runtime-patterns/keiro/brownfield-adoption.md)

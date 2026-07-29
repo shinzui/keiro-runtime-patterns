@@ -2,7 +2,7 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-07-23T04:08:00Z
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -19,7 +19,13 @@ need the surrounding rules.
   [architecture overview](architecture/overview.md) for module and test layout.
 - **Defining an aggregate:** begin with
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
-  apply the [build-time validation gate](keiki/build-time-validation.md).
+  apply the [build-time validation gate](keiki/build-time-validation.md). When
+  guards inspect fields of rich consumer-owned records, use the
+  [typed field-projection pattern](keiki/typed-field-projections.md).
+- **Adopting Keiro in an existing service:** follow
+  [brownfield Keiro adoption](keiro/brownfield-adoption.md) to inventory stored
+  bytes, map existing types, compare codecs, prove replay, and cut over without
+  introducing a second wire authority.
 - **Assembling the runtime:** follow
   [runtime assembly](keiro/runtime-assembly.md) for resource acquisition,
   validated streams, handlers, workers, and startup order.
@@ -32,7 +38,8 @@ need the surrounding rules.
   journaled sequence rather than event-driven orchestration.
 - **Evolving persisted events:** follow
   [event-schema evolution](keiki/event-schema-evolution.md) for wire kinds,
-  versions, defaults, and upcasters.
+  versions, defaults, and upcasters, then apply the
+  [Keiro evolution gates](keiro/evolution-and-rollout.md).
 - **Evolving database schemas:** follow
   [migration authoring](migrations/authoring.md), then use the
   [migration operations runbook](migrations/operations.md) for verification and

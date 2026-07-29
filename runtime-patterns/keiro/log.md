@@ -1,5 +1,13 @@
 # keiro Update Log
 
+## 2026-07-28
+* **Update**: Gotchas now cover partial structural bindings, dual event codec authority, and the snapshot boundary
+* **Update**: Evolution guidance now uses the six-layer gate model and six-surface compatibility vectors
+* **Update**: Runtime assembly now places structural binding evidence before validated stream construction
+* **Update**: Overview now identifies the current Keiro 0.4 source contract and public release availability
+* **Update**: DSL adoption now covers structural and opaque mappings, binding skeletons, coverage, and compatibility-vector gates
+* **Added**: Brownfield adoption standardizes historical byte capture, structural bindings, codec comparison, replay audit, and cutover
+
 ## 2026-07-23
 * **Added**: Workflow reliability and recovery — lease sizing, the failure budget, `resurrectFailedWorkflow`, and the durable wake-source lifecycle guarantees
 * **Added**: Evolution gates and rollout ordering — the five-gate ladder, the replay-impact verdict and targeted audit, and durable-value rollout rules

@@ -1,6 +1,6 @@
 # Guide
 
-- [Build-Time Validation of Keiki Transducers](build-time-validation.md) - Asserting transducers are well-formed in CI with validateTransducer
+- [Build-Time Validation of Keiki Transducers](build-time-validation.md) - Asserting transducers and typed field projections are well-formed in CI with validateTransducer
 - [Diagnosing Rejected Commands with `stepEither`](diagnosing-rejected-commands.md) - Using stepEither and StepFailure to learn why a command was rejected
 - [Keiki Diagram Documentation](diagram-docs.md) - Generating Mermaid diagrams, atlas sections, and edge inspectors from transducers
 - [Event Schema Evolution](event-schema-evolution.md) - Evolving persisted event JSON with in-band versions, pinned kinds, and upcaster chains
@@ -15,8 +15,9 @@
 
 # Pattern
 
-- [Checked Composition](checked-composition.md) - Wiring transducers with composeChecked, alternative, and the feedback1 stateless-only trap
+- [Checked Composition](checked-composition.md) - Wiring transducers with composeChecked, structural projection boundaries, alternative, and the feedback1 stateless-only trap
 - [Collections and Opaque Guards](collections-and-opaque-guards.md) - Modeling collections without losing solver verification through opaque guards
+- [Typed Field Projections](typed-field-projections.md) - Using Keiki 0.4 field witnesses to inspect consumer-owned values without opaque guards or flattened domain models
 
 # Standard
 

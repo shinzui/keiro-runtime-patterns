@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "Keiro-dsl adoption"
-description: "When to adopt keiro-dsl, its generated-code firewall, holes, CLI, and evolution gate"
-timestamp: 2026-07-23T16:55:16-07:00
+description: "When to adopt keiro-dsl, including brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -10,15 +10,15 @@ status: current
 
 # Keiro-dsl adoption
 
-**Adopt keiro-dsl for cross-node contracts and evolution safety; skip it only when there is nothing substantive for it to check.**
+**Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain types.**
 
 This guide decides when a service should own a checked `.keiro` specification and where generated structure stops and hand-written domain logic begins.
 
 ## Apply the adoption rule
 
-Adopt keiro-dsl when a service has more than one node family, any integration surface such as intake, emit, or queues, or expected schema/workflow evolution. The checker and evolution gate are the payoff, and their value grows with every contract edge.
+Adopt keiro-dsl when a service has more than one node family, any integration surface such as intake, emit, or queues, expected schema/workflow evolution, existing private-event history, or a consumer-owned value whose wire shape and decision fields must be checked. The checker, generated conformance harness, and evolution gate are the payoff, and their value grows with every durable contract edge.
 
-A trivial single-aggregate service may hand-write against the public API only when it has no queues, integration contracts, or workflow evolution. Revisit that choice as soon as a second node family or evolution concern appears; `keiro-dsl new` and `check` make retrofitting cheap.
+A trivial single-aggregate service may hand-write against the public API only when it has no queues, integration contracts, mapped persisted values, existing history, or expected evolution. Revisit that choice as soon as any of those appear. Structural mappings make retrofit adoption possible without replacing the service's Haskell domain types with generated equivalents.
 
 Keiro-dsl is a build-time parser, checker, scaffolder, harness emitter, and evolution differ—not a runtime interpreter. The `keiro-dsl` library has no dependency on `keiro`; generated and conformance code use the same public runtime APIs as hand-written services.
 
@@ -33,6 +33,7 @@ The grammar covers aggregates and upcasters, projections and snapshots, process 
 - snapshot codec identity, live shape hashes, status-map totality, and contiguous upcasters;
 - duplicate and incomplete aggregate upcaster chains, and the mutually exclusive `retiring event` marker;
 - event retirement discipline: a deprecated event with no replay-only emitter, and a replay-only transition that emits nothing or has no live sibling;
+- structural and opaque consumer mappings: total resolved type graphs, canonical and binding identities, injective wire policy, register initials, and complete consumer obligations;
 - workflow signal/await matching, unique labels, and terminal `continueAsNew`;
 - resolved cross-node references and rejection handling that never marks `CommandAmbiguous` benign.
 
@@ -44,9 +45,13 @@ The rule is absolute: **never edit a generated module**. Change the specificatio
 
 Generated modules carry `-- @generated` and are overwritten on every scaffold. `HoleStub` modules are create-once and skipped thereafter. The `FirewallSurface` checked by `firewallBreaches` prevents generated modules from containing keiki decision operators and builders such as `.==`, `./=`, `.||`, `lit`, or the `B` builder qualifier. Domain decide logic is always hand-owned, whether or not the service adopts the DSL.
 
-The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Scaffolding reports stale paths but never deletes them; review stale generated and hand-owned files separately.
+The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Structural mappings additionally emit private `Structural.Shape.*` modules and one `StructuralProjections` facade. Their binding, fixture, and optional register-initial modules are create-once, hand-owned files at the qualified modules named by the mapping declarations.
 
-## Recognize the eight hole kinds
+Scaffolding reports stale paths but never deletes them; review stale generated and hand-owned files separately. It also reports newly required structural binding fields, constructors, fixtures, and initials without parsing or rewriting filled Haskell bodies.
+
+## Recognize Runtime Holes And Mapping Obligations
+
+The established runtime surface has eight hole kinds:
 
 1. Deterministic identifier or string derivation; opaque strategies carry a captured fixture, never only a prose rule.
 2. Failure-to-action disposition, including ack, bounded retry, and dead-letter choices.
@@ -57,11 +62,21 @@ The default layout is `Generated.<Context>.<Node>` with holes under the domain n
 7. Emit optionality, made total with an explicit `_ => skip` catch-all.
 8. Deployment configuration such as Kafka brokers, `groupId`, `offsetReset`, metrics, shards, and runtime tuning.
 
+Structural mappings add a different kind of hand-owned obligation: a total `StructuralBinding`, deterministic `FixtureCases`, and a register initial when the mapped type is stored. These are not a ninth runtime escape hatch. They are the typed boundary between consumer-owned domain values and the generated private wire shape, and the generated harness tests both directions.
+
 ## Use only named escape hatches
 
 Use `ResolveHole` when a router needs a typed hand-owned resolver instead of a read model. Keep opaque queue group-key derivation hand-owned and capture its fixture in the spec. Implement PGMQ dispatch fan-out and its raw-SQL dedup predicate in typed holes. Leave deployment configuration in hole kind 8.
 
 `--force-generated-overwrite` is a repair footgun: it bypasses only the safety refusal for an existing generated path that lacks the banner. It can clobber a hand-edited file and is permitted only after confirming that file is disposable.
+
+## Map Consumer-Owned Values Without A Parallel Domain Model
+
+Use `mapped structural` when the checked declaration can own the complete private-event JSON shape and conversion between the generated shape and application type is total in both directions. The declaration owns wire keys, tags, presence, nullability, defaults, unknown-field policy, canonical type identity, and binding version. The Haskell `StructuralBinding` owns construction and destruction only.
+
+Use `mapped opaque` when the consumer codec must remain authoritative or conversion can reject a valid declared shape. Opaque fixtures document and test the boundary but do not expose nested compatibility or scalar field witnesses.
+
+Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
 
 ## Use the complete CLI loop
 
@@ -70,23 +85,27 @@ Run these commands from the Git repository containing the specification:
 ```sh
 keiro-dsl new KIND
 keiro-dsl parse FILE
-keiro-dsl check FILE [--emit]
+keiro-dsl check FILE [--emit] [--explain-bindings] \
+  [--coverage-report FILE] [--fail-on-opaque]
 keiro-dsl scaffold FILE --out DIR \
   [--module-root PREFIX] [--collocate] [--force-generated-overwrite] \
-  [--goldens DIR]
+  [--goldens DIR] \
+  [--codec-comparison TYPE --comparison-out FILE]
 keiro-dsl diff FILE --since GIT-REF \
-  [--emit-goldens DIR] [--replay-impact-out FILE]
+  [--emit-goldens DIR] [--replay-impact-out FILE] [--explain] \
+  [--report-out FILE] [--gate SURFACE] \
+  [--coverage-report FILE] [--fail-on-opaque-increase]
 ```
 
 - `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
 - `parse` parses and pretty-prints a normalized specification.
-- `check` exits non-zero on errors and optionally emits the normalized spec.
-- `scaffold` validates, then emits generated modules and creates missing typed holes. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes.
-- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING`. `--emit-goldens` captures old-shape fixtures for event version bumps while both specifications still exist, never overwriting an existing file. `--replay-impact-out` writes the machine-readable replay verdict that drives the audit.
+- `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
+- `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
+- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
 
 `diff` resolves the prior file with `git show`, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, and `ProcessTimerPayloadChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
 
-Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data.
+Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data. For a brownfield migration, capture genuine stored JSON before writing the new declaration and compare the historical and generated codecs explicitly; synthesized fixtures cannot prove a candidate codec agrees with production history.
 
 For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-toolchain.md`.
 
@@ -96,4 +115,6 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 - [Runtime assembly](runtime-assembly.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Durable workflows](durable-workflows.md)
-- The forthcoming architecture standard defines the fleet's `Generated.*` and hole-module placement.
+- [Brownfield Keiro adoption](brownfield-adoption.md)
+- [Typed field projections](../keiki/typed-field-projections.md)
+- [Specification and scaffolding](../architecture/spec-and-scaffolding.md)

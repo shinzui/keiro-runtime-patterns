@@ -2,7 +2,7 @@
 type: Pattern
 title: "Collections and Opaque Guards"
 description: "Modeling collections without losing solver verification through opaque guards"
-timestamp: 2026-07-22T09:35:21-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-collections-and-opaque-guards
 tags: [keiki, collections-and-opaque-guards]
 status: current
@@ -20,6 +20,10 @@ guards actually need, and promote any element with its own identity and lifecycl
 own aggregate. **Storing** a collection is fine and fully verified; **guarding on its
 contents** through a closure silently loses Keiki's verification; and the structural
 collection feature is **deferred**, not coming soon.
+
+Keiki 0.4 typed field projections do not change that ruling. They expose one total scalar
+getter from a direct consumer-owned record in a guard. They do not provide membership,
+quantification, lookup, nested projection chains, or collection updates.
 
 ## Why there is no collection vocabulary (and what was decided)
 
@@ -128,6 +132,7 @@ application layer), the options today are:
 
 ## Related Patterns
 
-- [Build-Time Validation](./build-time-validation.md) explains the seven defaults and the opt-in audit.
+- [Build-Time Validation](./build-time-validation.md) explains the default, projection, and opt-in checks.
+- [Typed Field Projections](./typed-field-projections.md) shows the narrow structural alternative for scalar fields of consumer-owned values.
 - [Keiki Transducer Best Practices](./transducer-best-practices.md) covers whole-collection command fields and replay.
 - [Checked Composition](./checked-composition.md) explains when independent identities belong on separate streams rather than inside one machine.

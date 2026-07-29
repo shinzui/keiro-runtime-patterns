@@ -2,7 +2,7 @@
 type: Standard
 title: "Six Packages Per Deployed Service"
 description: "The six-package split standard for deployed keiro services and its dependency rules"
-timestamp: 2026-07-22T11:39:26-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-service-packages
 tags: [architecture, service-packages]
 status: current
@@ -18,7 +18,7 @@ The package split keeps domain decisions, HTTP types, HTTP execution, background
 
 ### `<service>-core`
 
-This package owns the domain. It contains the custom `Prelude`, `App.Config`, each concept's generated ring, `Holes`, and `ReadModel`, the shared `Postgres.Pool` and `Postgres.Runner`, public `Integration.*` contracts, and `Diagrams` support. It may depend on keiki, kiroku, keiro, hasql, and domain-level libraries, but it depends on no sibling `<service>-*` package. Every other service package may depend on core.
+This package owns the domain. It contains the custom `Prelude`, `App.Config`, each concept's generated ring, `Holes`, and `ReadModel`, generated structural wire shapes and projection witnesses, hand-owned structural bindings and fixtures, the shared `Postgres.Pool` and `Postgres.Runner`, public `Integration.*` contracts, and `Diagrams` support. It may depend on keiki, kiroku, keiro, hasql, and domain-level libraries named by mapped declarations, but it depends on no sibling `<service>-*` package. Every other service package may depend on core.
 
 Danwa realizes this boundary under `danwa-core/src/Danwa/` and exposes the lifecycle-diagram program as the `danwa-diagrams` executable.
 

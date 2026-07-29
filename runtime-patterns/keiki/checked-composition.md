@@ -1,8 +1,8 @@
 ---
 type: Pattern
 title: "Checked Composition"
-description: "Wiring transducers with composeChecked, alternative, and the feedback1 stateless-only trap"
-timestamp: 2026-07-22T09:39:08-07:00
+description: "Wiring transducers with composeChecked, structural projection boundaries, alternative, and the feedback1 stateless-only trap"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-checked-composition
 tags: [keiki, checked-composition]
 status: current
@@ -24,14 +24,17 @@ case composeChecked aggregateTransducer policyTransducer of
   Left warnings -> reportAlignmentWarnings warnings
 ```
 
-`ComposeAlignmentWarning` reports four boundary facts with source locations:
+`ComposeAlignmentWarning` reports five boundary facts with source locations:
 
 - `UnconsumedWireOutput` means an upstream wire constructor has no consuming downstream edge at a reachable vertex.
 - `UnmatchedInCtorExpectation` means a downstream input-constructor expectation has no upstream emission.
 - `FieldArityMismatch` means a downstream field read addresses a position the upstream constructor does not emit.
 - `PoisonedNameInComposition` means a mapped or otherwise poisoned constructor name reached the boundary.
+- `NonStructuralProjectionBoundary` means substitution would turn a typed field projection over a direct owner into opaque application logic, usually because the upstream output is computed or the owner comes from a pending write.
 
-The reachability scan is conservative. Every warning is reviewable evidence of a name or position mismatch, but an empty list is not a proof about opaque guard logic. Keep `validateTransducer` on the resulting machine as a separate replay and determinism gate.
+The reachability scan is conservative. Every warning is reviewable evidence of a structural mismatch, but an empty list is not a proof about opaque guard logic. Keep `validateTransducer` on the resulting machine as a separate replay and determinism gate.
+
+For a projection boundary, move the decision to a side where its owner remains direct, expose the fact as an ordinary scalar, or keep the machines separate. Raw `compose` retains forward behavior by lowering the getter, but it no longer preserves the structural proof obligation that justified the projection.
 
 ## Do Not Compose Across A Non-Invertible Map
 
@@ -75,3 +78,4 @@ In keiki an orchestrator is a transducer, so `composeChecked` can validate a pur
 - [Build-Time Validation](./build-time-validation.md) checks the replay and determinism contract after composition.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) explains the inverse information that poison provenance protects.
 - [Collections and Opaque Guards](./collections-and-opaque-guards.md) gives another reason to split independently identified sub-entities into separate streams.
+- [Typed Field Projections](./typed-field-projections.md) explains the direct-base and guard-only projection contract.

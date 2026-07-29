@@ -62,7 +62,7 @@ fi
 
 okf graph "$bundle_dir" --json \
   | jq -e '
-      (.nodes | length) == 63
+      (.nodes | length) == 65
       and (.edges | length) > 0
       and ([.edges[] as $edge
             | ([.nodes[].id] | index($edge.source)) != null

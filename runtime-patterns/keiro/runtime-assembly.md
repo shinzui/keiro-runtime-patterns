@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Runtime assembly"
-description: "Store acquisition, validated event streams, resource effects, options, and startup order"
-timestamp: 2026-07-23T16:55:16-07:00
+description: "Store acquisition, validated event streams, structural mapping evidence, resource effects, options, and startup order"
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -48,11 +48,19 @@ validatedOrderStream <-
     Left warnings -> failStartup warnings
 ```
 
-Warnings—including head-recoverability, inversion ambiguity, unguarded input reads, and state-changing silent edges—mean the transducer must be corrected. `mkEventStreamOrThrow` is reserved for generated definitions or fixtures with a colocated validation proof. `mkEventStreamUnchecked` skips the durable boundary entirely and is permitted only in tests or emergency forensics, never production wiring.
+Warnings—including head-recoverability, inversion ambiguity, unguarded input reads, state-changing silent edges, unsupported field-projection results, ordered projections over unsupported types, and projections outside guards—mean the transducer must be corrected. `mkEventStreamOrThrow` is reserved for generated definitions or fixtures with a colocated validation proof. `mkEventStreamUnchecked` skips the durable boundary entirely and is permitted only in tests or emergency forensics, never production wiring.
 
 Validation now covers the **event codec** as well as the transducer. Construction is refused when the codec's schema version, event tags, or upcaster chain fail `mkCodec`, so a missing rung or a pair of conflicting sources is caught at startup rather than at the first hydration of an old stream. Hand-written streams get the same fail-fast treatment as generated ones; the generator's own checks are defense in depth, not the only gate.
 
 See [build-time validation](../keiki/build-time-validation.md) for the transducer checks and [evolution gates and rollout ordering](evolution-and-rollout.md) for how this boundary relates to the specification-level gates.
+
+## Compile And Prove Structural Bindings Before Startup
+
+`mkEventStream` validates the assembled codec contract, not the semantic honesty of a consumer-owned `StructuralBinding`. For each `mapped structural` type, compilation and the generated harness must first exercise both binding round trips over deterministic fixtures, the declared JSON policies, projection-witness agreement, and forward-versus-replay equality.
+
+The generated event codec is the sole private-event wire authority. A consumer `ToJSON` or `FromJSON` instance may delegate one way through `encodeViaBinding` or `decodeViaBinding`, but Keiro never delegates structural event encoding back to that instance. Mapped register snapshots remain a separate consumer-JSON cache boundary and are invalidated by the mapping/fold fingerprint when their executable shape changes.
+
+Treat this as pre-startup evidence, not another runtime interpreter. See [brownfield Keiro adoption](brownfield-adoption.md) for the binding and historical-codec gates.
 
 ## Extend defaults through lenses
 
@@ -96,3 +104,4 @@ Registration and worker startup should fail the process rather than leave a part
 - [Keiro gotchas](gotchas.md)
 - [Read models and projections](read-models-and-projections.md)
 - [Migration Operations](../migrations/operations.md)
+- [Brownfield Keiro adoption](brownfield-adoption.md)

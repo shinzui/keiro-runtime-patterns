@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-07-22T09:40:38-07:00
+timestamp: 2026-07-28T19:53:40-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
@@ -10,7 +10,7 @@ status: current
 
 # Keiki Patterns for Keiro Runtime Projects
 
-**Start here for prescriptive keiki 0.2 transducer, replay, validation, composition, and private-event guidance.**
+**Start here for prescriptive Keiki 0.4 transducer, replay, validation, composition, and private-event guidance.**
 
 This corpus is the terse, agent-facing standard for keiki-backed state machines inside keiro services. It covers pure aggregates and orchestrator transducers; the hosted process-manager runtime, durable timers, and cross-service messaging belong to keiro and the messaging standards tracked separately by this initiative.
 
@@ -21,7 +21,8 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 
 ## Focused Guides
 
-- **[Build-Time Validation](./build-time-validation.md)** documents the seven default-on checks, all eight warning constructors, the opaque-guard audit, keiro's reject-on-warning boundary, and solver escalation.
+- **[Build-Time Validation](./build-time-validation.md)** documents the configurable soundness checks, the unconditional projection checks, the opaque-guard audit, Keiro's reject-on-warning boundary, and solver escalation.
+- **[Typed Field Projections](./typed-field-projections.md)** explains when `regProj` and `inpProj` can expose decision scalars from consumer-owned records without flattening the model or losing symbolic checks.
 - **[Structured Replay and Hydration](./structured-replay-and-hydration.md)** covers `reconstituteEither`, resumable `replayEvents`, `InFlight`, and the complete structured failure taxonomy.
 - **[Diagnosing Rejected Commands](./diagnosing-rejected-commands.md)** uses `stepEither` and `StepFailure` to distinguish normal refusal from ambiguous-transition defects.
 - **[Event Schema Evolution](./event-schema-evolution.md)** gives the persisted-JSON playbook for missing-field defaults, stable wire kinds, in-band versions, and complete upcaster chains.
@@ -31,7 +32,14 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - **[Resolving Operator Conflicts](./operator-conflicts.md)** gives three import patterns for keiki's predicate operators alongside `lens` and `generic-lens`.
 - **[Keiki Diagram Documentation](./diagram-docs.md)** generates and validates Mermaid atlases and edge inspectors from executable transducers.
 
-## What Changed In Keiki 0.2.0.0 (2026-07)
+## What Changed Through Keiki 0.4.0.0 (2026-07)
+
+- Keiki 0.4 adds nominal, solver-visible `FieldProjection` witnesses over direct register and matched-input owners. They are guard-only, validated against the symbolic type registry, and designed for schema-derived generators such as Keiro-dsl. See [Typed Field Projections](./typed-field-projections.md).
+- `validateTransducer` now adds three unconditional projection-integrity warnings to the seven configured soundness checks and the opt-in opaque audit. See [Build-Time Validation](./build-time-validation.md).
+- `composeChecked` reports `NonStructuralProjectionBoundary` when composition would lower a structural getter to opaque application logic. See [Checked Composition](./checked-composition.md).
+- Keiki 0.3 introduced `Live` and `ReplayOnly` edge modes so historical events remain invertible after a live guard changes. See [Structured Replay and Hydration](./structured-replay-and-hydration.md).
+
+The Keiki 0.2 hardening remains foundational:
 
 - `validateTransducer defaultValidationOptions` now runs seven soundness checks. Four new replay-safety warnings—`HeadUnrecoverable`, `InversionAmbiguity`, `UnguardedInputRead`, and `StateChangingEpsilon`—make previously latent hydration defects visible, and keiro's `mkEventStream` rejects any warning. See [Build-Time Validation](./build-time-validation.md).
 - Every builder edge body must declare output intent with `emit`, `emitWith`, or `noEmit`. `buildTransducerEither` returns all located builder defects as values. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
@@ -47,3 +55,4 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - [Build-Time Validation](./build-time-validation.md) is the normative acceptance gate.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) is the normative hydration API guide.
 - [Event Schema Evolution](./event-schema-evolution.md) is the normative private-event compatibility guide.
+- [Typed Field Projections](./typed-field-projections.md) is the normative guide for decisions over consumer-owned values.
