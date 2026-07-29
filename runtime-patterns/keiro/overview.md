@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of prescriptive Keiro runtime and DSL standards; start here"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -12,7 +12,7 @@ status: current
 
 **Prescriptive defaults for assembling reliable services on the current Keiro 0.4 source line and Keiki 0.4.**
 
-Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 and 0.3 behavior remains foundational, while the current 0.4 source line adds structural consumer mappings, generated migration evidence, replay-impact targeting, and the Keiki 0.4 field-projection contract.
+Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 and 0.3 behavior remains foundational, while the current 0.4 source line adds composable multi-file service workspaces, structural consumer mappings, generated migration evidence, replay-impact targeting, and the Keiki 0.4 field-projection contract.
 
 Keiki 0.4.0.0 is published and tagged. As of 2026-07-28, Hackage and upstream Keiro tags still expose 0.3.0.0 even though the local 0.4 source and changelogs contain the documented surface. Verify the registry and upstream tags before choosing package bounds; do not claim the structural mapping workflow from a 0.3-only dependency set.
 
@@ -25,6 +25,7 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Runtime assembly](runtime-assembly.md) — acquire resources, validate event streams, and configure options.
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.
 - [Keiro-dsl adoption](dsl-adoption.md) — decide when checked specifications and the evolution gate pay off.
+- [Composable service workspaces](service-workspaces.md) — split complete aggregates across single-owner members while keeping one atomic scaffold and evolution boundary.
 - [Brownfield Keiro adoption](brownfield-adoption.md) — keep existing types and historical wire values while moving to one generated codec authority and a replay-audited cutover.
 - [Command cycle and errors](command-cycle-and-errors.md) — classify command failures and reject ambiguity as a definition bug.
 - [Read models and projections](read-models-and-projections.md) — register consistency contracts, honor async fences, and rebuild safely.

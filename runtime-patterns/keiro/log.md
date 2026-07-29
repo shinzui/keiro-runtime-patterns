@@ -1,5 +1,11 @@
 # keiro Update Log
 
+## 2026-07-29
+* **Update**: Evolution gates now reconstruct historical workspace membership and distinguish ownership and workspace-authority advisories from wire changes
+* **Update**: Brownfield adoption now covers one-member manifests and attributable migration from independent same-context scaffolds
+* **Update**: DSL adoption now treats a single file or composed workspace as the service input and includes workspace evolution advisories
+* **Added**: Composable service workspaces standardizes manifest identity, single-owner composition, whole-service commands, atomic scaffolding, attributable adoption, and historical diffing
+
 ## 2026-07-28
 * **Update**: Gotchas now cover partial structural bindings, dual event codec authority, and the snapshot boundary
 * **Update**: Evolution guidance now uses the six-layer gate model and six-surface compatibility vectors

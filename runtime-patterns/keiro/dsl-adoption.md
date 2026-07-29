@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "Keiro-dsl adoption"
-description: "When to adopt keiro-dsl, including brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
-timestamp: 2026-07-28T19:53:40-07:00
+description: "When to adopt keiro-dsl, including composable service workspaces, brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -12,7 +12,7 @@ status: current
 
 **Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain types.**
 
-This guide decides when a service should own a checked `.keiro` specification and where generated structure stops and hand-written domain logic begins.
+This guide decides when a service should own a checked `.keiro` contract — one file or a composed `.keiro-workspace` — and where generated structure stops and hand-written domain logic begins.
 
 ## Apply the adoption rule
 
@@ -37,7 +37,7 @@ The grammar covers aggregates and upcasters, projections and snapshots, process 
 - workflow signal/await matching, unique labels, and terminal `continueAsNew`;
 - resolved cross-node references and rejection handling that never marks `CommandAmbiguous` benign.
 
-Given the same tool version, specification, and placement options, scaffolding is deterministic; committed conformance modules pin generated output byte-for-byte.
+Given the same tool version, service input, and placement options, scaffolding is deterministic; committed conformance modules pin generated output byte-for-byte. A workspace composes complete same-context members before validation, so cross-member references and conflicts are checked as one service rather than by unrelated invocations.
 
 ## Keep domain decisions behind the firewall
 
@@ -84,26 +84,27 @@ Run these commands from the Git repository containing the specification:
 
 ```sh
 keiro-dsl new KIND
-keiro-dsl parse FILE
-keiro-dsl check FILE [--emit] [--explain-bindings] \
+keiro-dsl parse INPUT
+keiro-dsl check INPUT [--emit] [--explain-bindings] \
   [--coverage-report FILE] [--fail-on-opaque]
-keiro-dsl scaffold FILE --out DIR \
+keiro-dsl scaffold INPUT --out DIR \
   [--module-root PREFIX] [--collocate] [--force-generated-overwrite] \
   [--goldens DIR] \
   [--codec-comparison TYPE --comparison-out FILE]
-keiro-dsl diff FILE --since GIT-REF \
+keiro-dsl diff INPUT --since GIT-REF \
   [--emit-goldens DIR] [--replay-impact-out FILE] [--explain] \
   [--report-out FILE] [--gate SURFACE] \
   [--coverage-report FILE] [--fail-on-opaque-increase]
 ```
 
 - `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
-- `parse` parses and pretty-prints a normalized specification.
+- `INPUT` is either one `.keiro` file or a `.keiro-workspace` manifest. Use the manifest whenever complete aggregates live in separate members; all file-taking commands operate on the composed service.
+- `parse` parses and pretty-prints the normalized service specification.
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
 - `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
 - `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
 
-`diff` resolves the prior file with `git show`, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, and `ProcessTimerPayloadChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
+`diff` resolves the prior input with `git show`, including a workspace's historical manifest and member set, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, and `WorkspaceAuthorityChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
 
 Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data. For a brownfield migration, capture genuine stored JSON before writing the new declaration and compare the historical and generated codecs explicitly; synthesized fixtures cannot prove a candidate codec agrees with production history.
 
@@ -116,5 +117,6 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Durable workflows](durable-workflows.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
+- [Composable service workspaces](service-workspaces.md)
 - [Typed field projections](../keiki/typed-field-projections.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)

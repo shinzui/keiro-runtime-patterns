@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Evolution gates and rollout ordering"
-description: "The six-layer evolution gate model, compatibility vectors, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-07-28T19:53:40-07:00
+description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -19,7 +19,7 @@ This standard governs changing a service that already holds durable data. It def
 The rule is one sentence: each gate answers a question the earlier ones cannot, so none of them substitutes for another.
 
 1. **The Haskell compiler** checks generated imports and exact types, total `StructuralBinding` signatures, create-once hole implementations, and exact nominal `genericStructuralBinding` correspondence.
-2. **`keiro-dsl check` and `diff --since REF`** check one-spec invariants and cross-version change classes. They cover upcaster chains, event retirement, resolved mapped-type graphs, compatibility vectors, fold/decide changes, and named rollout obligations, but cannot inspect hand-written binding or hole bodies.
+2. **`keiro-dsl check` and `diff --since REF`** check one composed service graph and its cross-version change classes. The input may be one `.keiro` file or a `.keiro-workspace` manifest. They cover upcaster chains, event retirement, resolved mapped-type graphs, compatibility vectors, fold/decide changes, and named rollout obligations, but cannot inspect hand-written binding or hole bodies.
 3. **The generated conformance harness and historical codec evidence** exercise the executable transducer, current and old payloads, binding laws, mapping branches, projection witnesses, and forward-versus-replay equality. Capture genuine production goldens before declaring a brownfield mapping; synthesized goldens never overwrite them.
 4. **Validated stream construction** is the runtime assembly boundary. `mkEventStream` rejects transducer warnings and a codec whose schema version, event tags, or upcaster chain fail `mkCodec`; hand-written streams get the same fail-fast treatment. See [runtime assembly](runtime-assembly.md).
 5. **The database-backed replay audit** answers what finite fixtures cannot: whether *real stored histories* still decode, invert, and fold under the candidate binary.
@@ -36,21 +36,23 @@ Mapped declaration findings are recursive through every command, event, and regi
 Keep structural coverage as a separate named inventory:
 
 ```bash
-keiro-dsl check spec.keiro --coverage-report build/coverage.json
-keiro-dsl diff spec.keiro --since HEAD^ \
+keiro-dsl check SERVICE-INPUT --coverage-report build/coverage.json
+keiro-dsl diff SERVICE-INPUT --since HEAD^ \
   --coverage-report build/coverage-diff.json
 ```
 
 The reports name structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries; they do not produce one misleading percentage. `--fail-on-opaque` and `--fail-on-opaque-increase` are opt-in operator gates, not universal defaults.
 
-Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged` — not on the human-readable explanation.
+For a workspace, `diff` reconstructs the old manifest and old member set from Git and emits one compatibility stream, coverage report, and replay-impact verdict. Shared changes are classified at every aggregate use site with both declaring and consuming member locations. An unchanged declaration or aggregate moved between members emits `OwnershipMoved` and requires a whole-workspace rescaffold; a service, context, module, or layout authority change emits `WorkspaceAuthorityChanged` beside any actual persisted-identity break.
+
+Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, `WorkspaceAuthorityChanged` — not on the human-readable explanation.
 
 ## Gate transducer changes with a targeted replay audit
 
 The rule is one sentence: let the differ decide whether an audit is needed, then audit only the affected streams.
 
 ```sh
-keiro-dsl diff spec.keiro --since HEAD --replay-impact-out impact.json
+keiro-dsl diff SERVICE-INPUT --since HEAD --replay-impact-out impact.json
 ```
 
 The verdict is `{"verdict":"replay-neutral"}` or `{"verdict":"affected","aggregates":{...}}` with sorted event arrays. A neutral verdict touches no data. An affected verdict supplies the conservative event-type set for `Keiro.ReplayAudit` in `AuditTargeted` mode; generated services expose one context-wide `auditTargets :: [SomeAuditTarget]` in declaration order.
@@ -95,3 +97,4 @@ For the full narrative and per-rule failure modes, see the keiro repo's `docs/gu
 - [Event schema evolution](../keiki/event-schema-evolution.md)
 - [Workflow reliability and recovery](workflow-reliability.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
+- [Composable service workspaces](service-workspaces.md)

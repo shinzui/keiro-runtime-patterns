@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiro Service Architecture"
 description: "Index of the keiro service architecture standard: packages, vertical slices, tests, scaffolding; start here"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-overview
 tags: [architecture, overview]
 status: current
@@ -18,7 +18,7 @@ This area is the fleet structure standard for deployed keiro services. It reconc
 
 - [Service packages](service-packages.md) defines the six cabal packages, their dependency boundaries, and the teaching-repository exception.
 - [Vertical-slice modules](vertical-slice-modules.md) defines the per-concept generated and hand-owned module ring.
-- [Specification and scaffolding](spec-and-scaffolding.md) places the `.keiro` source of truth and gives the repeatable regeneration workflow.
+- [Specification and scaffolding](spec-and-scaffolding.md) places the single-file or workspace service contract and gives the repeatable whole-service regeneration workflow.
 - [Cross-cutting modules](cross-cutting-modules.md) is the closed allowlist for technical module names.
 - [Extended node verticals](extended-node-verticals.md) places read models, process managers, workflows, routers, queues, and integration contracts.
 - [Test layout](test-layout.md) assigns test suites to packages and mirrors source verticals in test modules.
@@ -37,3 +37,4 @@ The generated/hand-owned boundary is load-bearing. Keiro-dsl may replace every `
 - [Messaging patterns](../messaging/overview.md)
 - [Migration package standard](../migrations/service-package.md)
 - [Brownfield Keiro adoption](../keiro/brownfield-adoption.md)
+- [Composable service workspaces](../keiro/service-workspaces.md)

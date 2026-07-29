@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-07-29
+* **Update**: Architecture guidance now supports single-file and multi-file service inputs with whole-workspace records and regeneration
+
 ## 2026-07-28
 * **Update**: Allowlist now places concept bindings vertically and permits DomainBindings only for shared mapped types
 * **Update**: Test layout now requires structural conformance and isolates brownfield codec comparison from production modules

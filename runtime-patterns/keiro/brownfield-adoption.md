@@ -1,8 +1,8 @@
 ---
 type: Guide
 title: "Brownfield Keiro Adoption"
-description: "Adopting Keiro around existing domain types and stored JSON with structural mappings, codec evidence, and replay-safe cutover gates"
-timestamp: 2026-07-28T19:53:40-07:00
+description: "Adopting Keiro around existing domain types, stored JSON, and independent same-context scaffolds with workspace migration, codec evidence, and replay-safe cutover gates"
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -29,6 +29,20 @@ Before writing the mapping, inventory every durable surface: private events and 
 Capture sanitized production examples before deriving the declaration. Include every observed union tag, absent and explicit-null optionals, old bug-era payloads, and the oldest supported version. Constructor names and today's `ToJSON` instance are evidence, not the contract; Aeson options and old releases may have written something different.
 
 Public contracts and queue payloads keep their separately owned DSL grammars. Structural mapped coverage currently applies to private aggregate payloads and mapped registers. Snapshot payloads remain a consumer-JSON cache boundary; mapping fingerprints invalidate incompatible seeds, but the generated event codec is not the snapshot codec.
+
+## Choose one file or a service workspace
+
+Keep a small service in one `domain/service.keiro` file. When complete aggregates already live in separate same-context files, preserve those review boundaries with one versioned `.keiro-workspace` manifest instead of combining the sources or continuing to scaffold them independently.
+
+The manifest owns the stable service identity, module/layout policy, and member set. Every aggregate stays whole in one member, while every shared id, enum, rule, or mapped declaration moves to exactly one owning member. Run `check`, `scaffold`, and `diff` against the manifest so validation, context-level modules, scaffold history, coverage, compatibility, and replay impact describe the whole service.
+
+To adopt one existing multi-aggregate file, first list it as the manifest's only member. Split aggregates later as source-ownership moves. To adopt output from several independent same-context scaffolds, keep the output tree and scaffold the workspace once:
+
+```bash
+keiro-dsl scaffold domain/service.keiro-workspace --out service-core/src
+```
+
+With no workspace record present, the first run imports only attributable generated files: paths in the surviving legacy context record have `record` evidence, while orphaned planned Generated paths require the exact generated banner for `banner` evidence. It writes a workspace migration report, marks the legacy record `superseded-by:` without invalidating old readers, and leaves holes, unrelated files, and likely-stale paths unclaimed. It never deletes or renames. Any bannerless file at a planned Generated path refuses the entire run before bytes change.
 
 ## Declare One Schema Authority
 
@@ -112,7 +126,7 @@ Comparison is finite evidence. It does not prove that every historical value was
 Run the complete migration ladder before traffic switches:
 
 1. Compile the consumer bindings and generated code.
-2. Run `keiro-dsl check`, the coverage inventory, and `diff --since REF --explain`.
+2. Run `keiro-dsl check`, the coverage inventory, and `diff --since REF --explain` against the service file or workspace manifest.
 3. Pass the generated harness, genuine historical goldens, and structural codec comparison.
 4. Construct every `ValidatedEventStream`; never substitute `mkEventStreamUnchecked`.
 5. Run one `AuditFull` against a production copy for the first cutover. A non-zero `auditExitCode` blocks deployment.
@@ -128,3 +142,4 @@ For later changes, use the diff's replay-impact file and `AuditTargeted`. Run `d
 - [Typed Field Projections](../keiki/typed-field-projections.md)
 - [Specification and Scaffolding](../architecture/spec-and-scaffolding.md)
 - [Test Layout](../architecture/test-layout.md)
+- [Composable service workspaces](service-workspaces.md)

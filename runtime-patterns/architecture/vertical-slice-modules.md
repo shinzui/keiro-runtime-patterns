@@ -2,7 +2,7 @@
 type: Standard
 title: "Vertical-Slice Modules"
 description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -55,7 +55,7 @@ Every generated module lives below a `Generated` path segment. Its module header
 module Danwa.Conversation.Generated.Domain where
 ```
 
-The scaffolder uses the banner as an overwrite guard. Never remove it from a generated module, never add it to a hand-owned module, and never edit the generated module directly. Change `domain/<service>.keiro` and scaffold again.
+The scaffolder uses the banner as an overwrite guard. Never remove it from a generated module, never add it to a hand-owned module, and never edit the generated module directly. Change the owning `.keiro` member and scaffold the service file or workspace manifest again.
 
 There is exactly one create-once, hand-owned `Holes` module per aggregate. The scaffolder creates it only when absent and does not replace it on later runs. Structural binding modules are also create-once, but they are declared type owners rather than extra aggregate holes. Other hand-owned modules sit directly below `<Service>.<Concept>` without another layer.
 
