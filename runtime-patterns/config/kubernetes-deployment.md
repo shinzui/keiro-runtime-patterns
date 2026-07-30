@@ -2,10 +2,33 @@
 type: Runbook
 title: "Kubernetes Deployment Standard"
 description: "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
-timestamp: 2026-07-22T12:43:58-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-kubernetes-deployment
 tags: [config, kubernetes-deployment]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T12:43:58-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved settei 0.2.0.0 checkout, its examples and deploy manifests, and Hackage release state; changes requested: the envFrom and configMapKeyRef snippets cannot both work against one ConfigMap, leaving HASKELL_ENV unresolved.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against the settei reference deployment: both containers now bind HASKELL_ENV via configMapKeyRef, and the validator and kubeconform claims match their sources.
 ---
 
 # Kubernetes Deployment Standard
@@ -67,7 +90,7 @@ env:
     valueFrom:
       configMapKeyRef:
         name: service-runtime
-        key: environment
+        key: HASKELL_ENV
 ```
 
 `POD_NAMESPACE` answers where the pod runs. It must not silently decide database hosts, feature policy, credentials, or other behavior. Supply `HASKELL_ENV` and operational values explicitly through the overlay.
@@ -115,10 +138,12 @@ spec:
         - yaml:/etc/service/config/application.yaml
         - --secrets-dir
         - /etc/service/secrets/database
-      envFrom:
-        - configMapRef:
-            name: service-runtime
       env:
+        - name: HASKELL_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: service-runtime
+              key: HASKELL_ENV
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -138,10 +163,12 @@ spec:
         - yaml:/etc/service/config/application.yaml
         - --secrets-dir
         - /etc/service/secrets/database
-      envFrom:
-        - configMapRef:
-            name: service-runtime
       env:
+        - name: HASKELL_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: service-runtime
+              key: HASKELL_ENV
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -182,7 +209,7 @@ fi
 
 Never commit a real secret. The literal `PLACEHOLDER-REPLACE-VIA-YOUR-SECRET-PIPELINE` is permitted only as an unmistakable failure marker and must be rejected from rendered release manifests.
 
-Also assert on the rendered structure: the `check-config` init container exists, its image equals the main container image, both containers receive the same environment and mounts, `POD_NAMESPACE` uses `fieldRef`, `HASKELL_ENV` comes from the ConfigMap, and `--secrets-dir` names the actual Secret mount. The `shinzui/settei` repo's `examples/settei-service/deploy/validate.sh` is the reference validator; `kubeconform` may add offline Kubernetes schema validation.
+Also assert on the rendered structure: the `check-config` init container exists, its image equals the main container image, both containers receive the same environment and mounts, `POD_NAMESPACE` uses `fieldRef`, `HASKELL_ENV` comes from the ConfigMap, and `--secrets-dir` names the actual Secret mount. The `shinzui/settei` repo's `examples/settei-service/deploy/validate.sh` demonstrates the technique with a smaller grep-based assertion set (gate arguments, `fieldRef`, the secret mount, rendered `HASKELL_ENV` values); extend it with the structural assertions above. `kubeconform` can add client-side Kubernetes schema validation, but it downloads schemas by default, so treat it as a networked step or point it at vendored schemas.
 
 ## Drain HTTP Requests on SIGTERM
 

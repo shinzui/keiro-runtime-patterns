@@ -2,10 +2,33 @@
 type: Guide
 title: "Migration Testing"
 description: "Integrity gates in the default suite, ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-testing
 tags: [migrations, testing]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-23T16:55:16-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiro-migrations, kiroku-store-migrations, and pg-migrate source and CLIs; changes requested: the nested Either example names hasql-pool's UsageError where hasql 1.10 returns SessionError, and the per-service helper convention does not exist.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against hasql 1.10 and keiro-test-support: the nested Either names SessionError and the suite fixture convention matches the reference service.
 ---
 
 # Migration Testing
@@ -55,7 +78,7 @@ Use `withMigratedDatabaseOptions` to customize runner options and `withMigratedD
 
 ## Match both `Either` layers
 
-When the callback uses `Connection.use`, the result is nested: `Either MigratedDatabaseError (Either UsageError value)`. An outer `Right` means the test callback completed; it does not mean the Hasql session succeeded.
+When the callback uses `Connection.use`, the result is nested: `Either MigratedDatabaseError (Either SessionError value)`. An outer `Right` means the test callback completed; it does not mean the Hasql session succeeded.
 
 ```haskell
 -- WRONG: silently accepts a Hasql Left inside the callback result.
@@ -63,13 +86,13 @@ Right _ -> pure ()
 
 -- CORRECT: require success from the harness and the Hasql session.
 Right (Right value) -> assertExpected value
-Right (Left usageError) -> assertFailure (show usageError)
+Right (Left sessionError) -> assertFailure (show sessionError)
 Left migrationError -> assertFailure (show migrationError)
 ```
 
 ## Wrap the complete service plan
 
-Each service exports a `with<Service>MigratedDatabase` test helper. The wrapper constructs the service’s complete Kiroku, Keiro, optional pgmq, and application plan; calls `withMigratedDatabase`; unwraps the outer result; and fails loudly on `Left`. Tests still inspect any application-level or Hasql `Either` returned by their callback.
+Each service wraps its complete plan once at the suite boundary. The fleet convention is keiro-test-support's template-database fixture: `withMigratedSuiteWith` applies Kiroku's, Keiro's, and any extra components (for example pgmq's) to one template database that every example clones; jitsurei's `withJitsureiSuite` is the reference. Where a per-test database fits better, wrap the same complete plan in a `withMigratedDatabase` helper. Either way, fail loudly on `Left`; tests still inspect any application-level or Hasql `Either` returned by their callback.
 
 Assert fresh apply, idempotent rerun with `AlreadyApplied`, strict verification, and behavior that depends on every component. For data changes, also apply the old released plan, insert representative data, upgrade with the new plan, and assert the transformed state.
 

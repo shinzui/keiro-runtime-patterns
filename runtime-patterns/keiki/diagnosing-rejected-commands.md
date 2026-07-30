@@ -2,10 +2,33 @@
 type: Guide
 title: "Diagnosing Rejected Commands with `stepEither`"
 description: "Using stepEither and StepFailure to learn why a command was rejected"
-timestamp: 2026-07-22T09:35:21-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-diagnosing-rejected-commands
 tags: [keiki, diagnosing-rejected-commands]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T09:35:21-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiki v0.4.0.0 checkout, its changelogs, and the keiro consumer source; changes requested: the NoMatchingEdge taxonomy predates keiki 0.3's Live-edge filtering of forward candidates.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against Keiki.Core stepEither: the taxonomy now reflects Live-edge candidate filtering and step's rejection on ambiguity.
 ---
 
 # Diagnosing Rejected Commands with `stepEither`
@@ -46,10 +69,12 @@ data StepFailure s
   command arriving here is always rejected.
 - **`NoMatchingEdge s summaries`** — there were candidate edges but none matched: the
   command's constructor was wrong for every edge, or every matching-constructor guard was
-  false. The summaries locate the rejected edges (each by `EdgeRef`) so you can report which
-  guard turned the command away.
+  false. Since Keiki 0.3, only `Live` edges are forward candidates, yet the summaries
+  still describe every edge — a `ReplayOnly` twin can therefore appear among the rejected
+  summaries even though it was never eligible to fire. The summaries locate the rejected
+  edges (each by `EdgeRef`) so you can report which guard turned the command away.
 - **`AmbiguousEdges s summaries`** — **two or more guards matched the same command.** This
-  is a single-valuedness violation: `step` silently picks one (or rejects), hiding a real
+  is a single-valuedness violation: `step` rejects the command with no explanation, hiding a real
   modeling bug. `stepEither` makes it visible. It is the runtime witness of the same
   property `validateTransducer`'s `NondeterministicPair` proves at build time — see
   [build-time-validation.md](./build-time-validation.md).

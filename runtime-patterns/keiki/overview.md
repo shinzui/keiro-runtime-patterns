@@ -2,10 +2,33 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-28T19:53:40-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiki v0.4.0.0 checkout, its changelogs, and the keiro consumer source; changes requested: the release digest omits 0.3.1.0's CanonicalStateShape/stateShapeHash.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against the keiki changelog: the release digest now records 0.3.1.0's CanonicalStateShape/stateShapeHash.
 ---
 
 # Keiki Patterns for Keiro Runtime Projects
@@ -38,6 +61,7 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - `validateTransducer` now adds three unconditional projection-integrity warnings to the seven configured soundness checks and the opt-in opaque audit. See [Build-Time Validation](./build-time-validation.md).
 - `composeChecked` reports `NonStructuralProjectionBoundary` when composition would lower a structural getter to opaque application logic. See [Checked Composition](./checked-composition.md).
 - Keiki 0.3 introduced `Live` and `ReplayOnly` edge modes so historical events remain invertible after a live guard changes. See [Structured Replay and Hydration](./structured-replay-and-hydration.md).
+- Keiki 0.3.1.0 added `Keiki.Shape.CanonicalStateShape` with `stateShapeCanonical` and `stateShapeHash`, giving control-state snapshots a stable identity discriminator; Keiro 0.4's `StateCodec` requires it. See the [Keiro read-model and snapshot standard](../keiro/read-models-and-projections.md).
 
 The Keiki 0.2 hardening remains foundational:
 

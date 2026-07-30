@@ -2,10 +2,33 @@
 type: Runbook
 title: "Migration Operations"
 description: "Operating verify, verify-schema, status, and repair; the codd preflight; Running after a crash needs audited repair"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-operations
 tags: [migrations, operations]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-23T16:55:16-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiro-migrations, kiroku-store-migrations, and pg-migrate source and CLIs; changes requested: the every-command-supports-JSON claim excludes verify-schema, and the released import-codd-history command is never named.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against the keiro-migrate CLI: JSON support is scoped per command and import-codd-history is named with its flags.
 ---
 
 # Migration Operations
@@ -16,7 +39,7 @@ Use this runbook to inspect, apply, verify, or repair a service’s pg-migrate p
 
 ## Use the service executable
 
-Every command supports text and JSON output; use JSON as the stable automation contract.
+Use JSON as the stable automation contract: every command below accepts `--json` except `verify-schema`, which currently emits text only.
 
 | Command | Database | Purpose |
 | --- | --- | --- |
@@ -29,6 +52,7 @@ Every command supports text and JSON output; use JSON as the stable automation c
 | `repair` | yes | Perform one confirmed, audited nontransactional repair. |
 | `new` | no | Create a local SQL file and append its manifest entry. |
 | `verify-schema` | yes | Compare live schema objects with the embedded expected snapshot. |
+| `import-codd-history` | yes | Import verified codd history into the native ledger before the first `up`. |
 
 Run `plan`, `status`, and strict `verify` against the intended database and role before deployment. Pending migrations make strict verification fail before `up`; this is expected. After `up`, strict verification must succeed.
 
@@ -48,7 +72,7 @@ Record the artifact identity, target, role, timestamps, and command output. Do n
 
 `up` refuses to run when the database has a `codd.sql_migrations` (or legacy `codd_schema.sql_migrations`) ledger and native pg-migrate history is absent or empty. Running there would initialize a fresh ledger and re-plan every migration against a database that already has the objects.
 
-Import the codd history first. `--allow-fresh-ledger-over-codd` overrides the refusal and applies only to `up`; use it exclusively when a fresh native ledger over the retired codd ledger is genuinely what you want. See [Codd Transition](./codd-transition.md).
+Import the codd history first with `keiro-migrate import-codd-history`; it verifies the checked-in codd source evidence under advisory locking, requires `--reason` and `--confirm`, and supports `--json`. `--allow-fresh-ledger-over-codd` overrides the refusal and applies only to `up`; use it exclusively when a fresh native ledger over the retired codd ledger is genuinely what you want. See [Codd Transition](./codd-transition.md).
 
 ## Prove the plan reached each replica
 

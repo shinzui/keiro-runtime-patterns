@@ -2,10 +2,33 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of prescriptive Keiro runtime and DSL standards; start here"
-timestamp: 2026-07-29T12:40:01-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-29T12:40:01-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiro checkout (0.4.0.1 tags plus post-release workspace commits), keiki 0.4.0.0, kiroku-store source, and Hackage release state; changes requested: the Hackage-still-at-0.3.0.0 caveat is stale; 0.4.0.1 is published.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against Hackage and the keiro tags: release availability now states 0.4.0.1/0.4.0.0 and scopes workspaces to the post-0.4.0.1 source line.
 ---
 
 # Keiro runtime patterns
@@ -14,7 +37,7 @@ status: current
 
 Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 and 0.3 behavior remains foundational, while the current 0.4 source line adds composable multi-file service workspaces, structural consumer mappings, generated migration evidence, replay-impact targeting, and the Keiki 0.4 field-projection contract.
 
-Keiki 0.4.0.0 is published and tagged. As of 2026-07-28, Hackage and upstream Keiro tags still expose 0.3.0.0 even though the local 0.4 source and changelogs contain the documented surface. Verify the registry and upstream tags before choosing package bounds; do not claim the structural mapping workflow from a 0.3-only dependency set.
+Keiro 0.4.0.1 and Keiki 0.4.0.0 are published on Hackage and tagged upstream, so a released dependency set carries the structural mapping workflow, generated migration evidence, replay-impact targeting, and the field-projection contract. Composable multi-file service workspaces are post-0.4.0.1 source-line features: run the DSL toolchain from a checkout to use them, and verify the registry and upstream tags before choosing package bounds.
 
 The 0.4 line also changes three runtime surfaces incompatibly: `scheduleTimerOnceTx` returns `Bool`, `markChildFailedTx` takes a failure reason, and `StateCodec` gains `stateShapeHash`. Migrations `0019` and `0020` accompany the last two, and snapshot-enabled code requires Keiki 0.4.
 

@@ -1,5 +1,10 @@
 # keiki Update Log
 
+## 2026-07-29
+* **Update**: Overview's release digest now records 0.3.1.0's canonical control-state shape hashes; re-reviewed and approved
+* **Update**: Diagnosing rejected commands now reflects Live-edge forward filtering and step's rejection on ambiguity; re-reviewed and approved
+* **Review**: Recorded a model technical-accuracy review for all thirteen concepts; approved eleven, changes requested for the overview (0.3.1.0 state-shape digest omitted) and diagnosing-rejected-commands (taxonomy predates Live-edge filtering)
+
 ## 2026-07-28
 * **Update**: Historical upgrade guidance now links to the current validation vocabulary
 * **Update**: Collection guidance distinguishes scalar field projections from unsupported collection operations

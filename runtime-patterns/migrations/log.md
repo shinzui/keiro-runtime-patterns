@@ -1,5 +1,10 @@
 # migrations Update Log
 
+## 2026-07-29
+* **Update**: Operations now scope JSON output per command and name import-codd-history for the codd preflight; re-reviewed and approved
+* **Update**: Testing now names hasql's SessionError and the template-database suite fixture convention; re-reviewed and approved
+* **Review**: Recorded a model technical-accuracy review for all seven concepts; approved five, changes requested for operations (JSON-everywhere claim excludes verify-schema; import-codd-history never named) and testing (UsageError where hasql 1.10 returns SessionError)
+
 ## 2026-07-23
 * **Update**: Operations documents the `verify-schema` live-object gate, the codd-ledger preflight on `up`, and the per-replica startup handshake
 * **Update**: Authoring requires the three-file review diff (SQL, manifest, lockfile) and the qualified-DDL body lint

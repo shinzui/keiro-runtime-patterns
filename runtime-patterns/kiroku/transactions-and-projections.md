@@ -6,6 +6,18 @@ timestamp: 2026-07-22T09:52:58-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-transactions-and-projections
 tags: [kiroku, transactions-and-projections]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T09:52:58-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved kiroku-project checkout (kiroku-store, adapters, otel, metrics) and the keiro consumer's Connection API; verified exported symbols, signatures, version claims, and links.
 ---
 
 # Kiroku Transactions and Projections

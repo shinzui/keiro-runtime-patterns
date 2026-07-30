@@ -2,10 +2,33 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-28T19:53:40-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved the corpus's own routed documents and the keiro-dsl HEAD feature set; changes requested: no route reaches the new keiro/service-workspaces standard.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction: the structuring route now reaches the composable service-workspace standard.
 ---
 
 # Getting started with the runtime patterns
@@ -46,7 +69,9 @@ need the surrounding rules.
   repair.
 - **Structuring packages and modules:** use the
   [service-package standard](architecture/service-packages.md) and
-  [vertical-slice module standard](architecture/vertical-slice-modules.md).
+  [vertical-slice module standard](architecture/vertical-slice-modules.md); when
+  several spec members compose one service, apply the
+  [composable service-workspace standard](keiro/service-workspaces.md).
 - **Configuring a service:** begin with the
   [Settei service standard](config/settei-service-standard.md), and use the
   [Settei CLI standard](config/settei-cli-standard.md) for command-line tooling.

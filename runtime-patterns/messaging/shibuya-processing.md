@@ -6,6 +6,18 @@ timestamp: 2026-07-22T11:25:02-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-shibuya-processing
 tags: [messaging, shibuya-processing]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T11:25:02-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved shibuya 0.8.0.1, shibuya-{kafka,pgmq,kiroku,message-db} adapters, keiro 0.4.0.1, and kiroku source; verified exported symbols, signatures, version claims, and links.
 ---
 
 # Shibuya Processing Semantics

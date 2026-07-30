@@ -2,17 +2,40 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
-timestamp: 2026-07-22T11:19:01-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T11:19:01-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved shibuya 0.8.0.1, shibuya-{kafka,pgmq,kiroku,message-db} adapters, keiro 0.4.0.1, and kiroku source; changes requested: the standard pins itself to the released Keiro 0.3 boundary; 0.4.0.1 is the released line.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against the keiro changelog and tags: the standard now names the released 0.4 boundary.
 ---
 
 # Process Managers And Durable Timers
 
 **Use an event-sourced saga for stateful orchestration, deterministic dispatch for crash recovery, and durable timers for deadlines.**
 
-Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro 0.3 process-manager boundary, its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
+Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro 0.4 process-manager boundary (current release 0.4.0.1), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
 
 ## The Rule
 

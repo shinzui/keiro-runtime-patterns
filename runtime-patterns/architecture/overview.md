@@ -6,6 +6,18 @@ timestamp: 2026-07-29T12:40:01-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-overview
 tags: [architecture, overview]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-29T12:40:01-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved danwa and keiro-runtime-jitsurei reference applications and the keiro-dsl scaffolder at HEAD; verified exported symbols, signatures, version claims, and links.
 ---
 
 # Keiro Service Architecture

@@ -1,6 +1,7 @@
 # architecture Update Log
 
 ## 2026-07-29
+* **Review**: Recorded a model technical-accuracy review for all eight concepts; every concept approved against the danwa and jitsurei reference applications and the scaffolder at HEAD
 * **Update**: Architecture guidance now supports single-file and multi-file service inputs with whole-workspace records and regeneration
 
 ## 2026-07-28

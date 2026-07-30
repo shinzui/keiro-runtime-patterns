@@ -2,10 +2,33 @@
 type: Runbook
 title: "Kiroku Operational Invariants"
 description: "The ten invariants every kiroku-backed service must respect in production"
-timestamp: 2026-07-22T09:52:58-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-operational-invariants
 tags: [kiroku, operational-invariants]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T09:52:58-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved kiroku-project checkout (kiroku-store, adapters, otel, metrics) and the keiro consumer's Connection API; changes requested: the normative search path wrongly includes the keiro schema.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against keiro's Connection API: the normative search path now excludes the keiro schema.
 ---
 
 # Kiroku Operational Invariants
@@ -24,7 +47,7 @@ Use the fleet schema `kiroku` for both tables and the `<schema>.events` notifica
 
 ## 3. Preserve search-path order
 
-Keep Kiroku first, explicitly listed application or framework schemas next, and `pg_catalog` last. Keiro services normally use `kiroku, keiro, pg_catalog`; never depend on implicit `public`. See [Connection Settings](./connection-settings.md).
+Keep Kiroku first, explicitly listed application schemas next, and `pg_catalog` last. Keiro services normally use `kiroku, <application projection schema>, pg_catalog`; the `keiro` framework schema stays out of the search path because Keiro's runtime SQL is fully qualified and `keiroConnectionSettings` deliberately does not add it. Never depend on implicit `public`. See [Connection Settings](./connection-settings.md).
 
 ## 4. Bound database resource use
 

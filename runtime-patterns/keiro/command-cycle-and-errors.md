@@ -2,10 +2,33 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, and prescriptive error handling"
-timestamp: 2026-07-22T10:48:06-07:00
+timestamp: 2026-07-29T18:11:55-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
+reviews:
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T00:43:08Z
+    document_timestamp: 2026-07-22T10:48:06-07:00
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model technical-accuracy review against the mori-resolved keiro checkout (0.4.0.1 tags plus post-release workspace commits), keiki 0.4.0.0, kiroku-store source, and Hackage release state; changes requested: subscription failures are misattributed to keiro.keiro_dead_letters; they park in kiroku.dead_letters.
+  - kind: model
+    reviewer: claude-code
+    reviewed_at: 2026-07-30T01:11:55Z
+    document_timestamp: 2026-07-29T18:11:55-07:00
+    scope: technical-accuracy
+    outcome: approved
+    provider: anthropic
+    model: claude-fable-5
+    effort: unspecified
+    context: >-
+      Model re-review of the correction against Keiro.DeadLetter.Schema and docs/user/dead-letters.md: dispatch rejections and subscription failures are now attributed to their owning tables.
 ---
 
 # Command cycle and errors
@@ -40,7 +63,7 @@ The glossary rule is normative: **`CommandAmbiguous` is never benign.** Multiple
 
 ## Replay dead letters after repair
 
-Keiro stores durable dispatch and subscription failures in `keiro.keiro_dead_letters`. Policies such as `RejectedDeadLetter` and `PoisonDeadLetter` retain deliveries that cannot safely advance. After correcting the handler, codec, or definition, use `replaySubscriptionDeadLetters` to re-drive Kiroku subscription dead letters; do not treat replay as a substitute for fixing the cause.
+Keiro records rejected process-manager and router dispatches in `keiro.keiro_dead_letters`; each row is one failed dispatch whose source subscription event counts as handled and may advance its checkpoint. Terminal subscription failures — including deliveries a `PoisonDeadLetter` policy parks — land in Kiroku-owned `kiroku.dead_letters` instead. After correcting the handler, codec, or definition, use `replaySubscriptionDeadLetters` to re-drive Kiroku subscription dead letters; do not treat replay as a substitute for fixing the cause.
 
 For table layout and operational controls, see the keiro repo's `docs/user/dead-letters.md`.
 
