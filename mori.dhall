@@ -1,6 +1,6 @@
 let Schema =
-      https://raw.githubusercontent.com/shinzui/mori-schema/93104153ecf8817547229a867302a70a25c4b3d8/package.dhall
-        sha256:5e00bba267f27069df1d3caadfec2ec6a8c4e797ce652d78c09528f981b71b42
+      https://raw.githubusercontent.com/shinzui/mori-schema/b85081a0e935a976202fd7a1227f8b93e2cbeb23/package.dhall
+        sha256:1501e5c3e55e78d2a58774e2f8aefda20e32b948fa7caf639473fce90929464b
 
 in  Schema.Project::{
     , project = Schema.ProjectIdentity::{
@@ -23,6 +23,15 @@ in  Schema.Project::{
       , "shinzui/pg-migrate"
       , "shinzui/pgmq-hs"
       , "shinzui/okf"
+      ]
+    , skills =
+      [ Schema.Skill::{
+        , name = "update-patterns"
+        , description =
+            "Reconcile the runtime-patterns catalog with upstream keiro-ecosystem source: report which upstream repositories moved since the catalog last tracked them, rewrite affected concepts from the real source, add concepts for uncovered capabilities, retire ones whose feature is gone, and advance per-project git watermarks"
+        , path = Some "agents/skills/update-patterns"
+        , compatibility = Some "Requires git, jq, and the mori CLI"
+        }
       ]
     , okfBundles =
       [ Schema.OkfBundle::{
