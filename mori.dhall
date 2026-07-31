@@ -90,6 +90,16 @@ in  Schema.Project::{
               "runtime-patterns/keiki/collections-and-opaque-guards.md"
         }
       , Schema.DocRef::{
+        , key = "keiki-typed-field-projections"
+        , kind = Schema.DocKind.Pattern
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Guard-only field witnesses that expose a scalar of a consumer-owned record without an opaque guard or a flattened domain model"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiki/typed-field-projections.md"
+        }
+      , Schema.DocRef::{
         , key = "keiki-operator-conflicts"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
@@ -324,6 +334,16 @@ in  Schema.Project::{
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/durable-workflows.md"
         }
       , Schema.DocRef::{
+        , key = "keiro-workflow-reliability"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Lease sizing, the failure budget, terminal-failure resurrection, and the durable wake-source lifecycle"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiro/workflow-reliability.md"
+        }
+      , Schema.DocRef::{
         , key = "keiro-telemetry"
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
@@ -365,6 +385,36 @@ in  Schema.Project::{
             "Binding consumer-owned IDs, enums, and scalar wrappers with total isomorphisms, fixtures, and a decoder-tightening audit"
         , location = Schema.DocLocation.LocalFile
             "runtime-patterns/keiro/nominal-bindings.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-service-workspaces"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Composing single-owner .keiro members into one service with whole-service checking, atomic scaffolding, and attributable history"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiro/service-workspaces.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-brownfield-adoption"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Adopting Keiro around existing domain types and stored JSON with codec evidence and a replay-safe cutover"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiro/brownfield-adoption.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-evolution-and-rollout"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The six-layer evolution gate ladder, compatibility surfaces, targeted replay audits, and durable-value rollout ordering"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiro/evolution-and-rollout.md"
         }
       , Schema.DocRef::{
         , key = "keiro-gotchas"
