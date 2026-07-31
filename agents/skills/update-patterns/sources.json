@@ -35,9 +35,9 @@
         "keiro-pgmq",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "430c3d2cca0f491697d7e67a85362b78718a50be",
-      "last_checked_at": "2026-07-30T01:11:55Z",
-      "notes": "Catalog-wide model review baseline (keiro 0.4.0.1 tags plus post-release workspace commits)."
+      "last_checked_commit": "9177930aa9c1125d08d27da31f4a78254ae5dba4",
+      "last_checked_at": "2026-07-31T23:16:22Z",
+      "notes": "Reconciled through keiro 0.6.0.0 (release commit 9177930, tagged as one five-package set): the source-language contract, consumer-owned nominal bindings, and authoritative version-2 scalar aggregate expressions were added as new concepts; 0.5.0.0's service workspaces were already covered. Runtime packages carry no behaviour change beyond keiki >=0.6 bounds and keiro-core's new Keiro.Codec.Nominal; the bulk of the diff is the Fourmolu reformat."
     },
     {
       "project": "shinzui/kiroku",

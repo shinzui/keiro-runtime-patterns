@@ -2,7 +2,7 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -35,7 +35,7 @@ reviews:
 
 **Use an event-sourced saga for stateful orchestration, deterministic dispatch for crash recovery, and durable timers for deadlines.**
 
-Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro 0.4 process-manager boundary (current release 0.4.0.1), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
+Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.6.0.0, unchanged from 0.4 in this surface), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
 
 ## The Rule
 

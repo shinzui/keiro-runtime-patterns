@@ -340,6 +340,33 @@ in  Schema.Project::{
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/dsl-adoption.md"
         }
       , Schema.DocRef::{
+        , key = "keiro-language-versions"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Declaring the language keiro-dsl preamble, choosing version 1 or 2, and auditing legacy-unversioned sources"
+        , location = Schema.DocLocation.LocalFile
+            "runtime-patterns/keiro/language-versions.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-aggregate-expressions"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Version-2 guards and writes that generate the Keiki transducer, implementation holes, and FoldVersion discipline"
+        , location = Schema.DocLocation.LocalFile
+            "runtime-patterns/keiro/aggregate-expressions.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-nominal-bindings"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Binding consumer-owned IDs, enums, and scalar wrappers with total isomorphisms, fixtures, and a decoder-tightening audit"
+        , location = Schema.DocLocation.LocalFile
+            "runtime-patterns/keiro/nominal-bindings.md"
+        }
+      , Schema.DocRef::{
         , key = "keiro-gotchas"
         , kind = Schema.DocKind.Notes
         , audience = Schema.DocAudience.Module

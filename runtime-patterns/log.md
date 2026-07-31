@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-07-31
+* **Update**: Routes now reach the language-version, aggregate-expression, and nominal-binding standards
+
 ## 2026-07-29
 * **Update**: Getting started now routes multi-member services to the composable service-workspace standard; re-reviewed and approved
 * **Review**: Recorded a model technical-accuracy review for getting-started; changes requested because no route reaches the composable service-workspaces standard

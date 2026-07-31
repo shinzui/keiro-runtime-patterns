@@ -213,7 +213,7 @@ testKeikiValidation = do
 ```
 
 Each entry in the result is a structured `TransducerValidationWarning s` you can
-pattern-match on. Keiki 0.4 has eleven constructors: the original seven default warning
+pattern-match on. Keiki 0.6 has eleven constructors: the original seven default warning
 families, opt-in `OpaqueGuard`, and `ProjectionResultUnsupported`,
 `ProjectionOrderingUnsupported`, and `ProjectionOutsideGuard`. Each names the offending edge
 or edge pair. Fix the model rather than suppressing a warning.

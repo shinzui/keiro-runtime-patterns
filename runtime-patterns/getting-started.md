@@ -2,7 +2,7 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -44,7 +44,15 @@ need the surrounding rules.
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
   apply the [build-time validation gate](keiki/build-time-validation.md). When
   guards inspect fields of rich consumer-owned records, use the
-  [typed field-projection pattern](keiki/typed-field-projections.md).
+  [typed field-projection pattern](keiki/typed-field-projections.md). When the
+  aggregate is declared in a `.keiro` source, use
+  [aggregate scalar expressions and transition ownership](keiro/aggregate-expressions.md)
+  to decide what the spec generates and what stays hand-owned.
+- **Writing or upgrading a `.keiro` source:** start with
+  [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
+  the language contract; use
+  [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
+  enum, or scalar-wrapper types must appear in checked aggregate fields.
 - **Adopting Keiro in an existing service:** follow
   [brownfield Keiro adoption](keiro/brownfield-adoption.md) to inventory stored
   bytes, map existing types, compare codecs, prove replay, and cut over without

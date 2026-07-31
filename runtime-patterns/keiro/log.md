@@ -1,9 +1,18 @@
 # keiro Update Log
 
+## 2026-07-31
+* **Update**: Evolution gates cover the nominal and source-language diff codes and the hole FoldVersion obligation
+* **Update**: Workspace members must select one effective language version
+* **Update**: DSL adoption covers inspect/pretty, the third mapping kind, and the version-2 firewall exemption
+* **Update**: Overview targets the released Keiro 0.5.0.0 set and routes to the language-version, expression, and nominal standards
+* **Added**: Nominal bindings define the total-isomorphism contract for consumer-owned IDs, enums, and scalar wrappers
+* **Added**: Aggregate scalar expressions define the version-2 type model and the generated-or-hole transition ownership rule
+* **Added**: Language versions standardize the language keiro-dsl preamble, the v1/v2 choice, and legacy-source auditing
+
 ## 2026-07-29
 * **Update**: Overview now records the released 0.4.0.1/0.4.0.0 availability and scopes composable workspaces to the post-release source line; re-reviewed and approved
-* **Update**: Command cycle now attributes dispatch rejections to keiro.keiro_dead_letters and terminal subscription failures to kiroku.dead_letters; re-reviewed and approved
-* **Review**: Recorded a model technical-accuracy review for all thirteen concepts; approved eleven, changes requested for the overview (stale Hackage 0.3.0.0 caveat) and command-cycle-and-errors (subscription failures misattributed to keiro.keiro_dead_letters)
+* **Update**: Command cycle now attributes dispatch rejections to keiro.keiro\_dead\_letters and terminal subscription failures to kiroku.dead\_letters; re-reviewed and approved
+* **Review**: Recorded a model technical-accuracy review for all thirteen concepts; approved eleven, changes requested for the overview (stale Hackage 0.3.0.0 caveat) and command-cycle-and-errors (subscription failures misattributed to keiro.keiro\_dead\_letters)
 * **Update**: Evolution gates now reconstruct historical workspace membership and distinguish ownership and workspace-authority advisories from wire changes
 * **Update**: Brownfield adoption now covers one-member manifests and attributable migration from independent same-context scaffolds
 * **Update**: DSL adoption now treats a single file or composed workspace as the service input and includes workspace evolution advisories

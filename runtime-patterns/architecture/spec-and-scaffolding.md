@@ -2,7 +2,7 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a single-file or workspace Keiro source of truth, declaring consumer mappings, and running whole-service check/scaffold/conformance idempotently"
-timestamp: 2026-07-29T12:40:01-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -28,14 +28,15 @@ Keiro-dsl is a build-time toolchain, not a runtime interpreter. It checks a type
 
 ## Place The Service Contract At The Repository Root
 
-A small service specification lives at `domain/<service>.keiro`. In the standard one-service-per-repository shape, begin it with the context and collocated-layout clauses:
+A small service specification lives at `domain/<service>.keiro`. In the standard one-service-per-repository shape, begin it with the language preamble, then the context and collocated-layout clauses:
 
 ```text
+language keiro-dsl 1
 context ticket
 layout collocated
 ```
 
-The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+The `language` clause must be the first significant clause and is required of every new source; see [Keiro DSL language versions](../keiro/language-versions.md) for choosing between version 1 and version 2. The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
 
 Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its spec and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
 
@@ -56,7 +57,7 @@ The manifest owns the stable service identity and member set. Shared declaration
 
 ## Declare Consumer-Owned Types In The Same Source Of Truth
 
-When a private aggregate payload or register uses an application type, declare it as `mapped structural` or `mapped opaque` before the aggregate. A structural declaration owns the complete private-event wire policy and names a total hand-owned binding, deterministic fixtures, stable canonical/binding identities, and any register initial. An opaque declaration names the consumer codec identity and version and makes no nested compatibility claim.
+When a private aggregate payload or register uses an application type, declare it before the aggregate as `mapped structural`, `mapped opaque`, or — under language version 2 — a nominal binding. A structural declaration owns the complete private-event wire policy and names a total hand-owned binding, deterministic fixtures, stable canonical/binding identities, and any register initial. An opaque declaration names the consumer codec identity and version and makes no nested compatibility claim. A nominal binding (`id … using`, `enum … using`, or `mapped nominal`) keeps a consumer type in a direct field across a total isomorphism; see [consumer-owned nominal bindings](../keiro/nominal-bindings.md).
 
 Do not create a second generated domain type merely to satisfy the DSL, and do not let both a consumer `ToJSON` instance and generated structural codec write current events. The generated codec is authoritative for structural private-event JSON; the binding converts domain values without owning wire rules.
 
@@ -92,7 +93,9 @@ Do not use `--force-generated-overwrite` in an ordinary workflow. It bypasses th
 
 Each successful single-file run writes informational `keiro-dsl-manifest.<context>.txt` and `keiro-dsl-scaffold-record.<context>.txt` files. A workspace instead writes `keiro-dsl-manifest.workspace.<service>.txt` and `keiro-dsl-scaffold-record.workspace.<service>.txt`; the record attributes aggregate modules to their member and marks service-wide modules as context-level. The generated manifest includes Cabal `other-modules`, dependencies, and consumer package/module requirements. Gitignore it. The stale-path report is advisory: keiro-dsl never deletes modules that a changed service input no longer emits. Review each stale generated and hand-owned candidate, remove obsolete files deliberately, and keep any adopted hand code under an appropriate non-generated name.
 
-The first structural scaffold emits private `Structural.Shape.*` modules and one `StructuralProjections` facade and creates the declared binding module. Fill total conversion functions, deterministic fixtures, and required initials, then run the generated harness. Exact nominal types may opt into `genericStructuralBinding`; any constructor, selector, order, arity, or field-type mismatch must use the explicit skeleton.
+The first structural scaffold emits private `Structural.Shape.*` modules and one `StructuralProjections` facade and creates the declared binding module. Fill total conversion functions, deterministic fixtures, and required initials, then run the generated harness. Exact nominal types may opt into `genericStructuralBinding`; any constructor, selector, order, arity, or field-type mismatch must use the explicit skeleton. A nominal binding additionally emits create-once binding skeletons, a context-level `NominalProjections` facade, and any private enum-representation leaf modules, and records them in additive `nominal-mapping` rows.
+
+Under language version 2 each aggregate also gets generated `Expressions` and `Transducer` modules. They are the one exemption to the symbolic-operator firewall, because they are the generated authority that builds Keiki terms from declared guards and writes. Every version-2 transition is generated-owned or explicitly `implementation hole`; see [aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md).
 
 ## Evolve The Specification, Not Generated Haskell
 
@@ -108,3 +111,5 @@ For a brownfield structural mapping, capture production JSON before declaring th
 - [Checked composition](../keiki/checked-composition.md)
 - [Brownfield Keiro adoption](../keiro/brownfield-adoption.md)
 - [Composable service workspaces](../keiro/service-workspaces.md)
+- [Keiro DSL language versions](../keiro/language-versions.md)
+- [Aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md)

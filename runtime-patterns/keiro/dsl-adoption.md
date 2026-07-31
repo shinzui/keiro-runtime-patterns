@@ -2,7 +2,7 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including composable service workspaces, brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
-timestamp: 2026-07-29T12:40:01-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -55,7 +55,9 @@ Given the same tool version, service input, and placement options, scaffolding i
 
 The rule is absolute: **never edit a generated module**. Change the specification and scaffold again, or implement the hand-owned hole.
 
-Generated modules carry `-- @generated` and are overwritten on every scaffold. `HoleStub` modules are create-once and skipped thereafter. The `FirewallSurface` checked by `firewallBreaches` prevents generated modules from containing keiki decision operators and builders such as `.==`, `./=`, `.||`, `lit`, or the `B` builder qualifier. Domain decide logic is always hand-owned, whether or not the service adopts the DSL.
+Generated modules carry `-- @generated` and are overwritten on every scaffold. `HoleStub` modules are create-once and skipped thereafter. The `FirewallSurface` checked by `firewallBreaches` prevents generated modules from containing keiki decision operators and builders such as `.==`, `./=`, `.||`, `lit`, or the `B` builder qualifier.
+
+That firewall has exactly one exemption: the version-2 generated `Expressions` and `Transducer` modules, which are the intended generated authority for declared scalar guards and writes. Under language version 2 the spec, not a hand-written module, owns scalar decide logic for a generated transition; behavior the scalar language cannot express is marked `implementation hole` and stays hand-owned. Under version 1 every aggregate decide body remains hand-owned as before. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
 
 The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Structural mappings additionally emit private `Structural.Shape.*` modules and one `StructuralProjections` facade. Their binding, fixture, and optional register-initial modules are create-once, hand-owned files at the qualified modules named by the mapping declarations.
 
@@ -88,7 +90,9 @@ Use `mapped structural` when the checked declaration can own the complete privat
 
 Use `mapped opaque` when the consumer codec must remain authoritative or conversion can reject a valid declared shape. Opaque fixtures document and test the boundary but do not expose nested compatibility or scalar field witnesses.
 
-Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
+Use `mapped nominal`, a bound `id`, or a bound `enum` when the consumer type is a total isomorphism over a single scalar, ID, or closed enumeration — the binding then keeps the application type in direct command, event, and register fields. It requires language version 2 and carries its own obligations; see [consumer-owned nominal bindings](nominal-bindings.md).
+
+Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. Under language version 2 the generated expression modules use the same witnesses for checked dotted paths. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
 
 ## Use the complete CLI loop
 
@@ -97,6 +101,8 @@ Run these commands from the Git repository containing the specification:
 ```sh
 keiro-dsl new KIND
 keiro-dsl parse INPUT
+keiro-dsl pretty INPUT
+keiro-dsl inspect INPUT --format=json
 keiro-dsl check INPUT [--emit] [--explain-bindings] \
   [--coverage-report FILE] [--fail-on-opaque]
 keiro-dsl scaffold INPUT --out DIR \
@@ -111,7 +117,8 @@ keiro-dsl diff INPUT --since GIT-REF \
 
 - `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
 - `INPUT` is either one `.keiro` file or a `.keiro-workspace` manifest. Use the manifest whenever complete aggregates live in separate members; all file-taking commands operate on the composed service.
-- `parse` parses and pretty-prints the normalized service specification.
+- `parse` parses and pretty-prints the normalized service specification; `pretty` is the explicit alias for that canonical render. Neither one rewrites a source's language declaration.
+- `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
 - `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
 - `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
@@ -130,5 +137,8 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 - [Durable workflows](durable-workflows.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
 - [Composable service workspaces](service-workspaces.md)
+- [Keiro DSL language versions](language-versions.md)
+- [Aggregate scalar expressions and transition ownership](aggregate-expressions.md)
+- [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Typed field projections](../keiki/typed-field-projections.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)

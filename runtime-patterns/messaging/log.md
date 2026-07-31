@@ -1,5 +1,8 @@
 # messaging Update Log
 
+## 2026-07-31
+* **Update**: Process-manager boundary now cites the released 0.5.0.0 line
+
 ## 2026-07-29
 * **Update**: Process managers now name the released Keiro 0.4 boundary; re-reviewed and approved
 * **Review**: Recorded a model technical-accuracy review for all eleven concepts; approved ten, changes requested for process-managers (standard pins itself to the Keiro 0.3 released boundary; 0.4.0.1 is current)
