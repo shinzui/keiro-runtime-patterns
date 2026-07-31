@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "comment": "Upstream watermarks for the update-patterns skill. Each entry records the last upstream commit whose behaviour was reconciled with this catalog. Update last_checked_commit only after the affected concepts were re-read and corrected (or confirmed still correct).",
+  "sources": [
+    {
+      "project": "shinzui/keiki",
+      "uri": "mori://shinzui/keiki",
+      "branch": "master",
+      "subjects": ["keiki"],
+      "watch": ["keiki-core", "keiki-codec-json", "keiki-diagrams", "CHANGELOG.md"],
+      "last_checked_commit": "6807aac817fe53bbcc1b11b9e1a1b226bae14413",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline (keiki 0.4.0.0)."
+    },
+    {
+      "project": "shinzui/keiro",
+      "uri": "mori://shinzui/keiro",
+      "branch": "master",
+      "subjects": ["keiro", "architecture", "messaging"],
+      "watch": ["keiro", "keiro-core", "keiro-dsl", "keiro-pgmq", "CHANGELOG.md"],
+      "last_checked_commit": "430c3d2cca0f491697d7e67a85362b78718a50be",
+      "last_checked_at": "2026-07-30T01:11:55Z",
+      "notes": "Catalog-wide model review baseline (keiro 0.4.0.1 tags plus post-release workspace commits)."
+    },
+    {
+      "project": "shinzui/kiroku",
+      "uri": "mori://shinzui/kiroku",
+      "branch": "master",
+      "subjects": ["kiroku", "messaging"],
+      "watch": ["kiroku-store", "kiroku-metrics", "kiroku-otel", "migrations", "CHANGELOG.md"],
+      "last_checked_commit": "3009dda7238f7d05b1d0c97b04ec5d4c55031304",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline."
+    },
+    {
+      "project": "shinzui/shibuya",
+      "uri": "mori://shinzui/shibuya",
+      "branch": "master",
+      "subjects": ["messaging"],
+      "watch": ["shibuya", "shibuya-kiroku", "shibuya-pgmq", "CHANGELOG.md"],
+      "last_checked_commit": "172df245f40a454af46dd7f4cde855eaa4414c5a",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline."
+    },
+    {
+      "project": "shinzui/pgmq-hs",
+      "uri": "mori://shinzui/pgmq-hs",
+      "branch": "master",
+      "subjects": ["messaging"],
+      "watch": ["src", "CHANGELOG.md"],
+      "last_checked_commit": "b4cab751198b5012f025353610dfb4f3782c6eea",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline."
+    },
+    {
+      "project": "shinzui/pg-migrate",
+      "uri": "mori://shinzui/pg-migrate",
+      "branch": "master",
+      "subjects": ["migrations"],
+      "watch": ["src", "app", "CHANGELOG.md"],
+      "last_checked_commit": "f39d64e354818999667d345a1452f33eb4857fc1",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline."
+    },
+    {
+      "project": "shinzui/settei",
+      "uri": "mori://shinzui/settei",
+      "branch": "master",
+      "subjects": ["config"],
+      "watch": ["src", "CHANGELOG.md"],
+      "last_checked_commit": "b326814f9a676347e46d4e14aaf60ca9c322e507",
+      "last_checked_at": "2026-07-30T00:43:08Z",
+      "notes": "Catalog-wide model review baseline."
+    }
+  ]
+}
