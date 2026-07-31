@@ -1,6 +1,8 @@
 # keiki Update Log
 
 ## 2026-07-31
+* **Update**: Operator-clash guidance now matches the operator-conflicts preference for Recipe A
+* **Update**: Recipe A is now the preferred fix, with a worked guard example and the fixity rationale; owner review recorded
 * **Update**: Warning-constructor count now cites Keiki 0.6
 * **Update**: Overview targets Keiki 0.6 and records the 0.5/0.6 Natural, domain-constraint, and predicate-verification changes
 * **Update**: Opaque-guard audit now also reports unregistered arithmetic carriers, and fallbacks are domain-valid

@@ -274,7 +274,7 @@ If the service prelude re-exports `lens`/`generic-lens`, the bare `(.>)` conflic
 per module:
 
 ```haskell
--- A. hide and re-import (fine for a handful of operators)
+-- A. hide and re-import (the default)
 import MyService.Prelude hiding (Index, (.>))
 import Keiki.Core (lit, (.>), (.>=), (.+), (.-))
 
@@ -287,9 +287,11 @@ B.requireGt (B.reg @"availableIcuBeds") (lit 0)
 B.requireGe d.availableUnits           (lit 1)
 ```
 
-Prefer **C** (`B.requireGt`/`requireGe`/`requireLt`/`requireLe`/`requireEq`) when authoring
-a guard inside a `B.do` block — it never clashes and needs no import gymnastics. Reach for
-A or B only when building a compound `HsPred` value outside a builder. See
+Prefer **A**: the explicit import keeps every condition spelled as the arithmetic and
+comparison it is, whether it sits in a `B.do` block or in a compound `HsPred` built outside
+one, and Keiki's fixities match ordinary Haskell so the grouping needs no extra parentheses.
+Use B when a module's `hiding` list grows large enough to become the maintenance burden, and
+C for one or two simple in-builder comparisons. See
 [operator-conflicts.md](./operator-conflicts.md).
 
 ## Use `derive*All` Or `derive*With` Instead Of Manual Enumeration
@@ -468,8 +470,8 @@ timers around a keiki transducer. The complete hosted pattern will be documented
 - Author edges with `Keiki.Builder`.
 - Declare output intent on every edge with `emit`, `emitWith`, or `noEmit`.
 - Use `step` in the pure command runner; use `stepEither` where you need the rejection reason.
-- Use readable Keiki predicate and arithmetic operators (and the `B.requireGt`-style verbs
-  to dodge any lens operator clash).
+- Use readable Keiki predicate and arithmetic operators, hiding any clashing prelude name
+  and importing Keiki's explicitly.
 - Ensure emitted private events carry every command field read by guards or updates.
 - Add a `validateTransducer defaultValidationOptions transducer == []` test covering every
   default and unconditional check.
