@@ -2,7 +2,7 @@
 type: Pattern
 title: "Collections and Opaque Guards"
 description: "Modeling collections without losing solver verification through opaque guards"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-collections-and-opaque-guards
 tags: [keiki, collections-and-opaque-guards]
 status: current
@@ -88,9 +88,11 @@ B.requireGuard (TApp1 (all isResolved) (B.reg @"blockers")    .== lit True)
 ```
 
 These compile and *evaluate* correctly at runtime. But `Keiki.Symbolic.translateTermSym`
-turns the closure into an unconstrained free SBV variable, so the single-valuedness and
-dead-edge analyses **cannot see through the guard** and silently under-verify the edge. You
-get a green build that did not check what you think it did.
+turns the closure into a fresh SBV variable, so the single-valuedness and dead-edge analyses
+**cannot see through the guard** and silently under-verify the edge. You get a green build
+that did not check what you think it did. The fallback variable is constrained to the
+carrier's own domain — an opaque `Natural` term is still known non-negative — but that is a
+soundness floor, not verification of your predicate.
 
 ## Audit for them with `warnOpaqueGuards`
 
@@ -110,6 +112,12 @@ Each `OpaqueGuard` names the edge by `EdgeRef`. Consider asserting your aggregat
 *no unaudited* opaque guards, or at least reviewing each one. This call still runs all seven
 default checks; the list comprehension deliberately filters the combined result so this audit
 contains only `OpaqueGuard` findings.
+
+The audit is not limited to closures. It also reports a guard whose arithmetic runs at a
+carrier outside Keiki's symbolic numeric registry, because the translator gives that `TArith`
+the same fresh-variable treatment. Keep guard arithmetic on a registered carrier — `Int`,
+`Integer`, `Natural`, `Word8`/`Word16`/`Word32`/`Word64`, `Int32`, `Int64` — and match on the
+`OpaqueGuard` constructor rather than its detail text, which names no specific term shape.
 
 ## The sound options when you need an in-aggregate collection invariant
 
@@ -131,6 +139,10 @@ application layer), the options today are:
 3. **Counts and flags instead of structure.** Many "all resolved?" guards can be replaced by
    maintaining a scalar counter slot (`openBlockerCount`) updated structurally with
    `.+`/`.-`, and guarding `B.reg @"openBlockerCount" .== lit 0`. Fully verified, no closure.
+   Choose the counter's carrier deliberately: on `Natural`, `.-` is total monus and floors at
+   zero, so an unbalanced decrement reaches the "all resolved" guard instead of going
+   negative. Guard the decrement edge explicitly rather than relying on the carrier to
+   absorb it. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
 
 ## Quick reference
 
@@ -140,6 +152,7 @@ application layer), the options today are:
 | Guard "list is empty" | `B.reg @"xs" .== lit []` | ✅ |
 | Guard "k is a member" | application layer, or a count/flag slot | ✅ |
 | Guard "k is a member" via `Map.member` in a `TApp` | works at runtime, but **not** symbolically verified — audit with `warnOpaqueGuards` | ⚠️ |
+| Guard on arithmetic at an unregistered carrier | works at runtime, but translated opaquely — same audit flags it | ⚠️ |
 | Per-element lifecycle inside the aggregate | split the element into its own scalar aggregate | ✅ |
 
 ## Related Patterns

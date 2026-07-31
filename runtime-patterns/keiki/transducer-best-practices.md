@@ -2,7 +2,7 @@
 type: Standard
 title: "Keiki Transducer Best Practices"
 description: "Core rules for authoring Keiki transducers with the builder DSL"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-transducer-best-practices
 tags: [keiki, transducer-best-practices]
 status: current
@@ -248,6 +248,27 @@ B.slot @"availableIcuBeds" =: (B.reg @"availableIcuBeds" .- lit 1)
 B.slot @"reservedIcuBeds" =: (B.reg @"reservedIcuBeds" .+ lit 1)
 ```
 
+Guard arithmetic only at a carrier in Keiki's symbolic numeric registry — `Int`, `Integer`,
+`Natural`, `Word8`/`Word16`/`Word32`/`Word64`, `Int32`, `Int64`. Arithmetic at any other
+carrier still evaluates correctly but is translated to a fresh solver variable, and the
+opt-in audit reports it as an `OpaqueGuard`.
+
+On `Natural`, `.-` means **total monus**: `tsub a b` is `max 0 (a - b)` in concrete
+evaluation and `ite (a >= b) (a - b) 0` in the solver. It never calls partial `Natural`
+subtraction, so an over-decrement silently clamps to zero instead of throwing `Underflow`.
+That makes `Natural` the right carrier for a count that must not go negative, and the wrong
+one for a balance whose overdraft must be detectable:
+
+```haskell
+-- CORRECT: the guard, not the carrier, rejects the over-decrement.
+B.requireGt (B.reg @"reservedIcuBeds") (lit 0)
+B.slot @"reservedIcuBeds" =: (B.reg @"reservedIcuBeds" .- lit 1)
+
+-- WRONG: with a Natural register this edge cannot fail; it clamps at zero and
+-- replay reproduces the clamp, so the defect never surfaces.
+-- B.slot @"reservedIcuBeds" =: (B.reg @"reservedIcuBeds" .- d.releasedBeds)
+```
+
 If the service prelude re-exports `lens`/`generic-lens`, the bare `(.>)` conflicts (in
 `lens` it is optic composition; in Keiki it is greater-than). There are three fixes — pick
 per module:
@@ -326,6 +347,13 @@ Poor register slots:
 - Public integration envelopes.
 - Values that are only needed by a read model.
 - Large collections that the aggregate cannot update safely.
+
+Pick each slot's carrier for the invariant it must expose to the solver, not for
+convenience. A quantity that is non-negative by construction belongs in `Natural`, whose
+symbolic variables are constrained non-negative at every allocation and whose subtraction is
+total. A quantity whose negative values are meaningful, or whose overflow a proof depends
+on, belongs in `Integer` or a fixed-width type. Changing a register's carrier changes the
+register-file shape hash, so treat it as a snapshot-invalidating change.
 
 ## Be Careful With Whole-Collection Command Fields
 
@@ -447,8 +475,11 @@ timers around a keiki transducer. The complete hosted pattern will be documented
   default and unconditional check.
 - When a rich consumer-owned value stays whole, use a generated typed field projection only
   for eligible guard scalars; keep updates and outputs whole-value structural terms.
-- If the aggregate guards on collection contents through a `TApp`, run the
-  `warnOpaqueGuards = True` audit and confirm you understand each `OpaqueGuard`.
+- If the aggregate guards on collection contents through a `TApp`, or does arithmetic at a
+  carrier outside the symbolic numeric registry, run the `warnOpaqueGuards = True` audit and
+  confirm you understand each `OpaqueGuard`.
+- Guard every decrement of a `Natural` register explicitly; its subtraction clamps at zero
+  rather than failing.
 - Add command tests for rejected guards and accepted transitions.
 - Add a replay round-trip test with `replayEvents` or `reconstituteEither` for any edge that
   reads command fields in guards.

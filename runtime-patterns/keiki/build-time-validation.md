@@ -2,7 +2,7 @@
 type: Guide
 title: "Build-Time Validation of Keiki Transducers"
 description: "Asserting transducers and typed field projections are well-formed in CI with validateTransducer"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-build-time-validation
 tags: [keiki, build-time-validation]
 status: current
@@ -70,7 +70,7 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 
 ## Repair Each Structured Warning
 
-`TransducerValidationWarning` has eleven constructors in Keiki 0.4. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
+`TransducerValidationWarning` has eleven constructors in Keiki 0.6. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
 
 - `HiddenInput { tvwEdge, tvwInCtor, tvwMissingSlots, tvwDetail }` means an edge consumes command information that its output does not emit. Add the missing fields to the private event or stop reading them.
 - `HeadUnrecoverable { tvwEdge, tvwInCtor, tvwTailOnlySlots, tvwDetail }` means a later event in a multi-event edge carries a consumed field that the first event lacks. Streaming replay inverts only the head event, so move every replay-critical field onto that event.
@@ -79,14 +79,14 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 - `StateChangingEpsilon { tvwEdge, tvwChangesVertex, tvwWritesRegisters, tvwDetail }` means an output-free edge changes durable state. Emit an event or make the edge inert.
 - `NondeterministicPair { tvwSource, tvwEdgeA, tvwEdgeB, tvwInCtor, tvwDetail }` means two outgoing guards can hold for one command. Make them mutually exclusive; the runtime witness of this defect is `AmbiguousEdges`.
 - `PossiblyDeadEdge { tvwEdge, tvwDetail }` means the source vertex is structurally unreachable or the guard is statically unsatisfiable. Remove the edge or repair its source and guard.
-- `OpaqueGuard { tvwEdge, tvwDetail }` means the guard contains a `TApp` closure the symbolic analyses cannot inspect. Review and replace it with structural predicates, scalar facts, or an application-layer invariant.
+- `OpaqueGuard { tvwEdge, tvwDetail }` means the guard contains a term the symbolic translator must make opaque: a `TApp1`/`TApp2` closure, or a `TArith` whose carrier is outside the symbolic numeric registry. Review and replace it with structural predicates, a registered numeric carrier, scalar facts, or an application-layer invariant. Do not assert on the detail string; it names no specific constructor.
 - `ProjectionResultUnsupported { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionResultType, tvwDetail }` means a projected result lacks symbolic equality support. Expose a supported scalar or keep the predicate outside the transducer.
 - `ProjectionOrderingUnsupported { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionResultType, tvwDetail }` means the projected field supports equality but not ordered comparison. Use equality, expose an orderable scalar, or move the ordering decision outward.
 - `ProjectionOutsideGuard { tvwEdge, tvwProjectionPath, tvwProjectionShape, tvwProjectionLocation, tvwDetail }` means a projection appears in an update or output. Copy the whole owner or an ordinary scalar term there; projections are guard-only.
 
 ## Know What The Pure Determinism Pass Proves
 
-The pure pass proves overlap within supported conjunction spines. It understands constructor consistency, exact integral intervals for integral variables, and concrete literal witnesses for other types. It deliberately stays silent on disjunction, negation, arithmetic, opaque terms, variable-versus-variable comparisons, and non-integral strict-bound density.
+The pure pass proves overlap within supported conjunction spines. It understands constructor consistency, exact integral intervals for integral variables, and concrete literal witnesses for other types. `Natural` carries the exact interval `[0, ∞)`, so the pass can produce interior witnesses for it rather than only literal ones. It deliberately stays silent on disjunction, negation, arithmetic, opaque terms, variable-versus-variable comparisons, and non-integral strict-bound density.
 
 This direction has no false positives: every `NondeterministicPair` it reports is a real overlap. An empty result is not an exact proof for guards outside that fragment, so use the z3-backed checks when those constructs decide correctness.
 
@@ -129,7 +129,25 @@ checkDeadEdgesSym incidentTransducer
 
 These pure-looking APIs require the `z3` executable on `PATH` and throw if it is unavailable. Keep them in a dedicated test group while retaining the fast umbrella in every test run.
 
-Model numeric guards with the solver's representation in mind. Platform-sized `Int` is modeled as unbounded `Integer`; if a proof depends on overflow, use `Int32`, `Int64`, or a `Word*` type, whose fixed-width wraparound is modeled exactly. Solver uncertainty is conservative in 0.2: `Unknown`, `ProofError`, and every other non-definitive result do not prove disjointness or deadness. `satResultIsProvablyUnsat` returns `True` only for a definite unsatisfiable result.
+Model numeric guards with the solver's representation in mind. Platform-sized `Int` is modeled as unbounded `Integer`; if a proof depends on overflow, use `Int32`, `Int64`, or a `Word*` type, whose fixed-width wraparound is modeled exactly. `Natural` is modeled as an unbounded integer constrained non-negative at every allocation, and its subtraction is total monus in both evaluators; see [Keiki Transducer Best Practices](./transducer-best-practices.md). Solver uncertainty is conservative: `Unknown`, `ProofError`, and every other non-definitive result do not prove disjointness or deadness. `satResultIsProvablyUnsat` returns `True` only for a definite unsatisfiable result.
+
+## Never Read A Verification Result As A Bare Boolean
+
+When a test asks the solver about one predicate directly, use `verifyPredicate` rather than reducing a `SatResult` to `Bool` yourself. It refuses before invoking the solver when any node lacks an exact structural translation, so an opaque guard cannot masquerade as a proof:
+
+```haskell
+import Keiki.Symbolic (PredicateVerification (..), predicateTranslationExact, verifyPredicate)
+
+-- CORRECT: an inexact translation and an indefinite solver answer stay distinguishable.
+verifyPredicate reservationGuard >>= \case
+  VerifiedUnsatisfiable      -> pure ()          -- proved: the guard cannot hold
+  VerifiedSatisfiable        -> pure ()          -- proved: a witness exists
+  UnverifiedOpaque           -> failWith "guard is not structurally translatable"
+  UnverifiedSolverUnknown m  -> failWith m       -- Unknown, DeltaSat, SatExtField
+  UnverifiedSolverFailure m  -> failWith m       -- ProofError
+```
+
+Only the two `Verified*` constructors are evidence. Treat the three `Unverified*` constructors as an unproven model, never as a pass. Use `predicateTranslationExact` alone when a test asserts that a guard stays structural without paying for a solver run — it is stricter than `translatePred` accepting the predicate, because that translation substitutes fresh variables for unsupported pieces on purpose.
 
 ## Why Keiro Makes This Mandatory
 

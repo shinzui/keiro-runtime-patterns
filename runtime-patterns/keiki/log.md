@@ -1,5 +1,11 @@
 # keiki Update Log
 
+## 2026-07-31
+* **Update**: Overview targets Keiki 0.6 and records the 0.5/0.6 Natural, domain-constraint, and predicate-verification changes
+* **Update**: Opaque-guard audit now also reports unregistered arithmetic carriers, and fallbacks are domain-valid
+* **Update**: Validation covers verifyPredicate's explicit verification taxonomy and the widened opaque-guard audit
+* **Update**: Arithmetic authoring now names the symbolic numeric registry and Natural's total-monus subtraction
+
 ## 2026-07-29
 * **Update**: Overview's release digest now records 0.3.1.0's canonical control-state shape hashes; re-reviewed and approved
 * **Update**: Diagnosing rejected commands now reflects Live-edge forward filtering and step's rejection on ambiguity; re-reviewed and approved

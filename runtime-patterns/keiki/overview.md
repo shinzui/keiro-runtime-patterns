@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-31T16:04:17-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
@@ -33,7 +33,7 @@ reviews:
 
 # Keiki Patterns for Keiro Runtime Projects
 
-**Start here for prescriptive Keiki 0.4 transducer, replay, validation, composition, and private-event guidance.**
+**Start here for prescriptive Keiki 0.6 transducer, replay, validation, composition, and private-event guidance.**
 
 This corpus is the terse, agent-facing standard for keiki-backed state machines inside keiro services. It covers pure aggregates and orchestrator transducers; the hosted process-manager runtime, durable timers, and cross-service messaging belong to keiro and the messaging standards tracked separately by this initiative.
 
@@ -44,7 +44,7 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 
 ## Focused Guides
 
-- **[Build-Time Validation](./build-time-validation.md)** documents the configurable soundness checks, the unconditional projection checks, the opaque-guard audit, Keiro's reject-on-warning boundary, and solver escalation.
+- **[Build-Time Validation](./build-time-validation.md)** documents the configurable soundness checks, the unconditional projection checks, the opaque-guard audit, Keiro's reject-on-warning boundary, solver escalation, and the `verifyPredicate` verification taxonomy.
 - **[Typed Field Projections](./typed-field-projections.md)** explains when `regProj` and `inpProj` can expose decision scalars from consumer-owned records without flattening the model or losing symbolic checks.
 - **[Structured Replay and Hydration](./structured-replay-and-hydration.md)** covers `reconstituteEither`, resumable `replayEvents`, `InFlight`, and the complete structured failure taxonomy.
 - **[Diagnosing Rejected Commands](./diagnosing-rejected-commands.md)** uses `stepEither` and `StepFailure` to distinguish normal refusal from ambiguous-transition defects.
@@ -55,8 +55,13 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - **[Resolving Operator Conflicts](./operator-conflicts.md)** gives three import patterns for keiki's predicate operators alongside `lens` and `generic-lens`.
 - **[Keiki Diagram Documentation](./diagram-docs.md)** generates and validates Mermaid atlases and edge inspectors from executable transducers.
 
-## What Changed Through Keiki 0.4.0.0 (2026-07)
+## What Changed Through Keiki 0.6.0.0 (2026-07)
 
+- Keiki 0.6 makes structural `Natural` subtraction **total monus** — `a - b = max 0 (a - b)`, lowered as `ite (a >= b) (a - b) 0` — in both concrete and symbolic evaluation. It is a breaking semantic fix: a `Natural` register decrement now clamps at zero instead of throwing `Underflow`. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
+- Keiki 0.6 adds `verifyPredicate`, `PredicateVerification`, and `predicateTranslationExact`, which keep an inexact translation and an indefinite solver answer distinguishable from a proof. See [Build-Time Validation](./build-time-validation.md).
+- Keiki 0.6 moves `Natural` into the symbolic numeric registry, so the opt-in opaque audit no longer reports its arithmetic. That audit now covers any `TArith` whose carrier is *outside* the registry, not only `TApp` closures, and its detail text no longer names a constructor. See [Collections and Opaque Guards](./collections-and-opaque-guards.md).
+- Keiki 0.5 admits `Natural` as a symbolic scalar with a pinned `CanonicalTypeName` and equality/ordering support, constrained non-negative wherever a symbolic variable is allocated. `Sym.constrainSymDomain` is the seam that states such a domain invariant; it has a default, so existing hand-written `Sym` instances still compile.
+- Keiki 0.5 also applies that domain constraint to opaque fallbacks, so a term the translator cannot see through is now a fresh *domain-valid* variable rather than an unconstrained one — a soundness floor, not verification.
 - Keiki 0.4 adds nominal, solver-visible `FieldProjection` witnesses over direct register and matched-input owners. They are guard-only, validated against the symbolic type registry, and designed for schema-derived generators such as Keiro-dsl. See [Typed Field Projections](./typed-field-projections.md).
 - `validateTransducer` now adds three unconditional projection-integrity warnings to the seven configured soundness checks and the opt-in opaque audit. See [Build-Time Validation](./build-time-validation.md).
 - `composeChecked` reports `NonStructuralProjectionBoundary` when composition would lower a structural getter to opaque application logic. See [Checked Composition](./checked-composition.md).
