@@ -2,7 +2,7 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including composable service workspaces, brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -90,7 +90,7 @@ Use `mapped structural` when the checked declaration can own the complete privat
 
 Use `mapped opaque` when the consumer codec must remain authoritative or conversion can reject a valid declared shape. Opaque fixtures document and test the boundary but do not expose nested compatibility or scalar field witnesses.
 
-Use `mapped nominal`, a bound `id`, or a bound `enum` when the consumer type is a total isomorphism over a single scalar, ID, or closed enumeration — the binding then keeps the application type in direct command, event, and register fields. It requires language version 2 and carries its own obligations; see [consumer-owned nominal bindings](nominal-bindings.md).
+Use `mapped nominal`, a bound `id`, or a bound `enum` when the consumer type is a total isomorphism over a single scalar, ID, or closed enumeration — the binding then keeps the application type in direct command, event, and register fields. It requires language version 2 and carries its own obligations; see [consumer-owned nominal bindings](nominal-bindings.md). Every generated service-level ID and enum has one owner module, `Generated.<Context>.Nominals`; import constructors from there rather than from an aggregate `Domain`.
 
 Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. Under language version 2 the generated expression modules use the same witnesses for checked dotted paths. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
 
@@ -103,6 +103,7 @@ keiro-dsl new KIND
 keiro-dsl parse INPUT
 keiro-dsl pretty INPUT
 keiro-dsl inspect INPUT --format=json
+keiro-dsl behavior-obligations INPUT --format=text|json
 keiro-dsl check INPUT [--emit] [--explain-bindings] \
   [--coverage-report FILE] [--fail-on-opaque]
 keiro-dsl scaffold INPUT --out DIR \
@@ -119,6 +120,7 @@ keiro-dsl diff INPUT --since GIT-REF \
 - `INPUT` is either one `.keiro` file or a `.keiro-workspace` manifest. Use the manifest whenever complete aggregates live in separate members; all file-taking commands operate on the composed service.
 - `parse` parses and pretty-prints the normalized service specification; `pretty` is the explicit alias for that canonical render. Neither one rewrites a source's language declaration.
 - `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
+- `behavior-obligations` inventories every live transition, reachable rejection cell, and replay-only transition of the composed service, for a file or a workspace. See [behavior conformance and obligations](behavior-conformance.md).
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
 - `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
 - `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
@@ -132,6 +134,8 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 ## Related Patterns
 
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
+- [Behavior conformance and obligations](behavior-conformance.md)
+- [Enforced identifier domains](identifier-domains.md)
 - [Runtime assembly](runtime-assembly.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Durable workflows](durable-workflows.md)

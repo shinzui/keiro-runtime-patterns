@@ -35,9 +35,9 @@
         "keiro-pgmq",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "9177930aa9c1125d08d27da31f4a78254ae5dba4",
-      "last_checked_at": "2026-07-31T23:16:22Z",
-      "notes": "Reconciled through keiro 0.6.0.0 (release commit 9177930, tagged as one five-package set): the source-language contract, consumer-owned nominal bindings, and authoritative version-2 scalar aggregate expressions were added as new concepts; 0.5.0.0's service workspaces were already covered. Runtime packages carry no behaviour change beyond keiki >=0.6 bounds and keiro-core's new Keiro.Codec.Nominal; the bulk of the diff is the Fourmolu reformat."
+      "last_checked_commit": "80cd51516da513d530e4631d92a5f1350a0d38d9",
+      "last_checked_at": "2026-08-03T03:09:32Z",
+      "notes": "Reconciled through keiro 0.8.0.0 (release commit 80cd515), deliberately NOT master head. 0.7: language version 3 on the frozen keiro-dsl/id-domain/typeid-v7/1 contract (new keiro-core Keiro.Codec.IdDomain), one Generated.<Context>.Nominals owner with abstract v3 IDs, the CheckedService/EffectiveLanguageContract boundary, behavior obligations and the keiro/behavior-conformance/1 report, generated fields(Command) identity, AggregateEventlessStateChange, and keiki >=0.7 with its widened UnverifiedOpaque surface. 0.8: explicit syntax-profile and runtime-semantics selection per registry entry, LanguageDefinition (..), and the located Keiro.Dsl.Source/Syntax/Frontend API. Master carries unreleased 0.9-bound work (language 4, FNV-1a-128 fold fingerprints, Either FoldSurfaceError service APIs, removal of the Spec-only wrappers) that is excluded until it releases."
     },
     {
       "project": "shinzui/kiroku",

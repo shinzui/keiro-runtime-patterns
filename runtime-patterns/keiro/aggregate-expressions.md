@@ -2,7 +2,7 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring version-2 guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -70,7 +70,15 @@ For each version-2 aggregate the scaffolder emits two generated modules:
 - `Generated.<Context>.<Aggregate>.Expressions` — one typed Keiki predicate per declared guard and one typed Keiki term per register write;
 - `Generated.<Context>.<Aggregate>.Transducer` — the assembled transducer, the aggregate fold fingerprint, `BehaviorOwnership (GeneratedOwned | HoleOwned)`, and an aggregate-specific `<aggregate>PredicateVerifications` action.
 
-Generated ownership is the default and it is exclusive: no hand-owned module may replace a generated guard or write. Event-output field constructors remain create-once hooks in both ownership modes.
+Generated ownership is the default and it is exclusive: no hand-owned module may replace a generated guard or write.
+
+Explicit event fields remain hand-owned, but from Keiro 0.7 a version-2 `fields(Command)` event value is generated directly from a checked total identity mapping. Direct, aliased-wire, optional, nominal, `Time`, `Natural`, and structural fields no longer pass through a create-once identity-copy hook. An identity function left over from an earlier scaffold is reported as obsolete and cannot affect runtime execution — delete it rather than maintaining it.
+
+## Emit an event for every state change
+
+A version-2 transition that emits no event may no longer change control state or write registers. `check` rejects it with `AggregateEventlessStateChange`; an empty accepted edge is legal only as a true no-op. The companion code `EventOutputCommandMismatch` rejects an event output that disagrees with the command it claims to carry.
+
+Both are append-only `DiagnosticCode` constructors, so an exhaustive match over the code set must be extended. The rule they enforce is the same durability invariant Keiki's `StateChangingEpsilon` warning protects: a change with no event leaves nothing for replay to reproduce.
 
 ## Mark a hand-owned transition explicitly
 
@@ -93,6 +101,10 @@ That transition may not also carry `guard` or `write` clauses; mixing them is a 
 
 Read the result honestly: an opaque hole predicate is reported `UnverifiedOpaque`, which is the correct answer, not a failure to fix by weakening the assertion. Assert that generated-owned transitions verify and that the hole-owned set is exactly the set you intended to hand-own. See [build-time validation](../keiki/build-time-validation.md) for the verification taxonomy.
 
+From Keiro 0.7 the set of transitions reported `UnverifiedOpaque` is **larger**, because Keiki 0.7 classifies a predicate that crosses a one-way generated projection conservatively. A guard that reported `Verified*` under Keiro 0.6 can report `UnverifiedOpaque` now with no change to the spec. Runtime stepping and replay are unchanged. Restore proof strength by giving the projection an [exact domain](../keiki/exact-projection-domains.md) with its reverse witness — never by relabelling the result.
+
+Predicate verification covers guards. For coverage of the transitions themselves — every live transition, every reachable rejection, every replay-only edge — use the generated [behavior-conformance](behavior-conformance.md) report.
+
 ## Migrate to version 2 by hand
 
 Version-1 generated output is frozen, and version-1 whole-transducer holes are unchanged. The scaffolder never overwrites or claims to translate consumer behavior, so moving an aggregate to version 2 means rewriting its guards and writes in the spec and deleting the hand-owned logic they replace. Do it one aggregate at a time, and prove each with the replay audit before deleting the code it supersedes.
@@ -101,6 +113,7 @@ Version-1 generated output is frozen, and version-1 whole-transducer holes are u
 
 - [Keiro DSL language versions](language-versions.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
+- [Behavior conformance and obligations](behavior-conformance.md)
 - [Keiro-dsl adoption](dsl-adoption.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)

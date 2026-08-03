@@ -2,7 +2,7 @@
 type: Standard
 title: "Consumer-owned nominal bindings"
 description: "Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-nominal-bindings
 tags: [keiro, nominal-bindings]
 status: current
@@ -55,9 +55,17 @@ Every ingredient is required and qualified. `check` reports a missing or malform
 
 The generated layer imports the application type. Do not introduce a second wrapper to satisfy the DSL.
 
+## Import service-level IDs and enums from `Nominals`
+
+From Keiro 0.7 every generated service-level ID and enum has exactly one deterministic Haskell owner: the context-level `Generated.<Context>.Nominals` module. They are no longer redeclared in each aggregate `Domain`, so a hand-owned module that constructs one must import it from `Nominals` explicitly.
+
+Ownership is stable by construction. Each aggregate ring imports only the declarations it actually uses, an unused declaration is not imported into an unrelated domain, and reordering workspace members or moving a declaration between them leaves generated nominal type identity unchanged. Re-scaffolding overwrites only generated files; event wire bytes and canonical nominal identities do not move.
+
+Under version 3 the generated IDs in that module are abstract — use `parseX`, `mkX`, and `xText`, never the raw constructor. See [enforced identifier domains](identifier-domains.md).
+
 ## Know which representation each kind crosses
 
-- A bound **ID** crosses a typed `KindID "prefix"`. The generated decoder validates the ID text and its prefix before constructing the consumer value. Bound IDs add `mmzk-typeid` to the generated package requirements.
+- A bound **ID** crosses a typed `KindID "prefix"`. The generated decoder validates the ID text and its prefix before constructing the consumer value. Bound IDs add `mmzk-typeid` to the generated package requirements. Under [language version 3](identifier-domains.md) the value is additionally checked against the enforced TypeID-v7 domain *before* the binding conversion runs, and the generated harness adds exact-projection, fixture-domain, distinct-representation, wrong-prefix, and normalization probes.
 - A bound **enum** crosses a generated closed private representation. Decoding admits only the declared wire spellings; an unknown spelling is rejected, never defaulted.
 - A **nominal scalar** crosses exactly one of `Text`, `Int`, `Natural`, `Bool`, or `Time`.
 
@@ -84,6 +92,8 @@ Discharge it before shipping:
 2. Run the targeted replay audit for that event with `--replay-impact-out` and `AuditTargeted`.
 3. Only then switch the binding on in production.
 
+Moving the same ID onto the version-3 identifier domain is a *different*, heavier change reported as `IdDomainContractChanged`; it breaks public consumers and requires a producer-last rollout. Do not fold the two audits together. See [enforced identifier domains](identifier-domains.md).
+
 The other nominal diff codes carry the weight their surface implies: `NominalRepresentationChanged` is wire-breaking; `NominalBindingChanged` points at the binding laws, fixtures, and replay evidence because the change is not inspectable from spec text; `NominalInitialChanged` and `NominalCanonicalTypeChanged` reach the snapshot and consumer-build surfaces; `NominalFixturesChanged` records the evidence change. Branch on the code, never the sentence.
 
 ## Keep provenance in the record
@@ -93,6 +103,7 @@ Nominal consumer provenance is fingerprinted and diff-visible. Scaffold and work
 ## Related Patterns
 
 - [Keiro DSL language versions](language-versions.md)
+- [Enforced identifier domains](identifier-domains.md)
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
 - [Keiro-dsl adoption](dsl-adoption.md)

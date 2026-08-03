@@ -2,7 +2,7 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -59,6 +59,8 @@ For a workspace, `diff` reconstructs the old manifest and old member set from Gi
 
 Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, `WorkspaceAuthorityChanged` — not on the human-readable explanation.
 
+`IdDomainContractChanged` arrived with language version 3 and is the sharpest of the mapped-declaration codes: it is compatible on `private-history-read`, `old-binary-read-new-events`, and `persisted-identity`; advisory on `snapshot-hydration` and `consumer-build`; **breaking** on `public-consumer`; and it carries a producer-last rollout constraint. Old history stays readable through an internal legacy decoder while current command and public decoding reject the same text, so the rollout order is the whole safety argument. See [enforced identifier domains](identifier-domains.md).
+
 Three more code families arrived with the version-2 source language. `SourceLanguageDeclarationChanged` is a declaration-only change: an all-compatible vector and no semantic action. The nominal family lands on the surface its change actually reaches — `NominalRepresentationChanged` is wire-breaking, `NominalBindingChanged` points at binding laws and replay evidence, `NominalInitialChanged` and `NominalCanonicalTypeChanged` reach snapshot and consumer-build, and `NominalIdDecoderTightened` is an advisory that still obliges a committed old-payload fixture and a targeted audit. See [consumer-owned nominal bindings](nominal-bindings.md) and [Keiro DSL language versions](language-versions.md).
 
 ## Gate transducer changes with a targeted replay audit
@@ -98,6 +100,7 @@ The rule is one sentence: inventory every durable value whose decoder or decisio
 - **Timer payloads, integration contracts, and workflow step results have no automatic migration.** Firers and consumers learn new shapes before producers write them, old decoders stay until backlogs drain, and a changed workflow step result gets a **new step name** rather than a changed type.
 - **Every aggregate append goes through the codec boundary.** A direct Kiroku write without `encodeForAppend` is stamped version 1 forever, and the first codec bump then runs a current-shape payload through the version-1 upcaster chain.
 - **Structural mapping changes preserve one wire authority.** The `.keiro` declaration and generated codec own current private-event JSON. A historical codec is test or upcaster machinery only; never route current decode failures through it. Snapshot JSON remains a separate cache boundary and must not be described as generated structural event encoding.
+- **Adopting the version-3 identifier domain deploys consumers first.** Every reader that must accept the tightened ID form goes out before the producer starts emitting under it, and old snapshots are expected to miss and rebuild rather than be edited. See [enforced identifier domains](identifier-domains.md).
 - **A changed version-2 hole must bump its `FoldVersion`.** The aggregate fold fingerprint incorporates each hole's token, so bumping it invalidates stale snapshots. Change hole predicate or update behavior without the bump and the fingerprint stays equal, the differ sees nothing, and every existing snapshot is silently trusted against logic that no longer produced it. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
 
 `mkEventStreamUnchecked` skips every gate at the stream boundary. It is emergency forensics, never a rollout workaround.
@@ -107,6 +110,8 @@ For the full narrative and per-rule failure modes, see the keiro repo's `docs/gu
 ## Related Patterns
 
 - [Keiro-dsl adoption](dsl-adoption.md)
+- [Enforced identifier domains](identifier-domains.md)
+- [Behavior conformance and obligations](behavior-conformance.md)
 - [Runtime assembly](runtime-assembly.md)
 - [Read models and projections](read-models-and-projections.md)
 - [Event schema evolution](../keiki/event-schema-evolution.md)

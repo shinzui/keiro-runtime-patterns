@@ -54,7 +54,13 @@ need the surrounding rules.
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
   the language contract; use
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
-  enum, or scalar-wrapper types must appear in checked aggregate fields.
+  enum, or scalar-wrapper types must appear in checked aggregate fields; and
+  [enforced identifier domains](keiro/identifier-domains.md) before moving a
+  prefix-bearing ID onto version 3.
+- **Proving an aggregate behaves as declared:** use
+  [behavior conformance and obligations](keiro/behavior-conformance.md) to
+  inventory every transition, rejection, and replay-only edge and gate CI on the
+  generated report.
 - **Adopting Keiro in an existing service:** follow
   [brownfield Keiro adoption](keiro/brownfield-adoption.md) to inventory stored
   bytes, map existing types, compare codecs, prove replay, and cut over without

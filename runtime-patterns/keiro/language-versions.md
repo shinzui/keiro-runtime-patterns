@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Keiro DSL language versions"
-description: "Declaring an explicit language keiro-dsl preamble, choosing between version 1 and version 2, and auditing legacy-unversioned sources"
-timestamp: 2026-07-31T16:04:17-07:00
+description: "Declaring an explicit language keiro-dsl preamble, choosing among versions 1 through 3, and auditing legacy-unversioned sources"
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -27,14 +27,40 @@ Failures at this boundary are reported before any body grammar runs, with their 
 
 ## Choose the version by the syntax the service actually needs
 
-| Version | Admits |
-|---|---|
-| 1 | The frozen released grammar as of Keiro 0.6.0.0. Aggregate transitions keep the create-once whole-transducer hole. |
-| 2 | Everything in version 1, plus [consumer-owned nominal bindings](nominal-bindings.md) and [authoritative typed scalar aggregate expressions](aggregate-expressions.md) with explicit per-transition ownership. |
+| Version | Syntax profile | Runtime semantics | Admits |
+|---|---|---|---|
+| 1 | `keiro-dsl/syntax-profile/1` | `keiro-dsl/runtime-semantics/1` | The frozen released grammar as of Keiro 0.6.0.0. Aggregate transitions keep the create-once whole-transducer hole. |
+| 2 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/1` | Everything in version 1, plus [consumer-owned nominal bindings](nominal-bindings.md) and [authoritative typed scalar aggregate expressions](aggregate-expressions.md) with explicit per-transition ownership. |
+| 3 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/2` | Version 2's grammar exactly, with every prefix-bearing ID moved onto the enforced [TypeID-v7 identifier domain](identifier-domains.md) and made abstract in generated code. |
 
-Stay on version 1 when the service uses neither. Version 1 is not deprecated, and moving a source to version 2 changes generated output — it is a scaffolding change, not a formatting one.
+Stay on version 1 when the service needs neither the version-2 grammar nor the enforced ID domain. Version 1 is not deprecated, and moving a source across any version changes generated output — it is a scaffolding change, not a formatting one.
+
+Version 3 is the clearest case that syntax and runtime behavior are separate axes: it admits exactly the same grammar as version 2 and still changes what the runtime accepts. Read the two identifiers, not the version number.
 
 A version-1 or legacy source that uses version-2 syntax fails with `LanguageFeatureRequiresVersion` at the language boundary. A well-formed but unsupported future version fails with `UnsupportedLanguageVersion` before its body is read, so a newer file never produces a misleading body-grammar error.
+
+## Query the registry instead of hardcoding version numbers
+
+From Keiro 0.8 every registry entry selects an immutable `SyntaxProfile` and a runtime-semantics identity explicitly; nothing is inherited from numeric ordering, so version 3 reusing version 2's profile is a stated fact rather than an accident of arithmetic. Tooling must read the registry:
+
+- `syntaxProfileIdentifier` and `syntaxProfileSupportsFeature` for what a profile admits;
+- `languageVersionsSupportingFeature` for every version that owns a `LanguageFeature`, and `languageFeatureMinimumVersion` for the first;
+- `languageSupportsFeature` for the direct question about one version;
+- `sourceLanguageDiagnosticMessage` for the message behind a `SourceLanguageErrorCode`.
+
+`LanguageDefinition` is exported with all its fields, which makes positional construction and non-wildcard record patterns fail to compile — match with a wildcard. `definitionBodyParser` survives only as a compatibility projection and no longer drives parser dispatch; never branch on it.
+
+## Carry the checked contract, not a bare `Spec`
+
+The semantic input downstream of parsing is `CheckedService` — a normalized graph paired with the `EffectiveLanguageContract` it was checked under. The CLI retains it through validation, scaffold and harness planning, fold fingerprints, diff, replay-impact analysis, inspection JSON, and scaffold-record rows.
+
+Use it in any tooling built on `keiro-dsl`. The `Spec`-only entry points are explicit legacy/version-1 compatibility wrappers around `legacyCheckedService`; calling one silently asserts the version-1 contract, which is wrong for a version-3 source. Grammar-only differences between versions 1 and 2 preserve generated and fold bytes because both select `runtime-semantics/1`; a contract that changes runtime behavior contributes its own fingerprint discriminator through `runtimeSemanticsFingerprintSegment`.
+
+## Reach for the located frontend only for source tooling
+
+Keiro 0.8 publishes `Keiro.Dsl.Source`, `Keiro.Dsl.Syntax`, and `Keiro.Dsl.Frontend` as an advanced API: an ordered, located `SurfaceSource` with exact half-open spans and structured failures carrying a phase (source selection, body parsing, lowering), a stable code, a primary span, a message, expected items, and supported-version metadata. Megaparsec types stay internal.
+
+This is for editors, linters, and diagnostics renderers. Ordinary services keep using `parseSource`, `parseSpec`, and `parseSpecText`, whose behavior and rendered diagnostics are unchanged. Canonical pretty printing remains non-lossless — the located layer retains neither comments nor whitespace — so do not build a formatter that promises to preserve them.
 
 ## Treat an undeclared source as legacy, and audit it
 
@@ -74,6 +100,8 @@ Scaffold and workspace records carry additive source-language rows. A record wri
 - [Keiro-dsl adoption](dsl-adoption.md)
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
+- [Enforced identifier domains](identifier-domains.md)
+- [Behavior conformance and obligations](behavior-conformance.md)
 - [Composable service workspaces](service-workspaces.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)

@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of prescriptive Keiro runtime and DSL standards; start here"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -33,13 +33,20 @@ reviews:
 
 # Keiro runtime patterns
 
-**Prescriptive defaults for assembling reliable services on the released Keiro 0.6.0.0 set and Keiki 0.6.**
+**Prescriptive defaults for assembling reliable services on the released Keiro 0.8.0.0 set and Keiki 0.7.**
 
-Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 through 0.4 behavior remains foundational, while 0.5 and 0.6 add composable multi-file service workspaces, an explicit DSL language-version contract, consumer-owned nominal bindings, and authoritative typed scalar aggregate expressions.
+Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 through 0.4 behavior remains foundational, while 0.5 through 0.8 add composable multi-file service workspaces, an explicit DSL language-version contract, consumer-owned nominal bindings, authoritative typed scalar aggregate expressions, an enforced identifier domain, and complete aggregate behavior conformance.
 
-Keiro 0.6.0.0 is the current release. All five packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, and `keiro-migrations` — move together and are tagged upstream as one set; mixed versions across that set are unsupported. Upgrade the whole set at once and verify the registry and upstream tags before choosing bounds.
+Keiro 0.8.0.0 is the current release. All five packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, and `keiro-migrations` — move together and are tagged upstream as one set; mixed versions across that set are unsupported. Upgrade the whole set at once and verify the registry and upstream tags before choosing bounds.
 
-Two cycles arrived in quick succession. 0.5.0.0 was entirely `keiro-dsl`: composable service workspaces, now released rather than checkout-only. 0.6.0.0 is dominated by `keiro-dsl` again — the source-language contract, nominal bindings, and scalar aggregate expressions — while `keiro-core` gains the public `Keiro.Codec.Nominal` binding and fixture API (re-exported from `keiro`, so generated consumers keep one direct dependency) and both move to `keiki >=0.6 && <0.7`. `keiro` and `keiro-pgmq` take `keiro-core ^>=0.6.0.0`. Beyond those bounds and the new codec surface, the runtime packages carry no behavior change from 0.4.0.1.
+Four cycles arrived in quick succession, and every one of them is dominated by `keiro-dsl`:
+
+- **0.5.0.0** released composable service workspaces.
+- **0.6.0.0** added the source-language contract, nominal bindings, and scalar aggregate expressions; `keiro-core` gained the public `Keiro.Codec.Nominal` binding and fixture API.
+- **0.7.0.0** added [language version 3](language-versions.md) with the enforced [TypeID-v7 identifier domain](identifier-domains.md), one deterministic `Generated.<Context>.Nominals` owner for every service-level ID and enum, the `CheckedService`/`EffectiveLanguageContract` semantic boundary, and complete [behavior conformance](behavior-conformance.md). `keiro-core` gained the public `Keiro.Codec.IdDomain` contract, re-exported from `keiro`.
+- **0.8.0.0** is a `keiro-dsl`-only cycle: the grammar moved behind the stable `Keiro.Dsl.Parser` facade, the located `Keiro.Dsl.Source`/`Syntax`/`Frontend` API was published, and every registry entry now selects its syntax profile and runtime-semantics identity explicitly instead of inheriting them from numeric version ordering. `keiro-core`, `keiro`, `keiro-pgmq`, and `keiro-migrations` are unchanged and move with the set.
+
+The whole set requires `keiki >=0.7 && <0.8`. That bound carries a behavioral consequence: Keiki 0.7 classifies a predicate crossing a one-way generated projection conservatively, so symbolic verification may report `UnverifiedOpaque` where an earlier release reported a verified result. Command execution and replay are unchanged, and conformance tooling must preserve the unverified classification rather than relabel it. Beyond the bounds and the two new `keiro-core` codec surfaces, the runtime packages carry no behavior change from 0.4.0.1.
 
 The 0.4 line changed three runtime surfaces incompatibly and those rules still apply: `scheduleTimerOnceTx` returns `Bool`, `markChildFailedTx` takes a failure reason, and `StateCodec` gains `stateShapeHash`.
 
@@ -52,9 +59,11 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Runtime assembly](runtime-assembly.md) — acquire resources, validate event streams, and configure options.
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.
 - [Keiro-dsl adoption](dsl-adoption.md) — decide when checked specifications and the evolution gate pay off.
-- [Keiro DSL language versions](language-versions.md) — declare the source language, choose between version 1 and version 2, and audit legacy sources.
+- [Keiro DSL language versions](language-versions.md) — declare the source language, choose among versions 1 through 3, and carry the checked contract through tooling.
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) — declare guards and writes that generate the transducer, and mark what stays hand-owned.
 - [Consumer-owned nominal bindings](nominal-bindings.md) — keep existing ID, enum, and scalar-wrapper types in checked aggregate fields.
+- [Enforced identifier domains](identifier-domains.md) — put prefix-bearing IDs on the frozen TypeID-v7 contract and roll the adoption out producer-last.
+- [Behavior conformance and obligations](behavior-conformance.md) — inventory every transition, rejection, and replay-only edge, and prove each with an executed witness.
 - [Composable service workspaces](service-workspaces.md) — split complete aggregates across single-owner members while keeping one atomic scaffold and evolution boundary.
 - [Brownfield Keiro adoption](brownfield-adoption.md) — keep existing types and historical wire values while moving to one generated codec authority and a replay-audited cutover.
 - [Command cycle and errors](command-cycle-and-errors.md) — classify command failures and reject ambiguity as a definition bug.
@@ -70,3 +79,4 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Kiroku event-store patterns](../kiroku/overview.md)
 - [Keiki transducer patterns](../keiki/overview.md)
 - [Typed field projections](../keiki/typed-field-projections.md)
+- [Exact projection domains](../keiki/exact-projection-domains.md)

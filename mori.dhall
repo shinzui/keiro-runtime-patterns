@@ -374,7 +374,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Declaring the language keiro-dsl preamble, choosing version 1 or 2, and auditing legacy-unversioned sources"
+            "Declaring the language keiro-dsl preamble, choosing among versions 1 through 3, and carrying the checked contract through tooling"
         , location = Schema.DocLocation.LocalFile
             "runtime-patterns/keiro/language-versions.md"
         }
@@ -395,6 +395,24 @@ in  Schema.Project::{
             "Binding consumer-owned IDs, enums, and scalar wrappers with total isomorphisms, fixtures, and a decoder-tightening audit"
         , location = Schema.DocLocation.LocalFile
             "runtime-patterns/keiro/nominal-bindings.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-identifier-domains"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The frozen TypeID-v7 admission contract for version-3 prefix-bearing IDs and its producer-last rollout"
+        , location = Schema.DocLocation.LocalFile
+            "runtime-patterns/keiro/identifier-domains.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-behavior-conformance"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Inventorying every aggregate behavior obligation and proving each one with an executed typed witness"
+        , location = Schema.DocLocation.LocalFile
+            "runtime-patterns/keiro/behavior-conformance.md"
         }
       , Schema.DocRef::{
         , key = "keiro-service-workspaces"

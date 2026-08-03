@@ -1,5 +1,15 @@
 # keiro Update Log
 
+## 2026-08-03
+* **Update**: Overview targets the Keiro 0.8.0.0 set on Keiki 0.7 and digests the 0.7 and 0.8 cycles
+* **Update**: Adoption guide adds behavior-obligations to the CLI loop and points nominal imports at the Nominals module
+* **Update**: Evolution gates document the IdDomainContractChanged vector and its consumers-first deployment rule
+* **Update**: Aggregate expressions cover generated fields(Command) identity, eventless state-change rejection, and widened conservative verification
+* **Update**: Nominal bindings record the single Nominals owner module and the version-3 abstract identifier API
+* **Update**: Language versions cover version 3, explicit syntax profiles and runtime semantics, CheckedService, and the located frontend
+* **Added**: Behavior conformance defines the obligation inventory, typed witnesses, and the CI gate for declared aggregates
+* **Added**: Enforced identifier domains define the version-3 TypeID-v7 admission contract and its producer-last rollout
+
 ## 2026-07-31
 * **Update**: Evolution gates cover the nominal and source-language diff codes and the hole FoldVersion obligation
 * **Update**: Workspace members must select one effective language version
