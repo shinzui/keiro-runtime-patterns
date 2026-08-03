@@ -2,7 +2,7 @@
 type: Guide
 title: "Keiki Diagram Documentation"
 description: "Generating Mermaid diagrams, atlas sections, and edge inspectors from transducers"
-timestamp: 2026-07-22T09:35:21-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-diagram-docs
 tags: [keiki, diagram-docs]
 status: current
@@ -26,23 +26,38 @@ reviews:
 
 Use Keiki's Mermaid and edge-inspector renderers for aggregates and orchestrator transducers. Check the generated Markdown into each service, regenerate it after state-machine changes, and validate the rendered structure in tests.
 
-## Render Readable Mermaid
+## Take The Readable Default
 
-Prefer `toMermaidWith` with readable guards and multiline labels:
+From Keiki 0.8 readable output is the default, not an opt-in. `toMermaid` and every no-options shape renderer use `defaultMermaidOptions`: pretty guards, complete register assignments, multiline labels, and no truncation. Render with the plain entry point unless a diagram has a specific reason to say less.
 
 ```haskell
-annotatedMermaidOptions =
+toMermaid reservationTransducer
+```
+
+This renders domain labels and register comparisons instead of structural tags such as `PAnd`, `PEq`, and `PCmp`. Use `toMermaidWithLabels` when Haskell state constructors are not suitable visible labels; keep the Mermaid state IDs stable and ASCII.
+
+Reach for `toMermaidWith` only to narrow the default — for example to bound label width on a dense machine:
+
+```haskell
+boundedMermaidOptions =
   defaultMermaidOptions
-    { showWrittenSlots = True
-    , guardMode = MermaidGuardPretty
-    , labelLayout = MermaidLabelMultiline
-    , maxInlineWrittenSlots = Just 6
+    { maxInlineWrittenSlots = Just 6
     , maxInlineGuardWidth = Just 120
     , outputLayout = MermaidOutputMultiline
     }
 ```
 
-This renders domain labels and register comparisons instead of structural tags such as `PAnd`, `PEq`, and `PCmp`. Use `toMermaidWithLabels` when Haskell state constructors are not suitable visible labels; keep the Mermaid state IDs stable and ASCII.
+`MermaidOptions` no longer has `showWrittenSlots` or `showGuardSummary`. Their replacements are the two mode fields: `updateMode = MermaidUpdateWrittenSlots` for slot names without right-hand terms, and `guardMode = MermaidGuardStructuralSummary` for a structural guard summary. `MermaidUpdateHidden` and `MermaidGuardHidden` drop each segment entirely.
+
+## Make Topology-Only Output Explicit
+
+When a diagram is deliberately about shape rather than business semantics, ask for that by name:
+
+```haskell
+toTopologyMermaid reservationTransducer
+```
+
+`toTopologyMermaid` applies `topologyMermaidOptions` — hidden guards, hidden updates, inline labels — and reproduces Keiki 0.7's compact bytes exactly. Upgrading to 0.8 changes checked-in diagrams that relied on the old implicit compact default; regenerate them, and switch to `toTopologyMermaid` for the ones whose committed bytes should not move. Options-aware entry points cover the composite, nested, three-way, alternative, feedback, and labeled renderers too, so a whole atlas can hold one policy.
 
 ## Include Orchestrator Transducers
 
@@ -54,7 +69,7 @@ For an existing document with stable hand-authored prose, use `replaceMarkdownDi
 
 ## Generate Edge Inspectors
 
-Keep topology diagrams compact and generate edge-inspector Markdown for audits:
+Generate edge-inspector Markdown for audits and for detail too dense to sit in a diagram label:
 
 ```haskell
 renderEdgeInspector
@@ -67,9 +82,13 @@ renderEdgeInspector
 
 The inspector groups edges by source state and lists edge index, target, command, outputs, structural and pretty guards, written slots, and output terms. Put dense transition detail here instead of making Mermaid labels unreadable.
 
+## Read `<lit>` As A Deliberate Redaction
+
+Pretty rendering shows an ordinary `lit` value through its `Show` instance. `<lit>` appears only where the model used `opaqueLit`, which is the authoring signal that a value is a secret, a redaction, or a type with no `Show`. A `<lit>` in a generated diagram is therefore never a renderer limitation to work around — see [Keiki Transducer Best Practices](./transducer-best-practices.md).
+
 ## Validate Generated Diagrams
 
-Use `validateMermaidAtlas` or `validateMermaidDiagram` in service tests. When rendering pretty guards, tune the conservative defaults to accept the readable syntax:
+Use `validateMermaidAtlas` or `validateMermaidDiagram` in service tests. The readable default produces long multiline labels, so tune the conservative validation defaults to accept them:
 
 ```haskell
 readableMermaidValidationOptions =

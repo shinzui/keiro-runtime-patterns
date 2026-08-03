@@ -1,8 +1,8 @@
 ---
 type: Pattern
 title: "Typed Field Projections"
-description: "Using Keiki 0.4 field witnesses to inspect consumer-owned values without opaque guards or flattened domain models"
-timestamp: 2026-07-28T19:53:40-07:00
+description: "Using Keiki field witnesses to inspect consumer-owned values without opaque guards or flattened domain models"
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-typed-field-projections
 tags: [keiki, typed-field-projections]
 status: current
@@ -24,13 +24,19 @@ reviews:
 
 **Project a few decision scalars from rich domain values; keep the owner whole, the getter total, and the projection inside a guard.**
 
-Keiki 0.4 adds `FieldProjection`, `FieldWitness`, `regProj`, and `inpProj`. They make a named scalar field of a consumer-owned record visible to concrete and symbolic guard evaluation without replacing that record with a generated type or hiding the getter in `TApp1`.
+`FieldProjection`, `FieldWitness`, `regProj`, and `inpProj` make a named scalar field of a consumer-owned record visible to concrete and symbolic guard evaluation without replacing that record with a generated type or hiding the getter in `TApp1`.
+
+## Know That A Plain Witness Is One-Way
+
+`fieldWitness` records a total one-way getter and nothing else. From Keiki 0.7 the translator classifies a predicate that reads through it as a conservative over-approximation, so `verifyPredicate` returns `UnverifiedOpaque` and `predicateTranslationExact` returns `False` — regardless of whether the projected carrier is solver-supported. This is a semantic correctness fix, not a regression: a supported result type never implied that the solver could reconstruct an owner.
+
+Concrete execution, replay, `validateTransducer`, path-stable repeated reads, and the conservative `symIsBot` emptiness proof are unchanged. Only proof strength moved. When a test or gate needs a `Verified*` answer, declare the projection's complete image and canonical inverse; see [exact projection domains](exact-projection-domains.md). `fieldWitnessHasExactDomain` reports which contract a witness actually carries and returns `False` for every plain `fieldWitness`.
 
 ## Choose A Projection Only For Decision Facts
 
 Keep the rich value whole when commands, events, registers, or read models need it. Project a scalar when a guard needs one stable fact such as an identity, revision, quantity, flag, timestamp, or content hash.
 
-Prefer a separate scalar register when the fact is central to the aggregate, updated independently, or must appear in a solver-produced witness. A projection is a conservative scalar abstraction: the solver can reason about the projected result but cannot reconstruct an arbitrary owner value from it.
+Prefer a separate scalar register when the fact is central to the aggregate, updated independently, or must appear in a solver-produced witness. A one-way projection is a conservative scalar abstraction: the solver can reason about the projected result but cannot reconstruct an arbitrary owner value from it.
 
 Do not use a projection to smuggle arbitrary application logic into the symbolic language. Collections, nested projection chains, computed owners, partial getters, updates, and outputs remain outside this feature.
 
@@ -54,6 +60,8 @@ B.onCmd inCtorObserveArtifact $ \d -> B.do
 Use the actual import and name inserted by the scaffolded hole rather than guessing it. The generator derives each getter from the same resolved structural binding graph used by the event codec and exercises `fieldWitnessAgrees` over the declared fixtures.
 
 For a hand-written integration, define one fresh nominal tag per logical field, give it one coherent `FieldProjection` instance, construct the token with `fieldWitness`, and test the getter with `fieldWitnessAgrees`. Reuse that tag everywhere the same field occurs. Duplicate tags are sound but reduce proof precision because the solver treats them as unrelated values.
+
+Reading one owner through two different tags, or reading it both directly and through a projection in the same predicate, loses exactness for the whole predicate even when each tag is individually exact. Pick one view of an owner per guard.
 
 ## Respect The Direct-Base And Guard-Only Boundary
 
@@ -84,6 +92,7 @@ Treat that warning as a modeling boundary: expose the fact as an explicit scalar
 ## Related Patterns
 
 - [Keiki Transducer Best Practices](transducer-best-practices.md)
+- [Exact Projection Domains](exact-projection-domains.md)
 - [Build-Time Validation](build-time-validation.md)
 - [Checked Composition](checked-composition.md)
 - [Collections and Opaque Guards](collections-and-opaque-guards.md)

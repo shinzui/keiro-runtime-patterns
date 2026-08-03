@@ -2,7 +2,7 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -44,7 +44,9 @@ need the surrounding rules.
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
   apply the [build-time validation gate](keiki/build-time-validation.md). When
   guards inspect fields of rich consumer-owned records, use the
-  [typed field-projection pattern](keiki/typed-field-projections.md). When the
+  [typed field-projection pattern](keiki/typed-field-projections.md), and add
+  [exact projection domains](keiki/exact-projection-domains.md) when a gate must
+  prove something about a projected guard rather than merely execute it. When the
   aggregate is declared in a `.keiro` source, use
   [aggregate scalar expressions and transition ownership](keiro/aggregate-expressions.md)
   to decide what the spec generates and what stays hand-owned.

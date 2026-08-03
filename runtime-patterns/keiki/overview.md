@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
@@ -33,7 +33,7 @@ reviews:
 
 # Keiki Patterns for Keiro Runtime Projects
 
-**Start here for prescriptive Keiki 0.6 transducer, replay, validation, composition, and private-event guidance.**
+**Start here for prescriptive Keiki 0.8 transducer, replay, validation, composition, and private-event guidance.**
 
 This corpus is the terse, agent-facing standard for keiki-backed state machines inside keiro services. It covers pure aggregates and orchestrator transducers; the hosted process-manager runtime, durable timers, and cross-service messaging belong to keiro and the messaging standards tracked separately by this initiative.
 
@@ -46,6 +46,7 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 
 - **[Build-Time Validation](./build-time-validation.md)** documents the configurable soundness checks, the unconditional projection checks, the opaque-guard audit, Keiro's reject-on-warning boundary, solver escalation, and the `verifyPredicate` verification taxonomy.
 - **[Typed Field Projections](./typed-field-projections.md)** explains when `regProj` and `inpProj` can expose decision scalars from consumer-owned records without flattening the model or losing symbolic checks.
+- **[Exact Projection Domains](./exact-projection-domains.md)** is the only route from a conservatively classified projection back to a `Verified*` result: declare the complete image, the canonical inverse, and the owner-side conformance tests.
 - **[Structured Replay and Hydration](./structured-replay-and-hydration.md)** covers `reconstituteEither`, resumable `replayEvents`, `InFlight`, and the complete structured failure taxonomy.
 - **[Diagnosing Rejected Commands](./diagnosing-rejected-commands.md)** uses `stepEither` and `StepFailure` to distinguish normal refusal from ambiguous-transition defects.
 - **[Event Schema Evolution](./event-schema-evolution.md)** gives the persisted-JSON playbook for missing-field defaults, stable wire kinds, in-band versions, and complete upcaster chains.
@@ -55,8 +56,14 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - **[Resolving Operator Conflicts](./operator-conflicts.md)** gives three import patterns for keiki's predicate operators alongside `lens` and `generic-lens`.
 - **[Keiki Diagram Documentation](./diagram-docs.md)** generates and validates Mermaid atlases and edge inspectors from executable transducers.
 
-## What Changed Through Keiki 0.6.0.0 (2026-07)
+## What Changed Through Keiki 0.8.0.0 (2026-08)
 
+- Keiki 0.8 makes readable Mermaid the **default**: `toMermaid` and every no-options shape renderer now emit pretty guards, complete register assignments, multiline labels, and no truncation. `MermaidOptions` drops `showWrittenSlots` and `showGuardSummary` in favour of `updateMode` and `guardMode`; `toTopologyMermaid` and `topologyMermaidOptions` reproduce 0.7's compact bytes when a diagram is deliberately topology-only. Checked-in diagrams change on upgrade. See [Keiki Diagram Documentation](./diagram-docs.md).
+- Keiki 0.8 requires `Show` on `lit`/`TLit` so renderers print real literal text, and adds `opaqueLit`/`TOpaqueLit` for values with no `Show`, secrets, and deliberate redactions. Both are breaking for exhaustive `Term` matches. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
+- Keiki 0.7 **narrows what a field projection proves**: a one-way `fieldWitness` no longer counts as exact merely because its result carrier is solver-supported, so existing projection callers now receive `UnverifiedOpaque` from `verifyPredicate`. `Keiki.ProjectionDomain`, `ExactFieldProjection`, `exactFieldWitness`, and the `checkFieldProjection*` laws are the supported way back to a proof. See [Exact Projection Domains](./exact-projection-domains.md).
+- Keiki 0.7 makes `verifyPredicate` a compatibility projection of `verifyPredicateDetailed` and adds `predicateTranslationReport`, whose `TranslationIssue` list names exactly what cost the predicate its exactness. Only definite UNSAT under an exact translation is a proof. See [Build-Time Validation](./build-time-validation.md).
+- Keiki 0.7 adds opt-in proof-relevant execution evidence: `stepDetailedEither`/`StepSuccess` for forward steps, and `applyEventsDetailedEither`/`reconstituteDetailedEither`/`ReplayAttribution` for an ordered completed-edge factorization of a replay. The existing functions keep their signatures and their O(1) no-trace policy. See [Structured Replay and Hydration](./structured-replay-and-hydration.md).
+- Keiki 0.7 also makes `symSatExt` concretely recheck every reconstructed candidate, so a returned pair always satisfies `models`; `Nothing` still means "no witness recovered", never proof of unsatisfiability.
 - Keiki 0.6 makes structural `Natural` subtraction **total monus** — `a - b = max 0 (a - b)`, lowered as `ite (a >= b) (a - b) 0` — in both concrete and symbolic evaluation. It is a breaking semantic fix: a `Natural` register decrement now clamps at zero instead of throwing `Underflow`. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
 - Keiki 0.6 adds `verifyPredicate`, `PredicateVerification`, and `predicateTranslationExact`, which keep an inexact translation and an indefinite solver answer distinguishable from a proof. See [Build-Time Validation](./build-time-validation.md).
 - Keiki 0.6 moves `Natural` into the symbolic numeric registry, so the opt-in opaque audit no longer reports its arithmetic. That audit now covers any `TArith` whose carrier is *outside* the registry, not only `TApp` closures, and its detail text no longer names a constructor. See [Collections and Opaque Guards](./collections-and-opaque-guards.md).
@@ -85,3 +92,4 @@ The Keiki 0.2 hardening remains foundational:
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) is the normative hydration API guide.
 - [Event Schema Evolution](./event-schema-evolution.md) is the normative private-event compatibility guide.
 - [Typed Field Projections](./typed-field-projections.md) is the normative guide for decisions over consumer-owned values.
+- [Exact Projection Domains](./exact-projection-domains.md) is the normative guide for proving anything about those decisions.

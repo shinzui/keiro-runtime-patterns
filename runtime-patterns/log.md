@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-08-03
+* **Update**: Navigation routes projected-guard proof obligations to exact projection domains
+
 ## 2026-07-31
 * **Update**: Routes now reach the language-version, aggregate-expression, and nominal-binding standards
 

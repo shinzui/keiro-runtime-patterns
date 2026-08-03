@@ -2,7 +2,7 @@
 type: Guide
 title: "Diagnosing Rejected Commands with `stepEither`"
 description: "Using stepEither and StepFailure to learn why a command was rejected"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-diagnosing-rejected-commands
 tags: [keiki, diagnosing-rejected-commands]
 status: current
@@ -102,6 +102,25 @@ Treat `AmbiguousEdges` as a defect path, not an ordinary rejection — if it can
 runtime, the transducer has overlapping guards that `validateTransducer` /
 `checkTransitionDeterminismSym` should have caught. Keep `step` for hot paths where a bare
 accept/reject is all you need.
+
+## Take `stepDetailedEither` When Success Needs Evidence
+
+`stepEither` reports why a command was rejected but says nothing about *which* edge accepted
+one. Keiki 0.7 adds `stepDetailedEither`, whose `Right` is a `StepSuccess` carrying the
+construction-local `EdgeRef`, the selected `EdgeMode` (always `Live` for forward execution),
+the post-state, the register file, and the ordered output word — including `[]` for an
+accepted epsilon-output edge.
+
+```haskell
+case stepDetailedEither aggregateTransducer (vertex, regs) command of
+  Right success ->
+    recordAcceptedEdge (stepSuccessEdge success) (stepSuccessOutputs success)
+  Left failure -> reject failure
+```
+
+Use it for conformance reports, coverage accounting, and audit trails that must name the
+rule that fired. Failures are identical to `stepEither`'s, and `stepEither` keeps its
+signature by erasing this evidence — so the choice is per call site, not per service.
 
 Replay has the same diagnostic shape. `ReplayStepFailure` explains hydration through
 `ReplayNoInvertingEdge`, `ReplayAmbiguousInversions`, and `ReplayQueueMismatch`, just as

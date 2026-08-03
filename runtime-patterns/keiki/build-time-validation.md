@@ -2,7 +2,7 @@
 type: Guide
 title: "Build-Time Validation of Keiki Transducers"
 description: "Asserting transducers and typed field projections are well-formed in CI with validateTransducer"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-build-time-validation
 tags: [keiki, build-time-validation]
 status: current
@@ -70,7 +70,7 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 
 ## Repair Each Structured Warning
 
-`TransducerValidationWarning` has eleven constructors in Keiki 0.6. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
+`TransducerValidationWarning` has eleven constructors through Keiki 0.8. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
 
 - `HiddenInput { tvwEdge, tvwInCtor, tvwMissingSlots, tvwDetail }` means an edge consumes command information that its output does not emit. Add the missing fields to the private event or stop reading them.
 - `HeadUnrecoverable { tvwEdge, tvwInCtor, tvwTailOnlySlots, tvwDetail }` means a later event in a multi-event edge carries a consumed field that the first event lacks. Streaming replay inverts only the head event, so move every replay-critical field onto that event.
@@ -108,9 +108,9 @@ See [Collections and Opaque Guards](./collections-and-opaque-guards.md) for the 
 
 ## Treat Field Projections As Structural, Not Opaque
 
-A valid `TFieldProj` is visible to the symbolic translator, so the opt-in opaque audit does not flag it. An input-based projection still counts as an input read and requires the matching constructor guard. Keiki constrains projection variables from concrete owners when checking a supplied execution, but a satisfiable symbolic result is not proof that an arbitrary consumer-owned record can be reconstructed.
+A valid `TFieldProj` is visible to the symbolic translator, so the opt-in opaque audit does not flag it. An input-based projection still counts as an input read and requires the matching constructor guard. Visible is not the same as exact, though: a plain one-way `fieldWitness` yields `UnconstrainedProjection` and downgrades the whole predicate's translation strength, because a satisfiable symbolic result is no proof that an arbitrary consumer-owned record can be reconstructed.
 
-Generated Keiro witnesses add schema provenance and agreement tests; hand-written witnesses must be checked with `fieldWitnessAgrees`. See [Typed Field Projections](typed-field-projections.md).
+Generated Keiro witnesses add schema provenance and agreement tests; hand-written witnesses must be checked with `fieldWitnessAgrees`. See [Typed Field Projections](typed-field-projections.md) for the boundary and [Exact Projection Domains](exact-projection-domains.md) for the declaration that restores proof strength.
 
 ## Escalate To The Solver For Exact Answers
 
@@ -133,7 +133,7 @@ Model numeric guards with the solver's representation in mind. Platform-sized `I
 
 ## Never Read A Verification Result As A Bare Boolean
 
-When a test asks the solver about one predicate directly, use `verifyPredicate` rather than reducing a `SatResult` to `Bool` yourself. It refuses before invoking the solver when any node lacks an exact structural translation, so an opaque guard cannot masquerade as a proof:
+When a test asks the solver about one predicate directly, use `verifyPredicate` rather than reducing a `SatResult` to `Bool` yourself:
 
 ```haskell
 import Keiki.Symbolic (PredicateVerification (..), predicateTranslationExact, verifyPredicate)
@@ -142,12 +142,35 @@ import Keiki.Symbolic (PredicateVerification (..), predicateTranslationExact, ve
 verifyPredicate reservationGuard >>= \case
   VerifiedUnsatisfiable      -> pure ()          -- proved: the guard cannot hold
   VerifiedSatisfiable        -> pure ()          -- proved: a witness exists
-  UnverifiedOpaque           -> failWith "guard is not structurally translatable"
+  UnverifiedOpaque           -> failWith "guard is not exactly translatable"
   UnverifiedSolverUnknown m  -> failWith m       -- Unknown, DeltaSat, SatExtField
-  UnverifiedSolverFailure m  -> failWith m       -- ProofError
+  UnverifiedSolverFailure m  -> failWith m       -- ProofError, contract violation
 ```
 
-Only the two `Verified*` constructors are evidence. Treat the three `Unverified*` constructors as an unproven model, never as a pass. Use `predicateTranslationExact` alone when a test asserts that a guard stays structural without paying for a solver run — it is stricter than `translatePred` accepting the predicate, because that translation substitutes fresh variables for unsupported pieces on purpose.
+Since Keiki 0.7 `verifyPredicate` is a compatibility projection of `verifyPredicateDetailed`: it always runs the solver, and it reports `Verified*` only when the translation was exact for the whole predicate. A conservative translation collapses to `UnverifiedOpaque` whether the solver answered SAT or UNSAT. Only definite UNSAT under an exact translation counts as a proof; `symIsBot`, the determinism check, and the dead-edge check share the same failure-aware kernel.
+
+Only the two `Verified*` constructors are evidence. Treat the three `Unverified*` constructors as an unproven model, never as a pass. Use `predicateTranslationExact` alone when a test asserts that a guard stays exactly translatable without paying for a solver run — it is stricter than `translatePred` accepting the predicate, because that translation substitutes fresh variables for unsupported pieces on purpose.
+
+## Explain An Inexact Translation Before Rewriting The Guard
+
+`predicateTranslationReport` returns the `TranslationStrength` — `ExactTranslation`, or `ConservativeOverApproximation` with a non-empty ordered list of `TranslationIssue` values naming exactly what was lost:
+
+- `OpaqueApplication` — a `TApp1`/`TApp2` closure.
+- `UnsupportedEquality` / `UnsupportedOrdering` / `UnsupportedArithmetic` — a carrier outside the corresponding symbolic registry.
+- `UnconstrainedProjection` — a field projection read through a plain one-way `fieldWitness`. This is the common cause; see [exact projection domains](exact-projection-domains.md).
+- `UnsupportedProjectionDomain` — a declared exact domain the backend cannot constrain.
+- `ProjectionUsedOutsideEquality` — a projected value compared by something other than equality.
+- `ConflictingProjectionViews` — one owner read through disagreeing tags.
+- `DirectAndProjectedOwnerRead` — one owner read both whole and through a projection.
+- `UnguardedProjectionInputRead` — an input projection without its matching constructor guard.
+
+Fix the named issue rather than weakening the assertion. Do not pattern-match on rendered detail strings.
+
+## Read The Detailed Verification Result When Exactness Matters
+
+`verifyPredicateDetailed` returns `PredicateVerificationDetail`, which carries the `TranslationStrength` alongside the solver status and, for a satisfiable exact result, checked path-local `ProjectionModel` values recovered with `projectionModelKeyAs` and `projectionModelOwnerAs`. Its fifth constructor, `PredicateProjectionContractViolation`, has no compatibility equivalent worth acting on: it means a declared projection inverse rejected a key the solver admitted, which is a declaration defect. `checkTransitionDeterminismSymDetailed` and `checkDeadEdgesSymDetailed` expose the same evidence for the two edge analyses.
+
+Projection models are path-local key/owner pairs, not complete register or input witnesses. Use them to explain a counterexample, never as a replacement for `symSatExt`.
 
 ## Why Keiro Makes This Mandatory
 

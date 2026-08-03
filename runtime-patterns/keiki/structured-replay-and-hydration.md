@@ -2,7 +2,7 @@
 type: Guide
 title: "Structured Replay and Hydration"
 description: "Diagnosing hydration failures with reconstituteEither, replayEvents, and ReplayFailure"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-structured-replay-and-hydration
 tags: [keiki, structured-replay-and-hydration]
 status: current
@@ -110,6 +110,16 @@ This changes how to read a failure. A `ReplayNoInvertingEdge` after a guard tigh
 - `replayFailureReason` is the structured reason above.
 
 Log the index and reason with the stream identity. Treat `ReplayAmbiguousInversions`, unexpected `ReplayNoInvertingEdge`, and queue mismatches as durable-data or model defects that require investigation; do not recategorize them as normal command rejection.
+
+## Ask For Attribution Only Where It Is Needed
+
+Keiki 0.7 adds `applyEventsDetailedEither` and `reconstituteDetailedEither`, which return a `ReplaySuccess` instead of a bare pair: the final state, the final registers, and `replaySuccessTrace`, an ordered factorization of the event log into the edges that produced it. Each `ReplayAttribution` names the construction-local `EdgeRef`, the `EdgeMode` that actually selected it, the settled source and declared target vertices, and a zero-based half-open `ReplayEventSpan` whose length equals `replayAttributionEventCount`.
+
+Use them for audits, conformance reports, and "which rule produced this history?" diagnostics. Keep the ordinary functions on the hydration hot path: they share the same evaluator but retain a nullary no-trace policy with O(1) auxiliary state, so attribution is a cost you opt into.
+
+Two properties matter when reading a trace. A multi-event edge contributes exactly one attribution covering its whole span, not one per event. An epsilon-output edge contributes none — it emits nothing, so replay cannot observe it — which is precisely why `checkStateChangingEpsilon` must stay enabled.
+
+The forward counterpart is `stepDetailedEither`, returning `StepSuccess` with the selected `EdgeRef`, the mode (always `Live`), the post-state, the registers, and the ordered output word. `stepEither` keeps its signature and simply erases that evidence; failures are identical in both. See [Diagnosing Rejected Commands](./diagnosing-rejected-commands.md).
 
 ## Test Both Complete And Paged Replay
 

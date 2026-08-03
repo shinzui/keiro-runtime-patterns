@@ -100,6 +100,16 @@ in  Schema.Project::{
               "runtime-patterns/keiki/typed-field-projections.md"
         }
       , Schema.DocRef::{
+        , key = "keiki-exact-projection-domains"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Declaring a projection's exact image and canonical inverse so symbolic verification can return a proof"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/keiki/exact-projection-domains.md"
+        }
+      , Schema.DocRef::{
         , key = "keiki-operator-conflicts"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module

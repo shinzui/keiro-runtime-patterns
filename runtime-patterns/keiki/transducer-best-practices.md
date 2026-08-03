@@ -2,7 +2,7 @@
 type: Standard
 title: "Keiki Transducer Best Practices"
 description: "Core rules for authoring Keiki transducers with the builder DSL"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-02T19:56:33-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-transducer-best-practices
 tags: [keiki, transducer-best-practices]
 status: current
@@ -293,6 +293,28 @@ one, and Keiki's fixities match ordinary Haskell so the grouping needs no extra 
 Use B when a module's `hiding` list grows large enough to become the maintenance burden, and
 C for one or two simple in-builder comparisons. See
 [operator-conflicts.md](./operator-conflicts.md).
+
+## Use `lit` For Every Literal And `opaqueLit` Only For Redactions
+
+From Keiki 0.8 `lit` requires `Show` so renderers derive ordinary literal text from the
+executable value. `opaqueLit` has identical concrete, replay, pure-analysis, and symbolic
+semantics but deliberately renders as `<lit>`. Reserve it for exactly three cases: a carrier
+with no `Show` instance, a secret, and a value generated documentation must not disclose.
+
+```haskell
+-- CORRECT: the diagram shows the real threshold.
+B.requireGuard (d.availableIcuBeds .>= lit 3)
+
+-- CORRECT: the comparison is real; the value stays out of generated documentation.
+B.requireEq (B.reg @"apiToken") (opaqueLit configuredToken)
+
+-- WRONG: opaqueLit as a habit hides model semantics from every reviewer.
+-- B.requireGuard (d.availableIcuBeds .>= opaqueLit 3)
+```
+
+The `Show` constraint is breaking for exhaustive `Term` matches: a hand-written traversal
+must now handle `TOpaqueLit` alongside `TLit`. Both behave as invertible literal fields, so
+a matcher that treats them alike is usually correct.
 
 ## Use `derive*All` Or `derive*With` Instead Of Manual Enumeration
 

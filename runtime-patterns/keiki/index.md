@@ -17,9 +17,10 @@
 
 - [Checked Composition](checked-composition.md) - Wiring transducers with composeChecked, structural projection boundaries, alternative, and the feedback1 stateless-only trap
 - [Collections and Opaque Guards](collections-and-opaque-guards.md) - Modeling collections without losing solver verification through opaque guards
-- [Typed Field Projections](typed-field-projections.md) - Using Keiki 0.4 field witnesses to inspect consumer-owned values without opaque guards or flattened domain models
+- [Typed Field Projections](typed-field-projections.md) - Using Keiki field witnesses to inspect consumer-owned values without opaque guards or flattened domain models
 
 # Standard
 
+- [Exact Projection Domains](exact-projection-domains.md) - Declaring a projection's complete image and canonical inverse so symbolic verification can return a proof instead of UnverifiedOpaque
 - [Keiki Transducer Best Practices](transducer-best-practices.md) - Core rules for authoring Keiki transducers with the builder DSL
 

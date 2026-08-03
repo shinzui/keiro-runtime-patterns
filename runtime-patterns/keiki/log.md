@@ -1,5 +1,15 @@
 # keiki Update Log
 
+## 2026-08-03
+* **Update**: Overview targets Keiki 0.8 and digests the 0.7 and 0.8 releases
+* **Update**: Command diagnosis covers stepDetailedEither for naming the edge that accepted a command
+* **Update**: Replay guidance covers the opt-in Keiki 0.7 attribution trace and its epsilon and multi-event rules
+* **Update**: Authoring standard covers the Keiki 0.8 Show requirement on lit and the opaqueLit redaction rule
+* **Update**: Diagram guidance adopts Keiki 0.8 readable-by-default Mermaid, the mode fields, and explicit topology-only rendering
+* **Update**: Validation corrects verifyPredicate to a solving compatibility projection and documents translation reports and detailed results
+* **Update**: Typed field projections record that a one-way witness is now classified conservatively from Keiki 0.7
+* **Added**: Exact projection domains define the Keiki 0.7 declared-image and canonical-inverse contract for verifiable projected guards
+
 ## 2026-07-31
 * **Update**: Operator-clash guidance now matches the operator-conflicts preference for Recipe A
 * **Update**: Recipe A is now the preferred fix, with a worked guard example and the fixity rationale; owner review recorded
