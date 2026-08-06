@@ -62,6 +62,15 @@ in  Schema.Project::{
             Schema.DocLocation.LocalFile "runtime-patterns/keiki/transducer-best-practices.md"
         }
       , Schema.DocRef::{
+        , key = "keiki-constructor-evidence"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Minting InCtor and WireCtor values through trusted producers so composition, replay, and symbolic exclusion keep their proofs"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiki/constructor-evidence.md"
+        }
+      , Schema.DocRef::{
         , key = "keiki-build-time-validation"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module

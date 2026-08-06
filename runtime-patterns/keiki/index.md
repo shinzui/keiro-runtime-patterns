@@ -21,6 +21,7 @@
 
 # Standard
 
+- [Trusted Constructor Evidence](constructor-evidence.md) - Minting InCtor and WireCtor values through trusted producers so composition, replay, and symbolic exclusion keep their proofs
 - [Exact Projection Domains](exact-projection-domains.md) - Declaring a projection's complete image and canonical inverse so symbolic verification can return a proof instead of UnverifiedOpaque
 - [Keiki Transducer Best Practices](transducer-best-practices.md) - Core rules for authoring Keiki transducers with the builder DSL
 

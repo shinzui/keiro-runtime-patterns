@@ -2,7 +2,7 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
@@ -33,7 +33,7 @@ reviews:
 
 # Keiki Patterns for Keiro Runtime Projects
 
-**Start here for prescriptive Keiki 0.8 transducer, replay, validation, composition, and private-event guidance.**
+**Start here for prescriptive Keiki 0.9 transducer, replay, validation, composition, and private-event guidance.**
 
 This corpus is the terse, agent-facing standard for keiki-backed state machines inside keiro services. It covers pure aggregates and orchestrator transducers; the hosted process-manager runtime, durable timers, and cross-service messaging belong to keiro and the messaging standards tracked separately by this initiative.
 
@@ -44,6 +44,7 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 
 ## Focused Guides
 
+- **[Trusted Constructor Evidence](./constructor-evidence.md)** is the producer standard for `InCtor` and `WireCtor`: which `Via` builder to use, what evidence buys in composition, replay, and symbolic exclusion, and what silently drops it.
 - **[Build-Time Validation](./build-time-validation.md)** documents the configurable soundness checks, the unconditional projection checks, the opaque-guard audit, Keiro's reject-on-warning boundary, solver escalation, and the `verifyPredicate` verification taxonomy.
 - **[Typed Field Projections](./typed-field-projections.md)** explains when `regProj` and `inpProj` can expose decision scalars from consumer-owned records without flattening the model or losing symbolic checks.
 - **[Exact Projection Domains](./exact-projection-domains.md)** is the only route from a conservatively classified projection back to a `Verified*` result: declare the complete image, the canonical inverse, and the owner-side conformance tests.
@@ -56,8 +57,12 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - **[Resolving Operator Conflicts](./operator-conflicts.md)** gives three import patterns for keiki's predicate operators alongside `lens` and `generic-lens`.
 - **[Keiki Diagram Documentation](./diagram-docs.md)** generates and validates Mermaid atlases and edge inspectors from executable transducers.
 
-## What Changed Through Keiki 0.8.0.0 (2026-08)
+## What Changed Through Keiki 0.9.0.0 (2026-08)
 
+- Keiki 0.9 **seals `WireCtor` and `InCtor` construction**. Both are read-only patterns, so record literals and record updates no longer compile; trusted structural evidence comes only from the `mkInCtorVia` / `mkInCtorRecordVia` / `mkWireCtorVia` / `mkWireCtor0Via` / `mkWireCtorRecordVia` producers and Template Haskell derivation. `mkWireCtor`, `mkWireCtor0`, `mkInCtor`, and `mkInCtor0` are deprecated; `unavailableWireCtor` / `unavailableInCtor` are the explicit manual-behavior constructors and `renameWireCtor` / `renameInCtor` relabel without discarding evidence. See [Trusted Constructor Evidence](./constructor-evidence.md).
+- Keiki 0.9 makes that evidence load-bearing in three places: sequential composition substitutes only through typed input-to-wire alignment and reports `StructurallyDifferentInputWire` or `UnwitnessedInputWireAlignment` instead of trusting equal names; the replay-inversion check proves heads distinct from structural constructor paths; and symbolic `PInCtor` translation keeps same-named trusted constructors distinct while collapsing unwitnessed equal names onto one conservative atom. Schema alignment no longer contains an `unsafeCoerce`. See [Checked Composition](./checked-composition.md).
+- Keiki 0.9 **narrows the default `InversionAmbiguity` set**: a same-mode pair is suppressed when exact integral register-versus-literal conjuncts prove the two replay candidates disjoint. Unsupported and opaque guards stay conservative and name the blocking construct in `tvwDetail`. The opt-in `checkInversionAmbiguitySym` / `checkInversionAmbiguitySymDetailed` add an SBV analysis that removes a warning only on a uniquely matching definite UNSAT. Runtime replay is unchanged. See [Build-Time Validation](./build-time-validation.md).
+- **Breaking:** nullary Template Haskell wires match structurally, so they require `Generic co` rather than `Eq co`; a quotienting custom `Eq` no longer changes `wcMatch`. `solveOutput` still requires `Eq co`. `keiki-codec-json` 0.9 is a bounds-only co-release with an unchanged wire format.
 - Keiki 0.8 makes readable Mermaid the **default**: `toMermaid` and every no-options shape renderer now emit pretty guards, complete register assignments, multiline labels, and no truncation. `MermaidOptions` drops `showWrittenSlots` and `showGuardSummary` in favour of `updateMode` and `guardMode`; `toTopologyMermaid` and `topologyMermaidOptions` reproduce 0.7's compact bytes when a diagram is deliberately topology-only. Checked-in diagrams change on upgrade. See [Keiki Diagram Documentation](./diagram-docs.md).
 - Keiki 0.8 requires `Show` on `lit`/`TLit` so renderers print real literal text, and adds `opaqueLit`/`TOpaqueLit` for values with no `Show`, secrets, and deliberate redactions. Both are breaking for exhaustive `Term` matches. See [Keiki Transducer Best Practices](./transducer-best-practices.md).
 - Keiki 0.7 **narrows what a field projection proves**: a one-way `fieldWitness` no longer counts as exact merely because its result carrier is solver-supported, so existing projection callers now receive `UnverifiedOpaque` from `verifyPredicate`. `Keiki.ProjectionDomain`, `ExactFieldProjection`, `exactFieldWitness`, and the `checkFieldProjection*` laws are the supported way back to a proof. See [Exact Projection Domains](./exact-projection-domains.md).

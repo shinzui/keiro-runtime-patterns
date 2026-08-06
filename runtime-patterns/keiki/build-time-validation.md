@@ -2,7 +2,7 @@
 type: Guide
 title: "Build-Time Validation of Keiki Transducers"
 description: "Asserting transducers and typed field projections are well-formed in CI with validateTransducer"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-build-time-validation
 tags: [keiki, build-time-validation]
 status: current
@@ -70,11 +70,11 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 
 ## Repair Each Structured Warning
 
-`TransducerValidationWarning` has eleven constructors through Keiki 0.8. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
+`TransducerValidationWarning` has eleven constructors through Keiki 0.9. The first seven participate in the configurable default contract, `OpaqueGuard` appears only when its audit is enabled, and the three projection warnings are unconditional integrity checks.
 
 - `HiddenInput { tvwEdge, tvwInCtor, tvwMissingSlots, tvwDetail }` means an edge consumes command information that its output does not emit. Add the missing fields to the private event or stop reading them.
 - `HeadUnrecoverable { tvwEdge, tvwInCtor, tvwTailOnlySlots, tvwDetail }` means a later event in a multi-event edge carries a consumed field that the first event lacks. Streaming replay inverts only the head event, so move every replay-critical field onto that event.
-- `InversionAmbiguity { tvwSource, tvwEdgeA, tvwEdgeB, tvwWireCtor, tvwDetail }` means two outgoing edges share a head wire constructor. Give the edges distinct head events so an observed event selects one inverting edge.
+- `InversionAmbiguity { tvwSource, tvwEdgeA, tvwEdgeB, tvwWireCtor, tvwDetail }` means two same-mode outgoing edges may emit the same head event and their replay candidates were not proved disjoint. Give the edges distinct head events, or make their guards disjoint through exact integral register comparisons. `tvwDetail` names the first construct that blocked the cheap proof.
 - `UnguardedInputRead { tvwEdge, tvwInCtor, tvwDetail }` means an edge reads fields from an input constructor without first establishing the matching top-level constructor guard. Add the correct constructor guard so a different command cannot make evaluation throw.
 - `StateChangingEpsilon { tvwEdge, tvwChangesVertex, tvwWritesRegisters, tvwDetail }` means an output-free edge changes durable state. Emit an event or make the edge inert.
 - `NondeterministicPair { tvwSource, tvwEdgeA, tvwEdgeB, tvwInCtor, tvwDetail }` means two outgoing guards can hold for one command. Make them mutually exclusive; the runtime witness of this defect is `AmbiguousEdges`.
@@ -89,6 +89,38 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 The pure pass proves overlap within supported conjunction spines. It understands constructor consistency, exact integral intervals for integral variables, and concrete literal witnesses for other types. `Natural` carries the exact interval `[0, ∞)`, so the pass can produce interior witnesses for it rather than only literal ones. It deliberately stays silent on disjunction, negation, arithmetic, opaque terms, variable-versus-variable comparisons, and non-integral strict-bound density.
 
 This direction has no false positives: every `NondeterministicPair` it reports is a real overlap. An empty result is not an exact proof for guards outside that fragment, so use the z3-backed checks when those constructs decide correctness.
+
+## Know Why The Replay-Inversion Check Stays Quiet
+
+`checkInversionAmbiguity` runs in two stages, both pure and solver-free, and both conservative in the direction of keeping a warning.
+
+First it decides whether two head events may alias. When both wire constructors carry trusted structural schemas, structurally different constructor paths prove the heads distinct and the pair is dropped. When either schema is unavailable, it falls back to comparing `wcName` — so an aggregate built from deprecated or manual constructors gets the older, weaker answer. See [trusted constructor evidence](./constructor-evidence.md).
+
+Second, for a pair that may alias, it recursively extracts exact integral `register relation literal` conjuncts through `PAnd` and suppresses the warning only when the combined conditions are definitely unsatisfiable. Register variables are keyed by zero-based position and runtime type; labels are diagnostic only. Unsupported sibling conjuncts are dropped as weakening, so they can never manufacture disjointness. The proof deliberately does not enter `POr` or `PNot`, does not model output fields, and does not infer disjointness from different reconstructed command constructors. It ignores tail events, because replay equality-checks rather than inverts them.
+
+Cross-mode pairs are never reported: replay's two-phase attribution resolves them, with live candidates winning outright.
+
+Upgrading to Keiki 0.9 can therefore shrink the warning set for an unchanged model. That is the check getting more precise, not a regression — but confirm each disappearance is a pair you can now see is disjoint, rather than assuming it.
+
+## Escalate The Inversion Check Only When It Blocks You
+
+When a retained `InversionAmbiguity` looks spurious and its `tvwDetail` names a construct the cheap proof cannot enter, run the opt-in solver analysis:
+
+```haskell
+import Keiki.Symbolic
+  ( InversionAnalysisDetail (..)
+  , InversionProofVerdict (..)
+  , InversionSolverStatus (..)
+  , checkInversionAmbiguitySym
+  , checkInversionAmbiguitySymDetailed
+  )
+
+remaining <- checkInversionAmbiguitySym incidentTransducer
+```
+
+`checkInversionAmbiguitySym` returns the same warning values, minus the pairs the solver definitely proved disjoint. It fails closed by construction: a warning is removed only by one uniquely matching detail that is both `InversionSolverUnsatisfiable` and `InversionProvedDisjoint`. Missing, duplicate, or reordered details retain the warning.
+
+Use `checkInversionAmbiguitySymDetailed` when a test needs the reason rather than the verdict — it returns an `InversionAnalysisDetail` per candidate pair, carrying the solver status and the `InversionTranslationIssue` list. Neither function is called by default validation, and neither changes runtime replay.
 
 ## Audit Opaque Guards Explicitly
 
@@ -163,6 +195,7 @@ Only the two `Verified*` constructors are evidence. Treat the three `Unverified*
 - `ConflictingProjectionViews` — one owner read through disagreeing tags.
 - `DirectAndProjectedOwnerRead` — one owner read both whole and through a projection.
 - `UnguardedProjectionInputRead` — an input projection without its matching constructor guard.
+- `UnwitnessedInputConstructorIdentity` — a `PInCtor` guard over an input constructor with no trusted structural schema. Equal-named unwitnessed constructors collapse onto one conservative fallback atom, so the translator cannot tell them apart. Mint the constructor through a trusted producer; see [trusted constructor evidence](./constructor-evidence.md).
 
 Fix the named issue rather than weakening the assertion. Do not pattern-match on rendered detail strings.
 

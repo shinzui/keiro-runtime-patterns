@@ -42,7 +42,10 @@ need the surrounding rules.
   [architecture overview](architecture/overview.md) for module and test layout.
 - **Defining an aggregate:** begin with
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
-  apply the [build-time validation gate](keiki/build-time-validation.md). When
+  apply the [build-time validation gate](keiki/build-time-validation.md). Mint every
+  hand-written command and event constructor through
+  [trusted constructor evidence](keiki/constructor-evidence.md), which is also the
+  upgrade path for an aggregate still calling the deprecated `mkWireCtor` family. When
   guards inspect fields of rich consumer-owned records, use the
   [typed field-projection pattern](keiki/typed-field-projections.md), and add
   [exact projection domains](keiki/exact-projection-domains.md) when a gate must

@@ -2,7 +2,7 @@
 type: Pattern
 title: "Checked Composition"
 description: "Wiring transducers with composeChecked, structural projection boundaries, alternative, and the feedback1 stateless-only trap"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-checked-composition
 tags: [keiki, checked-composition]
 status: current
@@ -36,11 +36,13 @@ case composeChecked aggregateTransducer policyTransducer of
   Left warnings -> reportAlignmentWarnings warnings
 ```
 
-`ComposeAlignmentWarning` reports five boundary facts with source locations:
+`ComposeAlignmentWarning` reports seven boundary facts with source locations:
 
 - `UnconsumedWireOutput` means an upstream wire constructor has no consuming downstream edge at a reachable vertex.
 - `UnmatchedInCtorExpectation` means a downstream input-constructor expectation has no upstream emission.
 - `FieldArityMismatch` means a downstream field read addresses a position the upstream constructor does not emit.
+- `StructurallyDifferentInputWire { cawStructuralT1Edge, cawStructuralT2Edge, cawStructuralWireName, cawStructuralInCtorName }` means the two sides carry trusted schemas that disagree: the downstream input constructor is not the upstream wire constructor, however their names read.
+- `UnwitnessedInputWireAlignment { cawUnwitnessedT1Edge, cawUnwitnessedT2Edge, cawUnwitnessedWireName, cawUnwitnessedInCtorName }` means at least one side has no trusted schema, so alignment cannot be established either way. Mint both constructors through a trusted producer; see [trusted constructor evidence](./constructor-evidence.md).
 - `PoisonedNameInComposition` means a mapped or otherwise poisoned constructor name reached the boundary.
 - `NonStructuralProjectionBoundary` means substitution would turn a typed field projection over a direct owner into opaque application logic, usually because the upstream output is computed or the owner comes from a pending write.
 
@@ -48,11 +50,19 @@ The reachability scan is conservative. Every warning is reviewable evidence of a
 
 For a projection boundary, move the decision to a side where its owner remains direct, expose the fact as an ordinary scalar, or keep the machines separate. Raw `compose` retains forward behavior by lowering the getter, but it no longer preserves the structural proof obligation that justified the projection.
 
+## Do Not Rely On Matching Constructor Names
+
+Since Keiki 0.9 substitution is authorized by typed input-to-wire alignment, not by an equal `icName` and `wcName`. Two constructors that happen to share a diagnostic name no longer justify a result-type coercion, and the `unsafeCoerce` that coercion rested on is gone from schema alignment — composition-only identity now carries a typed prefix spine and derives field equality by lockstep refinement.
+
+The practical consequence is that a boundary built from deprecated or manual constructors reports `UnwitnessedInputWireAlignment` where it previously composed silently. That warning is not a false positive: it says the pipeline was never checked, only name-matched. Fix it at the constructor, not by ignoring the warning.
+
 ## Do Not Compose Across A Non-Invertible Map
 
 `SomeSymTransducer` in `Keiki.Profunctor` carries input and output poison provenance. `lmap`, `rmap`, and `dimap` can preserve forward evaluation while destroying the inverse information replay needs; their rewritten constructor names are stamped with `#lmapped` or `#rmapped`.
 
 Categorical composition checks that provenance. Crossing a poisoned upstream output or downstream input raises `PoisonedCompositionError` synchronously instead of silently bypassing a map or producing a dead pipeline. Move the map outside the composition boundary, or author a structural transducer whose input and wire constructors have honest `icBuild` and `wcMatch` behavior.
+
+A map also drops structural evidence. `lmap`, `rmap`, and `dimap` rewrite match and build behavior, so the constructors they produce are built through the evidence-unavailable path — a mapped boundary is therefore both poisoned and unwitnessed.
 
 ## Use `alternative` Only Inside One Consistency Boundary
 
@@ -87,6 +97,7 @@ In keiki an orchestrator is a transducer, so `composeChecked` can validate a pur
 ## Related Patterns
 
 - [Keiki Transducer Best Practices](./transducer-best-practices.md) places composition in the full authoring workflow.
+- [Trusted Constructor Evidence](./constructor-evidence.md) is what makes an input-to-wire boundary checkable at all.
 - [Build-Time Validation](./build-time-validation.md) checks the replay and determinism contract after composition.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) explains the inverse information that poison provenance protects.
 - [Collections and Opaque Guards](./collections-and-opaque-guards.md) gives another reason to split independently identified sub-entities into separate streams.

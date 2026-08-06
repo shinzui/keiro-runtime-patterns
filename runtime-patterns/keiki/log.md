@@ -1,5 +1,12 @@
 # keiki Update Log
 
+## 2026-08-06
+* **Update**: Overview targets Keiki 0.9 and digests the sealed-evidence and replay-inversion cycle
+* **Update**: Validation records the narrowed default InversionAmbiguity set, the opt-in symbolic inversion analysis, and the unwitnessed-identity translation issue
+* **Update**: Composition covers the two Keiki 0.9 input-to-wire alignment warnings and drops the equal-name substitution rule
+* **Update**: Authoring standard routes hand-written constructors through the Via producers and records the nullary Generic-over-Eq matching change
+* **Added**: Trusted constructor evidence defines the Keiki 0.9 sealed InCtor/WireCtor producers and what unwitnessed constructors cost
+
 ## 2026-08-03
 * **Update**: Overview targets Keiki 0.8 and digests the 0.7 and 0.8 releases
 * **Update**: Command diagnosis covers stepDetailedEither for naming the edge that accepted a command

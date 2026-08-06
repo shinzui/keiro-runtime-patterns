@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-08-06
+* **Update**: Aggregate route reaches trusted constructor evidence for boundary constructors and the deprecated mkWireCtor upgrade
+
 ## 2026-08-03
 * **Update**: Navigation routes identifier-domain adoption and behavior conformance
 * **Update**: Navigation routes projected-guard proof obligations to exact projection domains

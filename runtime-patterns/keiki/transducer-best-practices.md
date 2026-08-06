@@ -2,7 +2,7 @@
 type: Standard
 title: "Keiki Transducer Best Practices"
 description: "Core rules for authoring Keiki transducers with the builder DSL"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-transducer-best-practices
 tags: [keiki, transducer-best-practices]
 status: current
@@ -343,6 +343,18 @@ Use the same pattern with `deriveWireCtorsWith` and `defaultDeriveWireOptions` w
 event helper suffix differs from its constructor. Keep explicit `deriveAggregateCtors`
 or `deriveWireCtors` enumeration only as a legacy fallback for older Keiki versions.
 
+Template Haskell is also the shortest route to trusted structural evidence: the derived
+helpers route every constructor, including no-payload ones, through Keiki's `Via`
+producers. Hand-written boundary constructors must do the same — a record literal no
+longer compiles, and the deprecated `mkWireCtor` family produces evidence-free
+constructors that quietly weaken composition, replay, and symbolic checks. See
+[trusted constructor evidence](./constructor-evidence.md).
+
+One derived behavior changes on the 0.9 upgrade. No-payload event constructors now match
+structurally through `Generic` instead of comparing with `Eq`, so a carrier whose custom
+`Eq` quotients values matches differently than before. `solveOutput` still requires
+`Eq co`.
+
 Avoid spelling out identity mappings:
 
 ```haskell
@@ -489,6 +501,8 @@ timers around a keiki transducer. The complete hosted pattern will be documented
 - Define command payloads and private event payloads separately.
 - Use `deriveAggregateCtorsAll` and `deriveWireCtorsAll` unless helper names need
   custom suffixes.
+- Mint any hand-written `InCtor` or `WireCtor` through a `Via` producer, and reserve
+  `unavailableInCtor` / `unavailableWireCtor` for behavior that is genuinely not structural.
 - Author edges with `Keiki.Builder`.
 - Declare output intent on every edge with `emit`, `emitWith`, or `noEmit`.
 - Use `step` in the pure command runner; use `stepEither` where you need the rejection reason.
@@ -514,6 +528,7 @@ timers around a keiki transducer. The complete hosted pattern will be documented
 ## Related Patterns
 
 - [Build-Time Validation](./build-time-validation.md) is the complete warning and solver guide.
+- [Trusted Constructor Evidence](./constructor-evidence.md) is the producer standard for every boundary constructor.
 - [Typed Field Projections](./typed-field-projections.md) keeps decisions over consumer-owned values structural.
 - [Structured Replay and Hydration](./structured-replay-and-hydration.md) turns replay failures into actionable diagnostics.
 - [Checked Composition](./checked-composition.md) defines safe aggregate and orchestrator boundaries.
