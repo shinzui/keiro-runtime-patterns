@@ -35,7 +35,7 @@ reviews:
 
 **Use an event-sourced saga for stateful orchestration, deterministic dispatch for crash recovery, and durable timers for deadlines.**
 
-Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.6.0.0, unchanged from 0.4 in this surface), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
+Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.11.0.0, unchanged from 0.4 in this surface), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
 
 ## The Rule
 

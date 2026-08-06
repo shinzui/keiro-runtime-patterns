@@ -1,5 +1,9 @@
 # messaging Update Log
 
+## 2026-08-06
+* **Update**: Process-manager release claim moves to the current 0.11.0.0 set
+* **Update**: PGMQ standard states that the spec fanout body and top-level dedupe key are descriptive-only
+
 ## 2026-07-31
 * **Update**: Process-manager boundary now cites the released 0.5.0.0 line
 

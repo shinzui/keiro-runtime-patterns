@@ -2,7 +2,7 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including composable service workspaces, brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -105,10 +105,12 @@ keiro-dsl pretty INPUT
 keiro-dsl inspect INPUT --format=json
 keiro-dsl behavior-obligations INPUT --format=text|json
 keiro-dsl check INPUT [--emit] [--explain-bindings] \
-  [--coverage-report FILE] [--fail-on-opaque]
+  [--coverage-report FILE] [--fail-on-opaque] \
+  [--min-language N] [--deny-warnings] [--deny CODE[,CODE...]] \
+  [--report-out FILE]
 keiro-dsl scaffold INPUT --out DIR \
   [--module-root PREFIX] [--collocate] [--force-generated-overwrite] \
-  [--goldens DIR] \
+  [--goldens DIR] [--runtime-package PACKAGE] [--apply-name-migrations] \
   [--codec-comparison TYPE --comparison-out FILE]
 keiro-dsl diff INPUT --since GIT-REF \
   [--emit-goldens DIR] [--replay-impact-out FILE] [--explain] \
@@ -124,6 +126,32 @@ keiro-dsl diff INPUT --since GIT-REF \
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
 - `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
 - `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
+
+## Make warnings fail CI
+
+A `keiro-dsl` warning is a real finding, and until 0.11 nothing stopped a repository from accumulating them. Gate them explicitly; severities themselves do not change.
+
+```sh
+keiro-dsl check domain/service.keiro \
+  --min-language 4 \
+  --deny-warnings \
+  --report-out build/keiro-check.json
+```
+
+- `--deny-warnings` exits non-zero when any warning-severity diagnostic fires. Prefer it.
+- `--deny CODE[,CODE...]` is the selective fallback when one idiomatic spelling warns by design — router and process benign-inversion spellings are the usual reason. It is repeatable and comma-separated. Deny the codes you accept, never the reverse.
+- `--min-language N` enforces the effective-version floor. See [Keiro DSL language versions](language-versions.md).
+- `--report-out FILE` writes the append-only `keiro-dsl/check-report/1` JSON — source or workspace — through `Keiro.Dsl.CheckReport`. Each entry carries its severity, code, location, and whether a `--deny` selection matched it, so CI can report the finding without re-parsing rendered text.
+
+A denial that could never match is refused rather than silently ignored. `check --deny` rejects any code emitted only by `diff` or by the codec-comparison path, and rejects `CoverageOpaqueGateExceeded` outright because that code is the error `--fail-on-opaque` itself raises. If a `--deny` invocation is accepted, the code it names is genuinely reachable from that command.
+
+## Clear the inert-declaration warnings
+
+Keiro 0.11 started warning on spec surfaces the grammar accepts but no runtime implements — accepted intake bind flags, emit derivations, optional queue markers, and inline subscriptions. Scaffold reports additionally list emit, pgmq dispatch, and operation nodes that contribute no modules.
+
+These are not stylistic. Each one names a declaration a reader would reasonably expect to have an effect and which has none. Delete it or replace it with the surface that does the work. Under language 4 several of them are errors rather than warnings, so the warning is a preview of what adopting the stable contract will reject.
+
+Three surfaces are explicitly descriptive-only and are checked only for well-formedness: timer dead-letter text, pgmq fanout function names, and pgmq top-level dedupe keys. Do not read them as configuration; see [PGMQ jobs](../messaging/pgmq-jobs.md).
 
 `diff` resolves the prior input with `git show`, including a workspace's historical manifest and member set, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, and `WorkspaceAuthorityChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
 

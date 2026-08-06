@@ -63,6 +63,25 @@ Register initials are checked once, at their declared type: a `Time` initial is 
 
 Every rejection is a stable code. Type failures use the `AggregateType*` family; expression failures use `AggregateExpression*` for roots, paths, literals, operands, operators, Boolean contexts, and write targets; reserved collection spellings fail as `CollectionExpressionUnsupported`. All of them come from `check`, before scaffolding writes a byte.
 
+## Separate the three field namespaces when they must differ
+
+A direct field carries three identities: its spec name, its generated Haskell record selector, and its wire key. By default all three derive from the spec name. From [language version 4](language-versions.md) a direct aggregate or integration-contract field can declare the other two independently:
+
+```text
+family: text
+type haskell payloadType: text
+region haskell serviceRegion as "region_code": text
+```
+
+- `haskell <selector>` sets the generated record selector. Use it when the natural spec name collides with something Haskell cannot express as a selector.
+- `as "<wire-key>"` sets the persisted and published key. Use it when the wire is already fixed by an external contract.
+
+Records use selectors; codecs and goldens use wire keys; a `fields(Command)` event copies the resolved three-namespace identity rather than re-deriving it. Declare an alias only when the namespaces genuinely differ — three names for one field is a cost every reader pays.
+
+Version 4 also narrowed the generated occurrence reserved set to the 23 words GHC actually rejects, so previously refused contextual identifiers such as `family`, `via`, and `qualified` now check and compile without an alias. Remove aliases that existed only to dodge them.
+
+Three diagnostics guard the feature: `FieldWireKeyCollision` when two fields resolve to one wire key, `FieldWireKeyInvalid` when a key is not usable, and `EvtFieldWireKeyChanged` from `diff` when a key moves between revisions. The first two are refusals. The third is a wire change even though no Haskell changed — treat it as one; see [evolution gates and rollout ordering](evolution-and-rollout.md).
+
 ## Let generation own the transition by default
 
 For each such aggregate the scaffolder emits two generated modules:

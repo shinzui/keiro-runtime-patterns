@@ -1,6 +1,9 @@
 # keiro Update Log
 
 ## 2026-08-06
+* **Update**: Expression standard covers language-4 field aliases and the three field namespaces
+* **Update**: Adoption covers the check CI gate flags, the check-report schema, the deny-origin refusals, and the inert-declaration warnings
+* **Update**: Overview targets the Keiro 0.11.0.0 set on Keiki 0.9 and digests the 0.9, 0.10, and 0.11 cycles
 * **Update**: Workspace manifest gains the runtime-package clause and the renamed workspace ledgers
 * **Update**: Expression standard reads as version-2-onward rather than version-2-only and examples declare the stable version
 * **Update**: Snapshot discriminators record the Keiro 0.9 widening of fold fingerprints to FNV-1a-128

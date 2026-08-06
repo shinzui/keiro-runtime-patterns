@@ -2,7 +2,7 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
-timestamp: 2026-07-22T11:25:02-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -68,6 +68,12 @@ bufferSize * batchSize * average processing time < visibility timeout
 ```
 
 On shutdown, prefetched but undispatched messages are not lost; they remain invisible until VT expires and are then redelivered. Expect delay, not deletion.
+
+## Do Not Read The Descriptive pgmq Spec Clauses As Configuration
+
+A `.keiro` pgmq dispatch node accepts a `fanout body` function name and a top-level dedupe key. Both are **descriptive-only**: `check` verifies the reference is well-formed and nothing more. Neither configures runtime behavior, and no runtime reads them. The same holds for timer dead-letter text.
+
+Configure fanout and deduplication in the runtime, as this standard describes. If a spec clause is the only place a behavior is stated, that behavior does not exist. See [Keiro-dsl adoption](../keiro/dsl-adoption.md) for the wider set of accepted-but-inert surfaces Keiro 0.11 started warning about.
 
 ## Freeze Queue Identity
 
