@@ -2,7 +2,7 @@
 type: Standard
 title: "Behavior conformance and obligations"
 description: "Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-behavior-conformance
 tags: [keiro, behavior-conformance]
 status: current
@@ -66,6 +66,8 @@ Witnesses execute for real. Live keys run through `stepDetailedEither` and repla
 | `unverified` | passed, but the evidence is not proof-strength |
 
 `stale` is the signal that a spec change dropped an obligation — reconcile it with the diff rather than deleting the witness reflexively. `failed` carries a `BehaviorFailure` with a stable code and detail; branch on the code.
+
+From Keiro 0.11 the JSON report also carries an append-only `subject` field naming what was checked, so a CI run that reports several services can attribute a failure without inferring it from the file path. Generated harnesses additionally carry complete signatures, annotated behavior cells, named sample constants, and runtime-backed read-model facts; re-scaffold and recompile after upgrading. Behavior keys, wire data, shape hashes, fold identity, and replay semantics are unchanged.
 
 ## Gate on completeness, and opt into proof strength deliberately
 

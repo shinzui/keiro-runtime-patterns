@@ -1,6 +1,7 @@
 # architecture Update Log
 
 ## 2026-08-06
+* **Update**: Test layout separates hand-owned dsl-test from the generated conformance package
 * **Update**: Architecture route reaches the generated compilation contract
 * **Update**: Scaffolding covers the 0.11 sidecar ledger names, the refusal on legacy names, and --apply-name-migrations
 * **Added**: The generated compilation contract states the GHC2024 baseline, the closed module-local extension set, the runtime-package authority, and the generated conformance package

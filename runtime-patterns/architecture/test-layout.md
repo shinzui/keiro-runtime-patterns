@@ -2,7 +2,7 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -64,7 +64,7 @@ Every worker module gets a corresponding `*Spec`; danwa's missing `Embellishment
 Keiro-runtime-jitsurei's hospital-capacity package demonstrates six focused suite roles. In a six-package service, attach each role to the package that owns the tested surface:
 
 - `test` is the baseline unit suite.
-- `dsl-test` checks scaffolded modules, harnesses, and specification conformance; attach it to `<service>-core`.
+- `dsl-test` checks scaffolded modules, harnesses, and specification conformance; attach it to `<service>-core`. It is hand-owned and separate from the generated conformance package a configured service scaffolds — that package is generated output, so do not add tests to it. See [the generated compilation contract](generated-compilation-contract.md).
 - `contract-test` checks integration-event contracts; attach it to `<service>-workers`.
 - `migration-test` checks the pg-migrate plan; attach it to `<service>-migrations`.
 - `kafka-integration` runs real-broker integration tests; attach it to `<service>-workers` and keep it operationally distinct from unit tests.
