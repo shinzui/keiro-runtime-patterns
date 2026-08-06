@@ -2,10 +2,10 @@
 type: Guide
 title: "Kiroku Observability"
 description: "Wiring kiroku-metrics and kiroku-otel: collector composition, spans, Prometheus names, health probes"
-timestamp: 2026-07-22T16:52:58Z
+timestamp: 2026-08-06T22:43:02Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  at: "2026-08-06T22:43:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-observability
 tags: [kiroku, observability]
 status: current
@@ -43,6 +43,8 @@ settings =
 
 `newKirokuMetrics` normally receives the live store because it reads publisher gauges. When startup order requires it, use the explicit STM-reader seam and finish wiring before traffic begins. Do not perform exporter I/O in either synchronous callback.
 
+`existingEventHandler` above is the `Maybe` already on `baseSettings`. In a Keiro service it is rarely the only other claimant on that field — see [composing every `eventHandler` claimant](#compose-every-eventhandler-claimant) before treating this example as complete.
+
 ## Trace subscription lifecycle and event causality
 
 Create a subscription lifecycle callback with:
@@ -54,6 +56,30 @@ traceEvents <- subscriptionTraceHandler tracer
 Its type is `Tracer -> IO (KirokuEvent -> IO ())`; compose the returned handler into `eventHandler` alongside metrics and logging. It opens short lifecycle and batch spans. Configure a batch span processor: callback execution is synchronous, and a blocking exporter would stall subscription work.
 
 Set `StoreSettings.enrichEvent` to inject W3C context with `injectTraceContext currentSpanContext`. It writes `traceparent` and `tracestate` into event metadata while preserving other keys. The Shibuya Kiroku adapter consumes that metadata and adds Kiroku identity attributes to downstream processing spans.
+
+## Compose every `eventHandler` claimant
+
+`eventHandler` is one field, and in a Keiro service three packages want it. `metricsEventHandler` and `kirokuEventBridge` are wrappers that take the next handler as a delegate; `subscriptionTraceHandler` returns a leaf handler, so fan out to it explicitly. Assigning any one of them last, without threading the others through, silently drops the rest.
+
+```haskell
+-- kiroku-otel returns a leaf handler, not a wrapper: fan out to it explicitly.
+let baseHandler ev = traceEvents ev >> appEventHandler ev
+
+-- keiro counts the terminal dead-letter event; kiroku-metrics wraps the result.
+let bridged = kirokuEventBridge keiroMetrics baseHandler
+
+settings =
+  baseSettings
+    { eventHandler = Just (metricsEventHandler km (Just bridged))
+    , observationHandler = Just (metricsObservationHandler km existingObservationHandler)
+    }
+```
+
+`Keiro.Telemetry.kirokuEventBridge` is the claimant services forget, because Keiro's other instruments arrive by a different route. `keiro.outbox.deadlettered` and `keiro.dispatch.deadlettered` are recorded inside Keiro's own outbox and process-manager paths, so threading `KeiroMetrics` through option records is enough for them. `keiro.subscription.deadlettered` has no internal recorder at all: the bridge is its only source. A service that installs Kiroku's collector here and threads `KeiroMetrics` only into command and worker options exports that counter permanently at zero, and loses the signal that a subscription exhausted its retry ceiling.
+
+That constrains startup order. Every handle these wrappers close over — `KirokuMetrics`, the `Tracer`, and `KeiroMetrics` — must exist before `ConnectionSettings` is built, and therefore before `withStore`. `newKeiroMetrics` is the easy one to defer, because its other use is threading into option records assembled later; build it with the rest of the telemetry instruments at startup. See [telemetry](../keiro/telemetry.md).
+
+`observationHandler` is a separate slot with one claimant today; the Keiro bridge observes `KirokuEvent`, not `Observation`. Every wrapper in the chain invokes its delegate synchronously, so the whole chain must stay non-blocking.
 
 ## Serve the operational surface
 
@@ -78,3 +104,4 @@ Subscription lag is an upper bound: the collector learns a worker’s position a
 - [Connection Settings](./connection-settings.md)
 - [Subscriptions](./subscriptions.md)
 - [Operational Invariants](./operational-invariants.md)
+- [Keiro telemetry](../keiro/telemetry.md)

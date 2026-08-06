@@ -1,6 +1,8 @@
 # keiro Update Log
 
 ## 2026-08-06
+* **Update**: Startup order places telemetry instrument construction before store acquisition, because ConnectionSettings closes over the metrics and tracer handles.
+* **Update**: Telemetry records that keiro.subscription.deadlettered has no internal recorder and is fed only by kirokuEventBridge, so newKeiroMetrics must be constructed before the store opens.
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Conformance report records the append-only subject field and the regenerated harness content
 * **Update**: Expression standard covers language-4 field aliases and the three field namespaces

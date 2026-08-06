@@ -2,10 +2,10 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams, structural mapping evidence, resource effects, options, and startup order"
-timestamp: 2026-07-29T02:53:40Z
+timestamp: 2026-08-06T22:43:02Z
 generated:
   by: human:nadeem
-  at: "2026-07-29T02:53:40Z"
+  at: "2026-08-06T22:43:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -95,7 +95,9 @@ Apply the same pattern to subscription, projection, and workflow options.
 
 ## Startup order
 
-The rule is one sentence: migrate as a deployment job, prove the migration handshake in every replica, acquire the store, validate event streams, register read models, then start only the workers the service uses.
+The rule is one sentence: migrate as a deployment job, prove the migration handshake in every replica, construct telemetry instruments, acquire the store, validate event streams, register read models, then start only the workers the service uses.
+
+Telemetry instruments come before store acquisition, not after it, because `ConnectionSettings` closes over them. `newKirokuMetrics`, the `Tracer`, and `newKeiroMetrics` all feed `eventHandler` or `observationHandler` callbacks that can only be installed at construction time. A service that builds `KeiroMetrics` later, alongside the worker options it also feeds, silently loses every instrument sourced from those callbacks. See [telemetry](telemetry.md) and [Kiroku observability](../kiroku/observability.md).
 
 Applying migrations from a deployment job keeps schema ownership deterministic, but it does not stop a replica from starting before that job reaches its database. Close the gap by refusing to serve until the handshake passes:
 
@@ -115,6 +117,7 @@ Registration and worker startup should fail the process rather than leave a part
 ## Related Patterns
 
 - [The two-schema arrangement](two-schema-arrangement.md)
+- [Telemetry](telemetry.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Keiro gotchas](gotchas.md)
 - [Read models and projections](read-models-and-projections.md)
