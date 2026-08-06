@@ -2,7 +2,7 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a single-file or workspace Keiro source of truth, declaring consumer mappings, and running whole-service check/scaffold/conformance idempotently"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -31,12 +31,12 @@ Keiro-dsl is a build-time toolchain, not a runtime interpreter. It checks a type
 A small service specification lives at `domain/<service>.keiro`. In the standard one-service-per-repository shape, begin it with the language preamble, then the context and collocated-layout clauses:
 
 ```text
-language keiro-dsl 1
+language keiro-dsl 4
 context ticket
 layout collocated
 ```
 
-The `language` clause must be the first significant clause and is required of every new source; see [Keiro DSL language versions](../keiro/language-versions.md) for choosing between version 1 and version 2. The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+The `language` clause must be the first significant clause and is required of every new source. Version 4 is the sole stable authoring contract; versions 1 through 3 remain readable as compatibility-only and make the CLI emit a stderr contract notice. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
 
 Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its spec and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
 

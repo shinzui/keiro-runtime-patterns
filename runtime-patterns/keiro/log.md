@@ -1,5 +1,12 @@
 # keiro Update Log
 
+## 2026-08-06
+* **Update**: Expression standard reads as version-2-onward rather than version-2-only and examples declare the stable version
+* **Update**: Snapshot discriminators record the Keiro 0.9 widening of fold fingerprints to FNV-1a-128
+* **Update**: Rollout ordering records the contract-TypeID and field-alias change classes alongside the version-3 identifier domain
+* **Update**: Identifier domains cover version-4 contract TypeID fields, parseKindIdV7Text/Value, and their producer-first drain-required rollout
+* **Update**: Language versions adopt version 4 as the sole stable contract, the compatibility-only notice, --min-language, and the removal of the Spec-only fold and diff wrappers
+
 ## 2026-08-03
 * **Update**: Overview targets the Keiro 0.8.0.0 set on Keiki 0.7 and digests the 0.7 and 0.8 cycles
 * **Update**: Adoption guide adds behavior-obligations to the CLI loop and points nominal imports at the Nominals module

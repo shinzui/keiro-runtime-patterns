@@ -1,8 +1,8 @@
 ---
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
-description: "Declaring version-2 guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-08-02T19:56:33-07:00
+description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -10,9 +10,9 @@ status: current
 
 # Aggregate scalar expressions and transition ownership
 
-**Under [language version 2](language-versions.md) every aggregate transition is either fully generated from its declared guard and writes or explicitly `implementation hole` — never both.**
+**From [language version 2](language-versions.md) onward every aggregate transition is either fully generated from its declared guard and writes or explicitly `implementation hole` — never both.**
 
-Version 2 makes the `.keiro` source authoritative for scalar decision logic: declared guards and writes are compiled into the generated Keiki transducer instead of being restated by hand. That moves the generated/hand-owned firewall, so decide who owns each transition deliberately.
+Version 2 introduced this contract and every later version keeps it: declared guards and writes are compiled into the generated Keiki transducer instead of being restated by hand. That moves the generated/hand-owned firewall, so decide who owns each transition deliberately. Author new sources at the [stable version](language-versions.md); the examples here use it.
 
 ## Use the six direct scalar types
 
@@ -33,7 +33,7 @@ Direct `Json`, `Optional`, `List`, and `Map` aggregate fields do not exist. Expr
 ## Write guards and writes against explicit roots
 
 ```text
-language keiro-dsl 2
+language keiro-dsl 4
 context accounting
 
 aggregate Account
@@ -65,18 +65,18 @@ Every rejection is a stable code. Type failures use the `AggregateType*` family;
 
 ## Let generation own the transition by default
 
-For each version-2 aggregate the scaffolder emits two generated modules:
+For each such aggregate the scaffolder emits two generated modules:
 
 - `Generated.<Context>.<Aggregate>.Expressions` — one typed Keiki predicate per declared guard and one typed Keiki term per register write;
 - `Generated.<Context>.<Aggregate>.Transducer` — the assembled transducer, the aggregate fold fingerprint, `BehaviorOwnership (GeneratedOwned | HoleOwned)`, and an aggregate-specific `<aggregate>PredicateVerifications` action.
 
 Generated ownership is the default and it is exclusive: no hand-owned module may replace a generated guard or write.
 
-Explicit event fields remain hand-owned, but from Keiro 0.7 a version-2 `fields(Command)` event value is generated directly from a checked total identity mapping. Direct, aliased-wire, optional, nominal, `Time`, `Natural`, and structural fields no longer pass through a create-once identity-copy hook. An identity function left over from an earlier scaffold is reported as obsolete and cannot affect runtime execution — delete it rather than maintaining it.
+Explicit event fields remain hand-owned, but from Keiro 0.7 a `fields(Command)` event value is generated directly from a checked total identity mapping. Direct, aliased-wire, optional, nominal, `Time`, `Natural`, and structural fields no longer pass through a create-once identity-copy hook. An identity function left over from an earlier scaffold is reported as obsolete and cannot affect runtime execution — delete it rather than maintaining it.
 
 ## Emit an event for every state change
 
-A version-2 transition that emits no event may no longer change control state or write registers. `check` rejects it with `AggregateEventlessStateChange`; an empty accepted edge is legal only as a true no-op. The companion code `EventOutputCommandMismatch` rejects an event output that disagrees with the command it claims to carry.
+A transition that emits no event may no longer change control state or write registers. `check` rejects it with `AggregateEventlessStateChange`; an empty accepted edge is legal only as a true no-op. The companion code `EventOutputCommandMismatch` rejects an event output that disagrees with the command it claims to carry.
 
 Both are append-only `DiagnosticCode` constructors, so an exhaustive match over the code set must be extended. The rule they enforce is the same durability invariant Keiki's `StateChangingEpsilon` warning protects: a change with no event leaves nothing for replay to reproduce.
 
@@ -105,9 +105,9 @@ From Keiro 0.7 the set of transitions reported `UnverifiedOpaque` is **larger**,
 
 Predicate verification covers guards. For coverage of the transitions themselves — every live transition, every reachable rejection, every replay-only edge — use the generated [behavior-conformance](behavior-conformance.md) report.
 
-## Migrate to version 2 by hand
+## Migrate off version 1 by hand
 
-Version-1 generated output is frozen, and version-1 whole-transducer holes are unchanged. The scaffolder never overwrites or claims to translate consumer behavior, so moving an aggregate to version 2 means rewriting its guards and writes in the spec and deleting the hand-owned logic they replace. Do it one aggregate at a time, and prove each with the replay audit before deleting the code it supersedes.
+Version-1 generated output is frozen, and version-1 whole-transducer holes are unchanged. The scaffolder never overwrites or claims to translate consumer behavior, so moving an aggregate off version 1 means rewriting its guards and writes in the spec and deleting the hand-owned logic they replace. Do it one aggregate at a time, and prove each with the replay audit before deleting the code it supersedes.
 
 ## Related Patterns
 

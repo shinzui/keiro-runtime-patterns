@@ -2,7 +2,7 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -101,6 +101,8 @@ The rule is one sentence: inventory every durable value whose decoder or decisio
 - **Every aggregate append goes through the codec boundary.** A direct Kiroku write without `encodeForAppend` is stamped version 1 forever, and the first codec bump then runs a current-shape payload through the version-1 upcaster chain.
 - **Structural mapping changes preserve one wire authority.** The `.keiro` declaration and generated codec own current private-event JSON. A historical codec is test or upcaster machinery only; never route current decode failures through it. Snapshot JSON remains a separate cache boundary and must not be described as generated structural event encoding.
 - **Adopting the version-3 identifier domain deploys consumers first.** Every reader that must accept the tightened ID form goes out before the producer starts emitting under it, and old snapshots are expected to miss and rebuild rather than be edited. See [enforced identifier domains](identifier-domains.md).
+- **Adopting a version-4 contract TypeID deploys the producer first, after a drain.** `ContractTypeIdDomainChanged` is the opposite ordering from the aggregate case, because the tightening lands on what the service emits. Clear in-flight messages written under the looser contract before consumers move.
+- **A field alias change is a wire change even when the Haskell selector is untouched.** `EvtFieldWireKeyChanged` moves persisted and published bytes; `FieldWireKeyCollision` and `FieldWireKeyInvalid` are refusals, not warnings. See [Keiro-dsl adoption](dsl-adoption.md).
 - **A changed version-2 hole must bump its `FoldVersion`.** The aggregate fold fingerprint incorporates each hole's token, so bumping it invalidates stale snapshots. Change hole predicate or update behavior without the bump and the fingerprint stays equal, the differ sees nothing, and every existing snapshot is silently trusted against logic that no longer produced it. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
 
 `mkEventStreamUnchecked` skips every gate at the stream boundary. It is emergency forensics, never a rollout workaround.

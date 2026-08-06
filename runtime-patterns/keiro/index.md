@@ -15,12 +15,12 @@
 
 # Standard
 
-- [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) - Declaring version-2 guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned
+- [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) - Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned
 - [Behavior conformance and obligations](behavior-conformance.md) - Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness
 - [Command cycle and errors](command-cycle-and-errors.md) - Command hydration, decision, append, projection, and prescriptive error handling
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) - The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering
-- [Enforced identifier domains](identifier-domains.md) - The frozen TypeID-v7 admission contract for prefix-bearing IDs under language version 3, and the producer-last rollout its adoption requires
-- [Keiro DSL language versions](language-versions.md) - Declaring an explicit language keiro-dsl preamble, choosing among versions 1 through 3, and auditing legacy-unversioned sources
+- [Enforced identifier domains](identifier-domains.md) - The frozen TypeID-v7 admission contract for aggregate IDs from language version 3 and public contract fields from version 4, and the opposite rollouts they require
+- [Keiro DSL language versions](language-versions.md) - Declaring an explicit language keiro-dsl preamble, adopting the stable version 4 contract, and auditing compatibility-only sources
 - [Consumer-owned nominal bindings](nominal-bindings.md) - Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit
 - [Read models and projections](read-models-and-projections.md) - Read-model registration, consistency, async fencing, rebuilds, and snapshot limits
 - [Runtime assembly](runtime-assembly.md) - Store acquisition, validated event streams, structural mapping evidence, resource effects, options, and startup order

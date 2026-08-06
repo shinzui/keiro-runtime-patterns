@@ -2,7 +2,7 @@
 type: Standard
 title: "Read models and projections"
 description: "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -73,6 +73,8 @@ An aggregate snapshot is loaded only when three independent components agree:
 The manual clause is still load-bearing. **A fold or guard change the derivation cannot see — hand-written update logic, or logic living only in a generated service's hand-owned Holes module — must bump `stateCodecVersion`.** Nothing else will catch it: an unbumped invisible change presents identical discriminators by construction. As a backstop, one accepted seed in 1000 is verified against a full replay, and a mismatch increments `keiro.snapshot.seed.divergence`; alert on that metric.
 
 Rows written before the discriminator gained its third component carry an empty sentinel. They miss once, full-replay, and may then be replaced with a current seed, so expect a one-time replay cost per stream after the upgrade.
+
+Keiro 0.9 widened the fold fingerprint from a 16-hex-digit FNV-1a-64 to a 32-hex-digit FNV-1a-128 value. The widening is deliberate and invalidates every snapshot discriminated by the earlier token: after the upgrade each stream misses once and rebuilds from events. Plan the replay cost and refresh generated transducers; do not attempt to translate old tokens. Read-model, mapped-wire, and behavior-key identities are separate 64-bit values and did not move.
 
 For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `docs/user/snapshots.md`, and `docs/guides/project-read-models.md`.
 

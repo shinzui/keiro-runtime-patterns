@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-08-06
+* **Update**: Service contract example declares the stable language version instead of version 1
+
 ## 2026-07-31
 * **Update**: Spec placement requires the language preamble and covers nominal and version-2 generated modules
 
