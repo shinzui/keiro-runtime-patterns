@@ -83,12 +83,16 @@
         "messaging"
       ],
       "watch": [
-        "src",
+        "pgmq-core/src",
+        "pgmq-hasql/src",
+        "pgmq-effectful/src",
+        "pgmq-config/src",
+        "pgmq-migration/migrations",
         "CHANGELOG.md"
       ],
       "last_checked_commit": "b4cab751198b5012f025353610dfb4f3782c6eea",
       "last_checked_at": "2026-07-30T00:43:08Z",
-      "notes": "Catalog-wide model review baseline."
+      "notes": "Catalog-wide model review baseline. Watch paths corrected 2026-08-05: pgmq-hs is a five-package monorepo, so the previous bare `src` matched nothing and --files scoping reported only the CHANGELOG. Everything after this watermark is unreleased 0.5.0.0 work (all five .cabal files still read 0.4.0.1, latest tag v0.4.0.1); hold the catalog at released behaviour until it ships. On release, messaging/gotchas item 13 becomes false: isTransient will whitelist SQLSTATEs 40001, 40P01, 55P03, 57P01/02/03 and class 53 inside StatementSessionError."
     },
     {
       "project": "shinzui/pg-migrate",

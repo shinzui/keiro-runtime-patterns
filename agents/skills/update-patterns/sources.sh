@@ -87,7 +87,12 @@ cmd_status() {
     fi
     drift=1
 
-    git -C "$repo_path" log --no-merges --format='    %h %s' "${last_commit}..${ref}" | head -40
+    # `head` closes the pipe early on a long range; without this guard the
+    # resulting SIGPIPE would abort the whole loop under `set -o pipefail`.
+    { git -C "$repo_path" log --no-merges --format='    %h %s' "${last_commit}..${ref}" || true; } | head -40
+    if [[ "$count" -gt 40 ]]; then
+      printf '    ... and %s earlier commits\n' "$((count - 40))"
+    fi
     if [[ "$show_files" == "1" ]]; then
       printf '  changed files:\n'
       git -C "$repo_path" diff --stat "${last_commit}..${ref}" | sed 's/^/    /'
