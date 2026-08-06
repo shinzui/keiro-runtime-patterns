@@ -2,7 +2,7 @@
 type: Standard
 title: "Composable service workspaces"
 description: "Splitting one Keiro service into single-owner .keiro members while preserving whole-service checking, atomic scaffolding, adoption history, and evolution reports"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-08-05T19:47:25-07:00
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-service-workspaces
 tags: [keiro, service-workspaces]
 status: current
@@ -42,6 +42,7 @@ Version the manifest beside its members and list every member relative to the ma
 service demo-project
 module Demo.Modules.Project
 layout collocated
+runtime-package demo-project-service
 spec project-artifact.keiro
 spec project.keiro
 spec shared.keiro
@@ -50,6 +51,7 @@ spec shared.keiro
 The rules are strict:
 
 - `service` is the stable workspace identity and the key for scaffold history and reports.
+- `runtime-package` names the Cabal package that compiles the generated service runtime. It is optional in the manifest and overridable per run with `scaffold --runtime-package`, but it is never inferred, and a configured service needs it to scaffold its conformance package. The value is checked against Cabal's package-name grammar. At most one clause may appear. See [the generated compilation contract](../architecture/generated-compilation-contract.md).
 - Every member is a complete, independently parseable `.keiro` spec and declares the same `context`.
 - Every member selects the same effective language version. Composition compares versions before merging the graph and refuses a disagreement with `WorkspaceLanguageVersionMismatch`; move the whole workspace across a version in one change. See [Keiro DSL language versions](language-versions.md).
 - Aggregates are never split across members. Shared ids, enums, rules, and mapped declarations have exactly one owning member; even textually identical duplicates are refused.
@@ -81,11 +83,14 @@ Reordering `spec` lines and repeating an unchanged scaffold must produce byte-id
 A workspace scaffold writes:
 
 ```text
-keiro-dsl-scaffold-record.workspace.<service>.txt
-keiro-dsl-manifest.workspace.<service>.txt
+keiro-dsl-ledger.workspace.<service>.txt
+keiro-dsl-cabal-fragment.workspace.<service>.txt
+keiro-dsl-conformance-ledger.txt
 ```
 
-The record attributes aggregate-owned modules to their member and marks service-wide modules as context-level. Moving an aggregate or declaration between members is an ownership move, not stale/new churn. The single-file context-keyed record names remain unchanged for compatibility.
+The ledger attributes aggregate-owned modules to their member and marks service-wide modules as context-level. Moving an aggregate or declaration between members is an ownership move, not stale/new churn.
+
+A workspace still holding the pre-0.11 `keiro-dsl-scaffold-record.workspace.*` and `keiro-dsl-manifest.workspace.*` names refuses to scaffold until `scaffold --apply-name-migrations` renames them. The single-file forms were renamed in the same change; see [specification and scaffolding](../architecture/spec-and-scaffolding.md) for the full table and the migration mechanics.
 
 Stale reports are advisory and Keiro never deletes files. Review stale generated files, hand-owned holes, and unclaimed files separately; delete or rename only after a human establishes ownership.
 

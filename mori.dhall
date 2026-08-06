@@ -62,6 +62,16 @@ in  Schema.Project::{
             Schema.DocLocation.LocalFile "runtime-patterns/keiki/transducer-best-practices.md"
         }
       , Schema.DocRef::{
+        , key = "architecture-generated-compilation-contract"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "The GHC2024 baseline generated Haskell compiles under, the closed extension set a module may request locally, and the conformance package a configured service scaffolds"
+        , location =
+            Schema.DocLocation.LocalFile
+              "runtime-patterns/architecture/generated-compilation-contract.md"
+        }
+      , Schema.DocRef::{
         , key = "keiki-constructor-evidence"
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module

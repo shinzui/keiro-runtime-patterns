@@ -90,7 +90,10 @@ need the surrounding rules.
   [service-package standard](architecture/service-packages.md) and
   [vertical-slice module standard](architecture/vertical-slice-modules.md); when
   several spec members compose one service, apply the
-  [composable service-workspace standard](keiro/service-workspaces.md).
+  [composable service-workspace standard](keiro/service-workspaces.md). Satisfy
+  [the generated compilation contract](architecture/generated-compilation-contract.md)
+  when wiring the generated layer into Cabal, naming the runtime package, or
+  building the generated conformance package.
 - **Configuring a service:** begin with the
   [Settei service standard](config/settei-service-standard.md), and use the
   [Settei CLI standard](config/settei-cli-standard.md) for command-line tooling.

@@ -1,6 +1,7 @@
 # keiro Update Log
 
 ## 2026-08-06
+* **Update**: Workspace manifest gains the runtime-package clause and the renamed workspace ledgers
 * **Update**: Expression standard reads as version-2-onward rather than version-2-only and examples declare the stable version
 * **Update**: Snapshot discriminators record the Keiro 0.9 widening of fold fingerprints to FNV-1a-128
 * **Update**: Rollout ordering records the contract-TypeID and field-alias change classes alongside the version-3 identifier domain

@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-08-06
+* **Update**: Package-structure route reaches the generated compilation contract
 * **Update**: Aggregate route reaches trusted constructor evidence for boundary constructors and the deprecated mkWireCtor upgrade
 
 ## 2026-08-03
