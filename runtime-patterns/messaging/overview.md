@@ -2,7 +2,10 @@
 type: Overview
 title: "Keiro Messaging Patterns"
 description: "Index of messaging standards for keiro services: process managers, integration events, transports; start here"
-timestamp: 2026-07-22T11:27:32-07:00
+timestamp: 2026-07-22T18:27:32Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:27:32Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:27:32-07:00
+    document_timestamp: 2026-07-22T18:27:32Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

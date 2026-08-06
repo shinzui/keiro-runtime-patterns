@@ -2,7 +2,10 @@
 type: Guide
 title: "Resolving Keiki Operator Conflicts with `lens` / `generic-lens`"
 description: "Resolving the lens / generic-lens (.>) operator clash three ways"
-timestamp: 2026-07-31T16:27:44-07:00
+timestamp: 2026-07-31T23:27:44Z
+generated:
+  by: human:nadeem
+  at: "2026-07-31T23:27:44Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-operator-conflicts
 tags: [keiki, operator-conflicts]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:35:21-07:00
+    document_timestamp: 2026-07-22T16:35:21Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: human
     reviewer: nadeem
     reviewed_at: 2026-07-31T23:27:44Z
-    document_timestamp: 2026-07-31T16:27:44-07:00
+    document_timestamp: 2026-07-31T23:27:44Z
     scope: guidance
     outcome: approved
     context: >-

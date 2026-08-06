@@ -2,7 +2,10 @@
 type: Standard
 title: "Migration Authoring"
 description: "Authoring rules: append-only migrations, the three-file review diff, the no-transaction directive, and manifest v1 strictness"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-07-23T23:55:16Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T23:55:16Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-authoring
 tags: [migrations, authoring]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-23T16:55:16-07:00
+    document_timestamp: 2026-07-23T23:55:16Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

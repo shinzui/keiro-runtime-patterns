@@ -2,7 +2,10 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of prescriptive Keiro runtime and DSL standards; start here"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-29T12:40:01-07:00
+    document_timestamp: 2026-07-29T19:40:01Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

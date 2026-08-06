@@ -2,7 +2,10 @@
 type: Guide
 title: "Codd to pg-migrate Transition"
 description: "Why the fleet moved from codd to pg-migrate and how persistent databases were imported ledger-only"
-timestamp: 2026-07-23T16:55:16-07:00
+timestamp: 2026-07-23T23:55:16Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T23:55:16Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-codd-transition
 tags: [migrations, codd-transition]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-23T16:55:16-07:00
+    document_timestamp: 2026-07-23T23:55:16Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

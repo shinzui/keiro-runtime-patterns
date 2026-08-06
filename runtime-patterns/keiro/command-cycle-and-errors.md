@@ -2,7 +2,10 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, and prescriptive error handling"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-30T01:11:55Z
+generated:
+  by: human:nadeem
+  at: "2026-07-30T01:11:55Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T10:48:06-07:00
+    document_timestamp: 2026-07-22T17:48:06Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

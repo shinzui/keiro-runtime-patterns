@@ -38,7 +38,7 @@ in  Schema.Project::{
         , name = "runtime-patterns"
         , path = "runtime-patterns"
         , profile = Some "okf/runtime-patterns.dhall"
-        , okfVersion = "0.1"
+        , okfVersion = "0.2"
         , description = Some
             "Prescriptive Keiro runtime standards, patterns, guides, and runbooks"
         }

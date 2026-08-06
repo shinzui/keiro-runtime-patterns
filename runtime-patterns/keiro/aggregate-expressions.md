@@ -2,7 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current

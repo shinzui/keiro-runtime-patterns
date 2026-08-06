@@ -2,7 +2,10 @@
 type: Guide
 title: "Diagnosing Rejected Commands with `stepEither`"
 description: "Using stepEither and StepFailure to learn why a command was rejected"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-03T02:56:33Z
+generated:
+  by: human:nadeem
+  at: "2026-08-03T02:56:33Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-diagnosing-rejected-commands
 tags: [keiki, diagnosing-rejected-commands]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:35:21-07:00
+    document_timestamp: 2026-07-22T16:35:21Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

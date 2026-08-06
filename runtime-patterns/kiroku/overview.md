@@ -2,7 +2,10 @@
 type: Overview
 title: "Kiroku Event-Store Standards"
 description: "Index of kiroku event-store standards for keiro services; start here"
-timestamp: 2026-07-22T09:52:58-07:00
+timestamp: 2026-07-22T16:52:58Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T16:52:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-overview
 tags: [kiroku, overview]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:52:58-07:00
+    document_timestamp: 2026-07-22T16:52:58Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

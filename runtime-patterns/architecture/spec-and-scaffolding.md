@@ -2,7 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a single-file or workspace Keiro source of truth, declaring consumer mappings, and running whole-service check/scaffold/conformance idempotently"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-29T12:40:01-07:00
+    document_timestamp: 2026-07-29T19:40:01Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

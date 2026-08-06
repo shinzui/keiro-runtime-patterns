@@ -2,7 +2,10 @@
 type: Standard
 title: "Transactional Outbox"
 description: "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
-timestamp: 2026-07-22T11:21:13-07:00
+timestamp: 2026-07-22T18:21:13Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:21:13Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-outbox
 tags: [messaging, outbox]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:21:13-07:00
+    document_timestamp: 2026-07-22T18:21:13Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

@@ -2,7 +2,10 @@
 type: Standard
 title: "Read models and projections"
 description: "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-23T16:55:16-07:00
+    document_timestamp: 2026-07-23T23:55:16Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

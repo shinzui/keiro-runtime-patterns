@@ -2,7 +2,10 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
-timestamp: 2026-07-31T16:04:17-07:00
+timestamp: 2026-07-31T23:04:17Z
+generated:
+  by: human:nadeem
+  at: "2026-07-31T23:04:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:19:01-07:00
+    document_timestamp: 2026-07-22T18:19:01Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

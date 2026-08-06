@@ -1,5 +1,8 @@
 # migrations Update Log
 
+## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
+
 ## 2026-07-29
 * **Update**: Operations now scope JSON output per command and name import-codd-history for the codd preflight; re-reviewed and approved
 * **Update**: Testing now names hasql's SessionError and the template-database suite fixture convention; re-reviewed and approved

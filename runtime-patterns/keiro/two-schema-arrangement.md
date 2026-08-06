@@ -2,7 +2,10 @@
 type: Guide
 title: "The two-schema arrangement"
 description: "Separation of Kiroku store, Keiro framework, and application-owned PostgreSQL schemas"
-timestamp: 2026-07-22T10:46:22-07:00
+timestamp: 2026-07-22T17:46:22Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T17:46:22Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-two-schema-arrangement
 tags: [keiro, two-schema-arrangement]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T10:46:22-07:00
+    document_timestamp: 2026-07-22T17:46:22Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

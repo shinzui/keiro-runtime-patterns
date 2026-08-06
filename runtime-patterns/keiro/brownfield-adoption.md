@@ -2,7 +2,10 @@
 type: Guide
 title: "Brownfield Keiro Adoption"
 description: "Adopting Keiro around existing domain types, stored JSON, and independent same-context scaffolds with workspace migration, codec evidence, and replay-safe cutover gates"
-timestamp: 2026-07-29T12:40:01-07:00
+timestamp: 2026-07-29T19:40:01Z
+generated:
+  by: human:nadeem
+  at: "2026-07-29T19:40:01Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-29T12:40:01-07:00
+    document_timestamp: 2026-07-29T19:40:01Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

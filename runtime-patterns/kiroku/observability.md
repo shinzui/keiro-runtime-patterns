@@ -2,7 +2,10 @@
 type: Guide
 title: "Kiroku Observability"
 description: "Wiring kiroku-metrics and kiroku-otel: collector composition, spans, Prometheus names, health probes"
-timestamp: 2026-07-22T09:52:58-07:00
+timestamp: 2026-07-22T16:52:58Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T16:52:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-observability
 tags: [kiroku, observability]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:52:58-07:00
+    document_timestamp: 2026-07-22T16:52:58Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

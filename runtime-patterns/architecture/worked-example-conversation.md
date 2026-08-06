@@ -2,7 +2,10 @@
 type: Pattern
 title: "Worked Conversation Vertical"
 description: "Complete file listing of danwa's Conversation slice across all six packages"
-timestamp: 2026-07-22T11:54:19-07:00
+timestamp: 2026-07-22T18:54:19Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:54:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-worked-example-conversation
 tags: [architecture, worked-example-conversation]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:54:19-07:00
+    document_timestamp: 2026-07-22T18:54:19Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

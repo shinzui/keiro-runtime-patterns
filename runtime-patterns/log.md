@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Package-structure route reaches the generated compilation contract
 * **Update**: Aggregate route reaches trusted constructor evidence for boundary constructors and the deprecated mkWireCtor upgrade
 

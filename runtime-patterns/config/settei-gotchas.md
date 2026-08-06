@@ -2,7 +2,10 @@
 type: Gotcha
 title: "Settei Gotchas"
 description: "Settei footgun catalogue: null presence, positional precedence, pinning, redaction edges"
-timestamp: 2026-07-22T13:36:35-07:00
+timestamp: 2026-07-22T20:36:35Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T20:36:35Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-settei-gotchas
 tags: [config, settei-gotchas]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T13:36:35-07:00
+    document_timestamp: 2026-07-22T20:36:35Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

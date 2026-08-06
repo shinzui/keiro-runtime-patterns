@@ -2,7 +2,10 @@
 type: Standard
 title: "Kiroku Connection Settings"
 description: "Store schema and NOTIFY channel, extraSearchPath seam, timeouts, and synchronous handler discipline"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-30T01:11:55Z
+generated:
+  by: human:nadeem
+  at: "2026-07-30T01:11:55Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-connection-settings
 tags: [kiroku, connection-settings]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:52:58-07:00
+    document_timestamp: 2026-07-22T16:52:58Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

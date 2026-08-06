@@ -2,7 +2,10 @@
 type: Standard
 title: "Consumer-owned nominal bindings"
 description: "Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-03T02:56:33Z
+generated:
+  by: human:nadeem
+  at: "2026-08-03T02:56:33Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-nominal-bindings
 tags: [keiro, nominal-bindings]
 status: current

@@ -2,7 +2,10 @@
 type: Guide
 title: "Deriving JSON Codecs for Keiki Event Sums"
 description: "Deriving kind-discriminated JSON codecs with keiki-codec-json"
-timestamp: 2026-07-22T09:35:21-07:00
+timestamp: 2026-07-22T16:35:21Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T16:35:21Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-json-event-codecs
 tags: [keiki, json-event-codecs]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T09:35:21-07:00
+    document_timestamp: 2026-07-22T16:35:21Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

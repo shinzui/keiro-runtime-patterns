@@ -2,7 +2,10 @@
 type: Overview
 title: "Configuration and Kubernetes Standards"
 description: "Index of settei configuration and Kubernetes operational standards; start here"
-timestamp: 2026-07-22T12:43:58-07:00
+timestamp: 2026-07-22T19:43:58Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T19:43:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-overview
 tags: [config, overview]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T12:43:58-07:00
+    document_timestamp: 2026-07-22T19:43:58Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

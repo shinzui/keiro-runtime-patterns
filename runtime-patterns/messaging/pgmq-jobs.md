@@ -2,7 +2,10 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:25:02-07:00
+    document_timestamp: 2026-07-22T18:25:02Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

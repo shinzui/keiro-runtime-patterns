@@ -2,7 +2,10 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams, structural mapping evidence, resource effects, options, and startup order"
-timestamp: 2026-07-28T19:53:40-07:00
+timestamp: 2026-07-29T02:53:40Z
+generated:
+  by: human:nadeem
+  at: "2026-07-29T02:53:40Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-28T19:53:40-07:00
+    document_timestamp: 2026-07-29T02:53:40Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

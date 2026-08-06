@@ -31,14 +31,25 @@ mori registry concepts shinzui/keiro-runtime-patterns --bundle runtime-patterns
 Use `okf show runtime-patterns <concept-id>` for focused context. Concept IDs are
 bundle-relative paths without `.md`, such as `messaging/process-managers`.
 
+This bundle is Open Knowledge Format v0.2, governed by the
+`documentation.patternCatalog` profile pinned in `okf/runtime-patterns.dhall`.
+Every concept carries a `generated:` provenance mapping whose `by` is an OKF §7
+actor and whose `at` is an RFC3339 instant ending in `Z`; `timestamp` is retained
+alongside it and must use the same `Z` form. An offset such as `-07:00` fails the
+`rfc3339-utc` format rule.
+
 When changing a concept under `runtime-patterns/`:
 
-1. Update its frontmatter `timestamp` to the material change time.
+1. Update its frontmatter `timestamp` to the material change time, in UTC `Z`
+   form, and set `generated.at` to the same value.
 2. Add a concise entry to the nearest enclosing `log.md` with `okf log add`.
 3. Regenerate indexes with `okf index runtime-patterns --write`.
 4. Run `scripts/check-runtime-patterns [BASE_REF]`.
 
-Generated `index.md` files are owned by OKF and must not be edited by hand.
+Generated `index.md` files are owned by OKF and must not be edited by hand. The
+root `index.md` declares `okf_version: "0.2"`; plain `okf index --write`
+preserves it, so do not add the declaration by hand or drop it. Only a
+regeneration from a deleted index needs `--okf-version 0.2`.
 
 ## Git
 

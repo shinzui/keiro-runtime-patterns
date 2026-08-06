@@ -1,5 +1,8 @@
 # kiroku Update Log
 
+## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
+
 ## 2026-07-29
 * **Update**: Connection settings now append the application projection schema, keep the keiro schema out of the search path, and note runKirokuStoreWith; re-reviewed and approved
 * **Update**: Operational invariants now state the qualified-keiro-SQL search-path rule; re-reviewed and approved

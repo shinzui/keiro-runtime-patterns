@@ -1,6 +1,7 @@
 # keiki Update Log
 
 ## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Overview targets Keiki 0.9 and digests the sealed-evidence and replay-inversion cycle
 * **Update**: Validation records the narrowed default InversionAmbiguity set, the opt-in symbolic inversion analysis, and the unwitnessed-identity translation issue
 * **Update**: Composition covers the two Keiki 0.9 input-to-wire alignment warnings and drops the equal-name substitution rule

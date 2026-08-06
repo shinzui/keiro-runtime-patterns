@@ -2,7 +2,10 @@
 type: Standard
 title: "The generated compilation contract"
 description: "The GHC2024 baseline generated Haskell compiles under, the closed extension set a module may request locally, and the conformance package and runtime-package authority a configured service scaffolds"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-generated-compilation-contract
 tags: [architecture, generated-compilation-contract]
 status: current

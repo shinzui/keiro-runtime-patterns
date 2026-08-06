@@ -2,7 +2,10 @@
 type: Standard
 title: "Kiroku Subscriptions Through Shibuya"
 description: "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
-timestamp: 2026-07-22T11:25:02-07:00
+timestamp: 2026-07-22T18:25:02Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:25:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-kiroku-subscriptions
 tags: [messaging, kiroku-subscriptions]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:25:02-07:00
+    document_timestamp: 2026-07-22T18:25:02Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

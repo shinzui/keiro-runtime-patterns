@@ -2,7 +2,10 @@
 type: Standard
 title: "Behavior conformance and obligations"
 description: "Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-behavior-conformance
 tags: [keiro, behavior-conformance]
 status: current

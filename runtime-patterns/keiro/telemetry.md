@@ -2,7 +2,10 @@
 type: Standard
 title: "Telemetry"
 description: "Keiro tracing, metrics, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-07-22T10:49:54-07:00
+timestamp: 2026-07-22T17:49:54Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T17:49:54Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T10:49:54-07:00
+    document_timestamp: 2026-07-22T17:49:54Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

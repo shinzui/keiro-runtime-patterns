@@ -2,7 +2,10 @@
 type: Pattern
 title: "Extended Keiro-DSL Node Verticals"
 description: "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
-timestamp: 2026-07-22T11:42:26-07:00
+timestamp: 2026-07-22T18:42:26Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:42:26Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-extended-node-verticals
 tags: [architecture, extended-node-verticals]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:42:26-07:00
+    document_timestamp: 2026-07-22T18:42:26Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

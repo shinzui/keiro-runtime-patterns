@@ -2,7 +2,10 @@
 type: Guide
 title: "Migration Testing"
 description: "Integrity gates in the default suite, ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-30T01:11:55Z
+generated:
+  by: human:nadeem
+  at: "2026-07-30T01:11:55Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-testing
 tags: [migrations, testing]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-23T16:55:16-07:00
+    document_timestamp: 2026-07-23T23:55:16Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

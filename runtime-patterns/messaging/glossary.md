@@ -2,7 +2,10 @@
 type: Reference
 title: "Messaging Glossary"
 description: "Shared messaging vocabulary: domain vs integration events, outbox, inbox, ack decisions, at-least-once plus idempotency"
-timestamp: 2026-07-22T11:15:59-07:00
+timestamp: 2026-07-22T18:15:59Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:15:59Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-glossary
 tags: [messaging, glossary]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:15:59-07:00
+    document_timestamp: 2026-07-22T18:15:59Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

@@ -2,7 +2,10 @@
 type: Standard
 title: "Exact Projection Domains"
 description: "Declaring a projection's complete image and canonical inverse so symbolic verification can return a proof instead of UnverifiedOpaque"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-03T02:56:33Z
+generated:
+  by: human:nadeem
+  at: "2026-08-03T02:56:33Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-exact-projection-domains
 tags: [keiki, exact-projection-domains]
 status: current

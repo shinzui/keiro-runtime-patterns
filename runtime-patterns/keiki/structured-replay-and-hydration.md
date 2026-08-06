@@ -2,7 +2,10 @@
 type: Guide
 title: "Structured Replay and Hydration"
 description: "Diagnosing hydration failures with reconstituteEither, replayEvents, and ReplayFailure"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-03T02:56:33Z
+generated:
+  by: human:nadeem
+  at: "2026-08-03T02:56:33Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-structured-replay-and-hydration
 tags: [keiki, structured-replay-and-hydration]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-23T16:55:16-07:00
+    document_timestamp: 2026-07-23T23:55:16Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

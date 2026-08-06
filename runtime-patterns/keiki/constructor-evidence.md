@@ -2,7 +2,10 @@
 type: Standard
 title: "Trusted Constructor Evidence"
 description: "Minting InCtor and WireCtor values through trusted producers so composition, replay, and symbolic exclusion keep their proofs"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-constructor-evidence
 tags: [keiki, constructor-evidence]
 status: current

@@ -2,7 +2,10 @@
 type: Pattern
 title: "Transport Selection"
 description: "Choosing a transport: the pgmq vs Kafka vs kiroku-subscription matrix and rule of thumb"
-timestamp: 2026-07-22T11:27:32-07:00
+timestamp: 2026-07-22T18:27:32Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:27:32Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-transport-selection
 tags: [messaging, transport-selection]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:27:32-07:00
+    document_timestamp: 2026-07-22T18:27:32Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

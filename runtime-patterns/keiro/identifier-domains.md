@@ -2,7 +2,10 @@
 type: Standard
 title: "Enforced identifier domains"
 description: "The frozen TypeID-v7 admission contract for aggregate IDs from language version 3 and public contract fields from version 4, and the opposite rollouts they require"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-identifier-domains
 tags: [keiro, identifier-domains]
 status: current

@@ -2,7 +2,10 @@
 type: Guide
 title: "Shibuya Processing Semantics"
 description: "Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown"
-timestamp: 2026-07-22T11:25:02-07:00
+timestamp: 2026-07-22T18:25:02Z
+generated:
+  by: human:nadeem
+  at: "2026-07-22T18:25:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-shibuya-processing
 tags: [messaging, shibuya-processing]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T11:25:02-07:00
+    document_timestamp: 2026-07-22T18:25:02Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

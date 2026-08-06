@@ -2,7 +2,10 @@
 type: Standard
 title: "Keiro DSL language versions"
 description: "Declaring an explicit language keiro-dsl preamble, adopting the stable version 4 contract, and auditing compatibility-only sources"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current

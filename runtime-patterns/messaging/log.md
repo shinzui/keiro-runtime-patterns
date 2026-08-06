@@ -1,6 +1,7 @@
 # messaging Update Log
 
 ## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Process-manager release claim moves to the current 0.11.0.0 set
 * **Update**: PGMQ standard states that the spec fanout body and top-level dedupe key are descriptive-only
 

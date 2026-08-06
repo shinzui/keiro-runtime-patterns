@@ -1,6 +1,7 @@
 # architecture Update Log
 
 ## 2026-08-06
+* **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Test layout separates hand-owned dsl-test from the generated conformance package
 * **Update**: Architecture route reaches the generated compilation contract
 * **Update**: Scaffolding covers the 0.11 sidecar ledger names, the refusal on legacy names, and --apply-name-migrations

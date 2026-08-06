@@ -2,7 +2,10 @@
 type: Standard
 title: "Vertical-Slice Modules"
 description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
-timestamp: 2026-07-29T12:40:01-07:00
+timestamp: 2026-07-29T19:40:01Z
+generated:
+  by: human:nadeem
+  at: "2026-07-29T19:40:01Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-29T12:40:01-07:00
+    document_timestamp: 2026-07-29T19:40:01Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

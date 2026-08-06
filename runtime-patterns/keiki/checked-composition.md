@@ -2,7 +2,10 @@
 type: Pattern
 title: "Checked Composition"
 description: "Wiring transducers with composeChecked, structural projection boundaries, alternative, and the feedback1 stateless-only trap"
-timestamp: 2026-08-05T19:47:25-07:00
+timestamp: 2026-08-06T02:47:25Z
+generated:
+  by: human:nadeem
+  at: "2026-08-06T02:47:25Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-checked-composition
 tags: [keiki, checked-composition]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-28T19:53:40-07:00
+    document_timestamp: 2026-07-29T02:53:40Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

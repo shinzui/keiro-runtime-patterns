@@ -2,7 +2,10 @@
 type: Pattern
 title: "Typed Field Projections"
 description: "Using Keiki field witnesses to inspect consumer-owned values without opaque guards or flattened domain models"
-timestamp: 2026-08-02T19:56:33-07:00
+timestamp: 2026-08-03T02:56:33Z
+generated:
+  by: human:nadeem
+  at: "2026-08-03T02:56:33Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-typed-field-projections
 tags: [keiki, typed-field-projections]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-28T19:53:40-07:00
+    document_timestamp: 2026-07-29T02:53:40Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic

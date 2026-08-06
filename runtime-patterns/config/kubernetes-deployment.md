@@ -2,7 +2,10 @@
 type: Runbook
 title: "Kubernetes Deployment Standard"
 description: "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
-timestamp: 2026-07-29T18:11:55-07:00
+timestamp: 2026-07-30T01:11:55Z
+generated:
+  by: human:nadeem
+  at: "2026-07-30T01:11:55Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-kubernetes-deployment
 tags: [config, kubernetes-deployment]
 status: current
@@ -10,7 +13,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T00:43:08Z
-    document_timestamp: 2026-07-22T12:43:58-07:00
+    document_timestamp: 2026-07-22T19:43:58Z
     scope: technical-accuracy
     outcome: changes-requested
     provider: anthropic
@@ -21,7 +24,7 @@ reviews:
   - kind: model
     reviewer: claude-code
     reviewed_at: 2026-07-30T01:11:55Z
-    document_timestamp: 2026-07-29T18:11:55-07:00
+    document_timestamp: 2026-07-30T01:11:55Z
     scope: technical-accuracy
     outcome: approved
     provider: anthropic
