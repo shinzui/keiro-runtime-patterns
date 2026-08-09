@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro runtime patterns"
-description: "Index of prescriptive Keiro runtime and DSL standards; start here"
-timestamp: 2026-08-06T02:47:25Z
+description: "Index of prescriptive Keiro runtime and DSL standards, including the post-0.11 typed projection catalog release gate"
+timestamp: 2026-08-09T17:02:27Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-09T17:02:27Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -42,6 +42,8 @@ Use this area as the fleet standard for application wiring and operating boundar
 
 Keiro 0.11.0.0 is the current release. All five packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, and `keiro-migrations` — move together and are tagged upstream as one set; mixed versions across that set are unsupported. Upgrade the whole set at once and verify the registry and upstream tags before choosing bounds.
 
+Current post-0.11 source under `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` adds the validated typed projection catalog, dependency-group fencing, deterministic resumable replay, candidate Language 5 catalog generation, and catalog-backed operations described by [read models and projections](read-models-and-projections.md). Those APIs are not in the 0.11.0.0 Hackage cohort. Publish and adopt the next coherent Keiro package set before using that guidance as a new service's runtime baseline; do not pin a service to 0.11 and recreate the catalog in application code.
+
 Seven cycles arrived in quick succession, and every one of them is dominated by `keiro-dsl`:
 
 - **0.5.0.0** released composable service workspaces.
@@ -69,11 +71,12 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) — declare guards and writes that generate the transducer, and mark what stays hand-owned.
 - [Consumer-owned nominal bindings](nominal-bindings.md) — keep existing ID, enum, and scalar-wrapper types in checked aggregate fields.
 - [Enforced identifier domains](identifier-domains.md) — put prefix-bearing aggregate IDs and public contract fields on the frozen TypeID-v7 contract, and roll each adoption out in its own direction.
+- [TypeID prefix naming](typeid-prefix-naming.md) — use full ubiquitous-language type labels by default and treat renaming as a durable identity migration.
 - [Behavior conformance and obligations](behavior-conformance.md) — inventory every transition, rejection, and replay-only edge, and prove each with an executed witness.
 - [Composable service workspaces](service-workspaces.md) — split complete aggregates across single-owner members while keeping one atomic scaffold and evolution boundary.
 - [Brownfield Keiro adoption](brownfield-adoption.md) — keep existing types and historical wire values while moving to one generated codec authority and a replay-audited cutover.
 - [Command cycle and errors](command-cycle-and-errors.md) — classify command failures and reject ambiguity as a definition bug.
-- [Read models and projections](read-models-and-projections.md) — register consistency contracts, honor async fences, and rebuild safely.
+- [Read models and projections](read-models-and-projections.md) — validate one typed read-side catalog, honor group fences, and rebuild deterministically and resumably.
 - [Durable workflows](durable-workflows.md) — journal side effects and deploy the progress mechanisms each workflow uses.
 - [Workflow reliability and recovery](workflow-reliability.md) — size leases, budget failures, and resurrect terminal instances.
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) — pass every gate before deploying a change to a service that holds data.

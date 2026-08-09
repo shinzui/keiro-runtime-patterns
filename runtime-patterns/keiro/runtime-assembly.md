@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Runtime assembly"
-description: "Store acquisition, validated event streams, structural mapping evidence, resource effects, options, and startup order"
-timestamp: 2026-08-06T22:43:02Z
+description: "Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order"
+timestamp: 2026-08-09T16:56:58Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T22:43:02Z"
+  at: "2026-08-09T16:56:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Runtime assembly
 
-**Acquire the store once with `withKirokuStore`, validate every event stream at startup, and thread options through lenses.**
+**Acquire the store once with `withKirokuStore`, validate every event stream and the projection catalog at startup, and thread options through lenses.**
 
 This standard defines the process-level wiring shared by command handlers, projections, and workers; the keiro repo's `jitsurei/app/Main.hs` is the executable reference.
 
@@ -93,9 +93,15 @@ commandOptions metrics =
 
 Apply the same pattern to subscription, projection, and workflow options.
 
+## Validate one projection catalog
+
+Construct and validate the complete projection catalog after event streams and application-owned handlers are available. Refuse startup on catalog diagnostics or persisted fingerprint drift. Register the validated catalog before serving queries or starting projection workers, and derive live inline/async handlers and operator rebuild operations from that same value.
+
+Do not keep separate registration, worker, and rebuild inventories. They drift precisely where correctness matters: target ownership, foreign-key rebuild groups, source codecs, subscription resets, and replay-only behavior. See [read models and projections](read-models-and-projections.md).
+
 ## Startup order
 
-The rule is one sentence: migrate as a deployment job, prove the migration handshake in every replica, construct telemetry instruments, acquire the store, validate event streams, register read models, then start only the workers the service uses.
+The rule is one sentence: migrate as a deployment job, prove the migration handshake in every replica, construct telemetry instruments, acquire the store, validate event streams and the projection catalog, register the catalog, then start only the workers the service uses.
 
 Telemetry instruments come before store acquisition, not after it, because `ConnectionSettings` closes over them. `newKirokuMetrics`, the `Tracer`, and `newKeiroMetrics` all feed `eventHandler` or `observationHandler` callbacks that can only be installed at construction time. A service that builds `KeiroMetrics` later, alongside the worker options it also feeds, silently loses every instrument sourced from those callbacks. See [telemetry](telemetry.md) and [Kiroku observability](../kiroku/observability.md).
 
@@ -112,7 +118,7 @@ guardMigrations provider plan = do
 
 `missingMigrations` is a read-only status query, so every replica may call it at boot. `StartupHandshake` reports `pendingMigrations` and `ledgerIssues`; `handshakePassed` requires both to be empty. Open Kiroku with schema initialization disabled afterwards.
 
-Registration and worker startup should fail the process rather than leave a partially assembled runtime alive.
+Catalog registration and worker startup should fail the process rather than leave a partially assembled runtime alive. Before starting any worker against a populated event store, also resolve its missing-checkpoint policy explicitly; see [Kiroku subscription patterns](../kiroku/subscriptions.md).
 
 ## Related Patterns
 

@@ -1,5 +1,13 @@
 # keiro Update Log
 
+## 2026-08-09
+* **Update**: The overview marks typed projection catalogs as post-0.11 source that must ship in a coherent release before becoming a new-service baseline, and routes TypeID prefix naming.
+* **Update**: Identifier-domain guidance now routes prefix selection to the ubiquitous-language TypeID naming standard.
+* **Update**: Startup now validates and registers one projection catalog before queries and workers, and requires explicit missing-checkpoint intent on populated stores.
+* **Update**: Brownfield acceptance now inventories source-to-target ownership and tests full history replay separately from old-versus-candidate current write-path parity.
+* **Update**: Read-side guidance now requires one validated typed projection catalog, catalog-derived live paths, dependency-group fencing, and deterministic resumable replay.
+* **Added**: TypeID prefix naming defaults to the full singular ubiquitous-language noun, separates locators from UUIDv7 entity identity, and treats prefix changes as durable migrations.
+
 ## 2026-08-06
 * **Update**: Startup order places telemetry instrument construction before store acquisition, because ConnectionSettings closes over the metrics and tracer handles.
 * **Update**: Telemetry records that keiro.subscription.deadlettered has no internal recorder and is fed only by kirokuEventBridge, so newKeiroMetrics must be constructed before the store opens.

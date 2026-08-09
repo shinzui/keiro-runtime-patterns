@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Read models and projections"
-description: "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
-timestamp: 2026-08-06T02:47:25Z
+description: "Typed projection catalogs, group fencing, deterministic resumable rebuilds, consistency, and snapshot limits"
+timestamp: 2026-08-09T16:56:58Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-09T16:56:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -25,15 +25,28 @@ reviews:
 
 # Read models and projections
 
-**Register every read model at startup, fence every rebuild, and treat snapshots as advisory until history is truncated.**
+**Declare one validated projection catalog, fence and rebuild whole dependency groups through it, and treat snapshots as advisory until history is truncated.**
 
-This standard governs projection registration, consistency waits, asynchronous fencing, rebuilds, and the one condition that makes snapshots load-bearing.
+This standard governs projection ownership, registration, consistency waits, asynchronous fencing, rebuilds, and the one condition that makes snapshots load-bearing.
+
+## Declare one read-side inventory
+
+Every new service must build one `ProjectionCatalog`, validate it, and use only the resulting `ValidatedProjectionCatalog` for registration, live projection selection, rebuilds, and operator inventory. The catalog keeps four identities separate:
+
+- a typed query-model binding describes what a query observes;
+- a physical target identifies one application-owned table and its reset policy;
+- a rebuild group orders targets that must fence, reset, verify, and promote together; and
+- one projection owner describes the source, targets, live handlers, and explicit replay behavior.
+
+Catalog validation must prove that every target has exactly one owner, every reference resolves, no owner crosses rebuild groups, target dependencies are acyclic and correctly ordered, and clear-before-replay targets have replayable owners. Persist and compare the catalog inventory so deleting a target and its owner together cannot disappear undetected. Validation is closed-world: inventory arbitrary application SQL and every external writer separately.
+
+Candidate Language 5 generates the catalog facade and create-once handler holes. Until that language is released and adopted, a hand-written catalog is the supported bridge; unmanaged compatibility wrappers are migration tools, not the baseline for a new service.
+
+This catalog contract is the unreleased source outcome of `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds`. Its explicit missing-checkpoint lifecycle follow-up is tracked by `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`; complete both before treating the next package cohort as a new-service baseline.
 
 ## Register before serving queries
 
-The rule is one sentence: call `registerReadModel` once for every model during projection startup, before any `runQuery` call.
-
-An unregistered query returns `ReadModelUnregistered`; a stale version or `shapeHash` requires a rebuild. The `ReadModel.schema` field names the application-owned data schema but is deliberately absent from persisted registry identity. `subscriptionName`, `version`, and `shapeHash` bind the live projection contract.
+Call `registerProjectionCatalog` once during projection startup, before any `runQuery` call or projection worker. Refuse startup on validation or fingerprint drift. An unregistered query returns `ReadModelUnregistered`; a stale version or `shapeHash` requires a rebuild.
 
 `runQuery` checks registration and liveness before applying the model's consistency mode:
 
@@ -43,19 +56,23 @@ An unregistered query returns `ReadModelUnregistered`; a stale version or `shape
 
 ## Choose inline or asynchronous application
 
-Use `runCommandWithProjections` for state the command side must update atomically with its events. Projection failure aborts the append transaction.
+Use `runCommandWithCatalogProjections` for state the command side must update atomically with its events. It derives the handlers and rebuild-group locks from the validated catalog; projection failure or a fenced group aborts the append transaction.
 
-Use `applyAsyncProjection` in subscription workers. Its `AsyncApplyOutcome` is part of the checkpoint protocol: acknowledge `AsyncApplied` and `AsyncDuplicate`; on `AsyncFenced`, do not checkpoint past the event—fail or park it until the model is live.
+Use `applyAsyncProjectionFromCatalog` in subscription workers. Its `AsyncApplyOutcome` is part of the checkpoint protocol: acknowledge `AsyncApplied` and `AsyncDuplicate`; on `AsyncFenced`, do not checkpoint past the event—fail or park it until the group is live.
 
-## Rebuild behind the fence
+Handlers must derive time-dependent values from recorded event time or payload data. `NOW()`, wall-clock reads, random values, network calls, and other ambient effects make replay diverge from the live result. Keep external side effects out of replay adapters.
 
-The rule is one sentence: rebuild with the supported three-phase protocol, never with ad hoc table truncation.
+## Rebuild one dependency group behind the fence
 
-1. `startRebuild` marks the model `Rebuilding`, truncates its application table, clears named projection dedup keys, and resets its subscriptions in one transaction.
-2. Replay through `applyAsyncProjectionUnfenced`; live workers continue using the fenced function.
-3. Verify the result and call `finishRebuild`, or call `abandonRebuild` on failure.
+The rule is one sentence: drive rebuilds from the validated catalog, never from caller-supplied table, subscription, or projection lists.
 
-This is an offline rebuild for that model, not a zero-downtime shadow-table swap.
+1. `startCatalogRebuild` invokes the group preparation lifecycle to fence the whole group, capture its declared identities, clear every `ClearBeforeReplay` target with one foreign-key-safe multi-table `TRUNCATE`, preserve reconcile-only targets, and reset only replayable subscription and dedup identities.
+2. The runner captures an immutable event-store head and replays deterministic bounded pages through explicit catalog adapters. It persists source cursors, adapter counts, the catalog fingerprint, and failure evidence so `resumeCatalogRebuild` can continue the same run.
+3. Run every declared verification hook. Promote only when all sources prove exhaustion through the captured head and all verification passes. On failure, abandon the run and keep the group fenced.
+
+`PreserveAndReconcile` and `LiveOnly` are honest brownfield policies, not lesser forms of `ClearBeforeReplay` and `Replayable`. Reset policy says what preparation does to a target; replay policy says whether history can reconstruct it. Keep those decisions independent. The legacy single-read-model lifecycle is a compatibility path and cannot safely coordinate foreign-key-linked targets.
+
+This is an offline rebuild for the group, not a zero-downtime shadow-table swap. Preview and operate it through the catalog-backed operations adapter so application CLIs do not maintain a second rebuild map.
 
 ## Keep snapshots advisory—with one exception
 
@@ -84,6 +101,7 @@ For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `doc
 ## Related Patterns
 
 - [Runtime assembly](runtime-assembly.md)
+- [Brownfield Keiro adoption](brownfield-adoption.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [The two-schema arrangement](two-schema-arrangement.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)

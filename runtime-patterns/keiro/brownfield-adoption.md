@@ -1,11 +1,11 @@
 ---
 type: Guide
 title: "Brownfield Keiro Adoption"
-description: "Adopting Keiro around existing domain types, stored JSON, and independent same-context scaffolds with workspace migration, codec evidence, and replay-safe cutover gates"
-timestamp: 2026-07-29T19:40:01Z
+description: "Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates"
+timestamp: 2026-08-09T16:56:58Z
 generated:
   by: human:nadeem
-  at: "2026-07-29T19:40:01Z"
+  at: "2026-08-09T16:56:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -39,7 +39,9 @@ Never keep two live codec authorities. After cutover, the generated structural c
 
 ## Start From Stored Bytes
 
-Before writing the mapping, inventory every durable surface: private events and versions, snapshots, imported rows, queued jobs, timers, workflow values, and public messages. Record each writer, reader, retention period, and actual serialized form.
+Before writing the mapping, inventory every durable surface: private events and versions, snapshots, imported rows, queued jobs, timers, workflow values, public messages, and every projection table. Record each writer, reader, retention period, and actual serialized form.
+
+For the read side, build a source-to-target ownership matrix before writing the catalog. For every table, record its live writer, event source and historical codec, query readers, subscription and dedup identities, foreign-key dependencies, reset policy, replay policy, replay adapter, and verification. One catalog projection must own each declared target. Classify a target as `PreserveAndReconcile` or an owner as `LiveOnly` when history cannot honestly reconstruct it; never fabricate a replay story to satisfy the inventory.
 
 Capture sanitized production examples before deriving the declaration. Include every observed union tag, absent and explicit-null optionals, old bug-era payloads, and the oldest supported version. Constructor names and today's `ToJSON` instance are evidence, not the contract; Aeson options and old releases may have written something different.
 
@@ -136,6 +138,18 @@ Compile it beside an explicit `HistoricalCodec ArtifactInfo`. Require RFC 8785-c
 
 Comparison is finite evidence. It does not prove that every historical value was sampled, that an event still selects one inverting edge, or that replay folds to the same state.
 
+## Test replay and the current write path separately
+
+A full replay proves only what exists in the event log. It cannot detect a current command or worker path that stopped emitting an event, writes a projection directly, uses a different codec or stream category, or exercises a new branch absent from history.
+
+On a migrated production clone, first bring the clone to the exact shipping migration cohort. Then run both forms of evidence:
+
+1. replay the complete retained history into the catalog-owned targets and require zero decode, transducer, adapter, verification, or final-state divergence;
+2. exercise representative current commands and worker deliveries through both the old and candidate write paths, then compare appended bytes, stream identity, projection effects, idempotency, and externally visible responses; and
+3. build and run the actual shipping artifact, not only a development shell executable.
+
+Include every accepted configuration family and every conditional event-emission branch. Seed or inspect side-effecting subscription checkpoints without invoking the effect, and prove that a restart cannot interpret a missing checkpoint as permission to replay all history.
+
 ## Gate The Cutover
 
 Run the complete migration ladder before traffic switches:
@@ -143,9 +157,12 @@ Run the complete migration ladder before traffic switches:
 1. Compile the consumer bindings and generated code.
 2. Run `keiro-dsl check`, the coverage inventory, and `diff --since REF --explain` against the service file or workspace manifest.
 3. Pass the generated harness, genuine historical goldens, and structural codec comparison.
-4. Construct every `ValidatedEventStream`; never substitute `mkEventStreamUnchecked`.
-5. Run one `AuditFull` against a production copy for the first cutover. A non-zero `auditExitCode` blocks deployment.
-6. Use a stop-the-world or blue/green switch with exclusive ownership of each stream category; after the first new-version append, rollback is roll-forward-only.
+4. Construct every `ValidatedEventStream` and one `ValidatedProjectionCatalog`; never substitute `mkEventStreamUnchecked` or an unvalidated caller-owned rebuild list.
+5. Compare the catalog inventory to the source-to-target ownership matrix and a persisted prior baseline.
+6. Run one `AuditFull` against a migrated production copy for the first cutover. A non-zero `auditExitCode` blocks deployment.
+7. Run old-versus-candidate write-path parity for every accepted configuration family and conditional emission branch.
+8. Build and exercise the shipping artifact.
+9. Use a stop-the-world or blue/green switch with exclusive ownership of each stream category; after the first new-version append, rollback is roll-forward-only.
 
 For later changes, use the diff's replay-impact file and `AuditTargeted`. Run `diff --coverage-report ... --fail-on-opaque-increase` only when the service has chosen that operator policy. A binding symbol or version change is not inspectable from spec text, so the differ points to binding laws, fixtures, historical comparison, and replay evidence instead of claiming compatibility.
 
@@ -154,6 +171,7 @@ For later changes, use the diff's replay-impact file and `AuditTargeted`. Run `d
 - [Keiro-dsl Adoption](dsl-adoption.md)
 - [Evolution Gates and Rollout Ordering](evolution-and-rollout.md)
 - [Runtime Assembly](runtime-assembly.md)
+- [Read models and projections](read-models-and-projections.md)
 - [Typed Field Projections](../keiki/typed-field-projections.md)
 - [Specification and Scaffolding](../architecture/spec-and-scaffolding.md)
 - [Test Layout](../architecture/test-layout.md)

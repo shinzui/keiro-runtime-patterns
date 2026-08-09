@@ -1,5 +1,8 @@
 # kiroku Update Log
 
+## 2026-08-09
+* **Update**: Subscription guidance now requires explicit first-run checkpoint intent and blocks future-only side-effect workers until from-head behavior is provided atomically.
+
 ## 2026-08-06
 * **Update**: Kiroku observability documents the shared eventHandler slot: metricsEventHandler, subscriptionTraceHandler, and Keiro's kirokuEventBridge compose into one field, and every handle they close over must exist before withStore.
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC

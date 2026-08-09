@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Kiroku Subscription Patterns"
-description: "At-least-once subscriptions, per-batch checkpoints, overflow policies, and Serial consumer groups"
-timestamp: 2026-07-22T16:52:58Z
+description: "At-least-once subscriptions, explicit first-run checkpoint intent, per-batch checkpoints, overflow policies, and Serial consumer groups"
+timestamp: 2026-08-09T16:56:58Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  at: "2026-08-09T16:56:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-subscriptions
 tags: [kiroku, subscriptions]
 status: current
@@ -36,6 +36,18 @@ Kiroku delivers events at least once and advances checkpoints per batch. A crash
 Prefer `withSubscription` to bare `subscribe`. The bracketed API cancels the worker on normal exit and exceptions, preventing a thread from outliving its effect environment.
 
 Handlers return `Continue`, `Stop`, `Retry delay`, or `DeadLetter reason`. The default retry policy allows five total deliveries, including the first. A fifth `Retry` writes the event to `kiroku.dead_letters`, advances the checkpoint, and continues.
+
+## Decide what a missing checkpoint means
+
+A missing checkpoint is a deployment decision, not ordinary worker state. The current public subscription API starts a missing subscription at global position zero. That is correct for a projection that must derive all retained history, but it can repeat external effects when a side-effecting worker is added to a populated store or its checkpoint name changes.
+
+For every subscription, record one intended first-run policy in the runtime inventory:
+
+- **from beginning** for replayable, idempotent derivations that require all retained history;
+- **from current head** for intentionally future-only processing; or
+- **fail if missing** when an operator must resolve ambiguity before startup.
+
+Until Kiroku exposes these choices as an atomic public subscription policy, treat a required `from current head` or `fail if missing` behavior as a library gap and block that worker's startup. The owning request and implementation plan are `mori://shinzui/kiroku/okf/improvement-requests/concepts/IR-3` and `mori://shinzui/kiroku/plans/70-make-subscription-checkpoint-initialization-and-reset-semantics-explicit`. Do not hide a private checkpoint-table insert in ordinary application wiring. If a brownfield cutover must seed a checkpoint, make it an explicit, reviewed, idempotent migration tied to the subscription identity, and prove with a checkpoint drill that no historical side effect runs.
 
 ## Choose overflow behavior only where it applies
 

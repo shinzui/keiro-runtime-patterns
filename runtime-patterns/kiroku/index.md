@@ -15,6 +15,6 @@
 
 - [Kiroku Append and Read Patterns](append-and-read.md) - ExpectedVersion semantics, idempotent retries via supplied event ids, and streaming reads
 - [Kiroku Connection Settings](connection-settings.md) - Store schema and NOTIFY channel, extraSearchPath seam, timeouts, and synchronous handler discipline
-- [Kiroku Subscription Patterns](subscriptions.md) - At-least-once subscriptions, per-batch checkpoints, overflow policies, and Serial consumer groups
+- [Kiroku Subscription Patterns](subscriptions.md) - At-least-once subscriptions, explicit first-run checkpoint intent, per-batch checkpoints, overflow policies, and Serial consumer groups
 - [Kiroku Transactions and Projections](transactions-and-projections.md) - Atomic append plus projection with runTransactionAppendingResource, and why the other combinators are traps
 

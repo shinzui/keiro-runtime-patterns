@@ -2,10 +2,10 @@
 type: Standard
 title: "Enforced identifier domains"
 description: "The frozen TypeID-v7 admission contract for aggregate IDs from language version 3 and public contract fields from version 4, and the opposite rollouts they require"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-08-09T16:56:58Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-09T16:56:58Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-identifier-domains
 tags: [keiro, identifier-domains]
 status: current
@@ -32,6 +32,8 @@ The two adoptions roll out in opposite directions. Do not carry the version-3 ha
 `validateIdDomainText` returns the specific `IdDomainFailure` — `IdDomainNonCanonical`, `IdDomainWrongPrefix`, `IdDomainMalformed`, or `IdDomainNotUuidV7`. Branch on the constructor; do not parse the rendered text. `idDomainAcceptsText` is the Boolean shorthand for a predicate, and `idDomainSampleText` supplies a conforming value for fixtures and documentation.
 
 Nothing here is configurable. `enforcedIdDomainVersion` is a frozen string; a future admission policy arrives as a new version identifier and a new language version, never as a change to this one.
+
+The declaration must also choose a human-readable prefix. Admission rules answer whether a value is valid; they do not make an abbreviated prefix intelligible. Follow [TypeID prefix naming](typeid-prefix-naming.md): use the full ubiquitous-language noun by default and treat a later prefix rename as a durable migration.
 
 ## Construct IDs through the generated abstract API
 
@@ -115,6 +117,7 @@ The ID-domain version is persisted in the sidecar ledgers and in `--explain-bind
 ## Related Patterns
 
 - [Keiro DSL language versions](language-versions.md)
+- [TypeID prefix naming](typeid-prefix-naming.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Behavior conformance and obligations](behavior-conformance.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)

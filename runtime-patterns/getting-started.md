@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-08-03T02:56:33Z
+timestamp: 2026-08-09T17:02:27Z
 generated:
   by: human:nadeem
-  at: "2026-08-03T02:56:33Z"
+  at: "2026-08-09T17:02:27Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -62,7 +62,9 @@ need the surrounding rules.
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
   enum, or scalar-wrapper types must appear in checked aggregate fields; and
   [enforced identifier domains](keiro/identifier-domains.md) before moving a
-  prefix-bearing ID onto version 3.
+  prefix-bearing ID onto version 3. Choose every new prefix with the
+  [TypeID prefix naming standard](keiro/typeid-prefix-naming.md); do not impose
+  an arbitrary abbreviation budget.
 - **Proving an aggregate behaves as declared:** use
   [behavior conformance and obligations](keiro/behavior-conformance.md) to
   inventory every transition, rejection, and replay-only edge and gate CI on the
