@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Process Managers And Durable Timers"
-description: "The process manager standard: saga streams, deterministic ids, worker policies, durable timers, and the orchestration decision ladder"
-timestamp: 2026-07-31T23:04:17Z
+description: "The process manager standard: UTF-8-stable deterministic ids, worker policies, batched durable timers, and the orchestration decision ladder"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-07-31T23:04:17Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -96,6 +96,8 @@ Keep each transaction short. Target inline projections and timer scheduling must
 
 Keiro derives the manager-state event id and every target-command event id with `deterministicCommandId`, a UUIDv5 over manager name, correlation id, source event id, and emit index. Index `-1` is the manager-state append and target commands use `0..` in the stable order returned by `handle`.
 
+The derivation now hashes UTF-8 seed bytes. ASCII identities are byte-identical to earlier releases. Non-ASCII seeds derive different ids, so a process-manager input retried across the upgrade can emit one duplicate command; keep target handling idempotent. The encoding and seed composition are frozen replay identity and must not change without a versioned adoption path.
+
 Before dispatch, Keiro checks `eventAlreadyIn`. If a concurrent writer wins after that check, `confirmBenignDuplicate` verifies that the colliding id really exists in the intended stream. The result records `PMStateDuplicate` or `PMCommandDuplicate` rather than appending twice.
 
 Timer ids are caller-owned. Derive each `TimerRequest.timerId` deterministically from stable business facts—normally manager name, correlation id, source event id, and timer purpose—so a replay upserts the same timer row:
@@ -143,6 +145,8 @@ A manager schedules a `TimerRequest` containing a stable `timerId`, manager name
 Timer firing is at-least-once. A crash can happen after the external action but before `markTimerFired`, and a fire action running longer than the stale-claim window can be claimed again. The fire action must dispatch with a stable event id.
 
 The default worker has no attempt ceiling and requeues stale claims after five minutes. In production, validate explicit options with `mkTimerWorkerOptions`. `maxAttempts = Just n` compares against the post-claim count: the `(n + 1)`th claim moves the timer to `Dead` without firing. Recovery tooling includes `countDueTimers`, `countStuckTimers`, `findStuckTimers`, `requeueStuckTimers`, `cancelTimer`, and `deadLetterTimer`.
+
+Use `drainDueTimersWith` for a bounded backlog pass. It runs the requeue and gauge preamble once, then claims and fires up to the supplied limit with the same per-timer semantics as `runTimerWorkerWith`; do not drain a backlog one row per polling tick.
 
 ## Keiro DSL Contract
 

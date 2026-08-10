@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-08-09T17:02:27Z
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T17:02:27Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -58,7 +58,9 @@ need the surrounding rules.
   to decide what the spec generates and what stays hand-owned.
 - **Writing or upgrading a `.keiro` source:** start with
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
-  the language contract; use
+  the language contract. For candidate Language 5, follow
+  [semantic-local regeneration](keiro/dsl-semantic-locality.md) and inventory
+  every [mapped consumer surface](keiro/mapped-consumer-surfaces.md); use
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
   enum, or scalar-wrapper types must appear in checked aggregate fields; and
   [enforced identifier domains](keiro/identifier-domains.md) before moving a
@@ -75,14 +77,24 @@ need the surrounding rules.
   introducing a second wire authority.
 - **Assembling the runtime:** follow
   [runtime assembly](keiro/runtime-assembly.md) for resource acquisition,
-  validated streams, handlers, workers, and startup order.
+  validated streams, handlers, workers, and startup order. Build read-side
+  ownership through [typed projection catalogs](keiro/projection-catalogs.md).
+- **Inspecting or repairing a live runtime:** use the
+  [Keiro operations console](keiro/operations-console.md) so schema checks,
+  previews, stable JSON, bounded passes, and application-owned hooks wrap the
+  supported lifecycle APIs.
 - **Choosing a transport:** use the
   [transport-selection matrix](messaging/transport-selection.md) before adopting
-  PGMQ, Kafka, or a Kiroku subscription.
+  PGMQ, Kafka, or a Kiroku subscription. For PGMQ, also apply the
+  [queue lifecycle and reconciliation standard](messaging/pgmq-queue-reconciliation.md).
 - **Implementing process coordination:** start with the
   [process-manager standard](messaging/process-managers.md); use
   [durable workflows](keiro/durable-workflows.md) when the work is a stable,
   journaled sequence rather than event-driven orchestration.
+- **Inspecting subscription progress:** read the public
+  [Kiroku durable checkpoint inventory](kiroku/checkpoint-inventory.md), keeping
+  member rows and global-position distance distinct from live worker state and
+  event lag.
 - **Evolving persisted events:** follow
   [event-schema evolution](keiki/event-schema-evolution.md) for wire kinds,
   versions, defaults, and upcasters, then apply the

@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Telemetry"
-description: "Keiro tracing, metrics, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-08-06T22:43:02Z
+description: "Keiro tracing, metrics including global-position distance, W3C propagation, Kiroku bridging, and logging seams"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T22:43:02Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -35,7 +35,9 @@ The rule is one sentence: create telemetry instruments once at startup, before t
 
 `Keiro.Telemetry` is keiro's sole dependency seam to `hs-opentelemetry-api`. Supply a `Tracer` to enable `withProducerSpan`, `withConsumerSpan`, `withCommandSpan`, and `withWorkflowSpan`; a missing tracer makes each helper a pass-through. These spans carry standard messaging/database attributes and bounded `keiro_*` runtime attributes.
 
-Call `newKeiroMetrics meter` once to construct `KeiroMetrics`, whose 40 instruments cover commands, snapshots, projection lag, inbox/outbox, timers, dispatch, and workflows. Thread `Maybe KeiroMetrics` through `#metrics` on command, worker, and workflow options as shown in [runtime assembly](runtime-assembly.md).
+Call `newKeiroMetrics meter` once to construct `KeiroMetrics`, whose instruments cover commands, snapshots, projection rebuilds and position distance, inbox/outbox, timers, dispatch, and workflows. Thread `Maybe KeiroMetrics` through `#metrics` on command, worker, and workflow options as shown in [runtime assembly](runtime-assembly.md).
+
+The preferred projection gauge is `keiro.projection.global_position_distance`, recorded with `recordProjectionGlobalPositionDistance`. It subtracts the slowest durable member checkpoint from the store position captured in the same Kiroku inventory snapshot. It is an opaque cursor distance, not event lag or backlog. `keiro.projection.lag` and `recordProjectionLag` remain only as deprecated compatibility aliases; do not use their historical name in new dashboards. See [Kiroku durable checkpoint inventory](../kiroku/checkpoint-inventory.md).
 
 Option records carry most of those instruments, but not all of them. `keiro.subscription.deadlettered` has no internal recorder anywhere in Keiro: its only source is `kirokuEventBridge metrics delegate`, composed into the Kiroku connection's `eventHandler`. It increments the counter only for `KirokuEventSubscriptionDeadLettered`, then invokes the delegate synchronously; keep that delegate fast. Query the durable dead-letter table for current depth rather than treating the counter as a gauge.
 
@@ -64,3 +66,4 @@ Metrics and traces do not replace these diagnostic events, and the hooks must re
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Durable workflows](durable-workflows.md)
 - [Kiroku observability](../kiroku/observability.md)
+- [Kiroku durable checkpoint inventory](../kiroku/checkpoint-inventory.md)

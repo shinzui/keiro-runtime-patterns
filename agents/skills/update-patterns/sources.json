@@ -15,9 +15,9 @@
         "keiki.cabal",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "9714d37033c37595e3aaa3319ca0ca77466782e0",
-      "last_checked_at": "2026-08-06T02:53:34Z",
-      "notes": "Reconciled through keiki 0.9.0.0 (release commit 9714d37, tagged v0.9.0.0 at master head). 0.9 was read from src/Keiki/{Core,Generics,Generics/TH,Composition,Profunctor,Symbolic}.hs and the new src/Keiki/Internal/WireSchema.hs, not from the changelog alone: sealed InCtor/WireCtor pattern synonyms over private MkInCtor/MkWireCtor, the trusted*Internal capability behind Keiki.Internal.ConstructorEvidence, the mk*Via/mk*RecordVia/mkWireCtor0Via producers, unavailable*/rename*, the four deprecations, classifyWireHeads/classifyInputHeads/classifyInputWireHeads, wireHeadsMayAliasForDefault's trusted-vs-wcName fallback, the two-stage inversionAmbiguityWarnings with its exact-integral conjunct proof, checkInversionAmbiguitySym(Detailed) failing closed on non-unique details, ComposeAlignmentWarning's StructurallyDifferentInputWire/UnwitnessedInputWireAlignment, the UnwitnessedInputConstructorIdentity TranslationIssue, and Profunctor maps building through the unavailable* path. keiki-codec-json 0.9 is bounds-only with an unchanged wire format. Added keiki/constructor-evidence as the cross-cutting standard the three consumers link to. Earlier cycles: 0.7 Keiki.ProjectionDomain, ExactFieldProjection/exactFieldWitness and the checkFieldProjection* laws, the conservative reclassification of one-way fieldWitness projections, verifyPredicateDetailed/predicateTranslationReport, and the detailed step and replay attribution APIs; 0.8 Show on lit plus opaqueLit/TOpaqueLit, and readable-by-default Mermaid with MermaidUpdateMode/toTopologyMermaid. Watch paths corrected earlier: the library is src/, not the keiki-core and keiki-diagrams directories a previous entry named."
+      "last_checked_commit": "04296a744a577ed10ee50259e954437d94798125",
+      "last_checked_at": "2026-08-10T14:13:15Z",
+      "notes": "Reconciled through 04296a7. The behavioral baseline remains the released Keiki 0.9.0.0 source previously reviewed in src/Keiki and keiki-codec-json; 9714d37..04296a7 adds only the OKF capability bundle and does not change watched runtime source, package versions, APIs, or catalog claims."
     },
     {
       "project": "shinzui/keiro",
@@ -33,11 +33,12 @@
         "keiro-core",
         "keiro-dsl",
         "keiro-pgmq",
+        "keiro-ops",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "e796227cd19899acb286621b351eff30051e3fee",
-      "last_checked_at": "2026-08-06T03:09:24Z",
-      "notes": "Reconciled through keiro 0.11.0.0 at master head (e796227). NOTE: 0.11 is cut in every .cabal but not yet tagged; 0.10.0.0 is the newest tag. Reconciled in three commits, each read from source rather than the CHANGELOG. 0.9: the four-entry language registry in Keiro.Dsl.LanguageVersion (v4 = syntax-profile/3 + runtime-semantics/3, the single Stable entry, currentStableLanguageVersion's one-stable invariant), profileV3 = profileV2 + FieldAliasSyntax, runtimeProfileV3 = v2 + ContractIdDomainTypeIdV7 + StrictSpecSurfaceValidation, languageContractNotice's stderr line for non-stable contracts, LanguageVersionBelowMinimum, the removal of the Spec-only wrappers in favour of aggregateFoldFingerprintForService/diffServices/replayImpactServices returning Either FoldSurfaceError, foldFingerprint128, keiro-core parseKindIdV7Text/parseKindIdV7Value, and contractTypeIdDomainVector's producer-first + drain-required rollout (the reverse of idDomainContractVector). 0.10: Keiro.Dsl.GeneratedHaskellLanguage's GHC2024 + OverloadedStrings baseline and eight-constructor closed extension set, Keiro.Dsl.{RuntimePackage,ServiceHarness,ConformancePackage}, the runtime-package workspace clause and --runtime-package override, the conformance facade and its ledger rows. 0.11: Keiro.Dsl.SidecarNames (ledger.context/ledger.workspace/conformance-ledger/cabal-fragment plus the legacy* names it refuses), SidecarMigration's .keiro-dsl-name-migrations/sidecar-v1 backups, the field-alias grammar in Parser/{Aggregate,Integration}.hs verified against test/fixtures/contract-fieldtype.keiro, Main.hs's --min-language/--deny-warnings/--deny/--report-out, Keiro.Dsl.CheckReport's keiro-dsl/check-report/1, and Validate.hs's DiagnosticOrigin registry refusing deny codes that command can never emit. Added architecture/generated-compilation-contract. Not covered, deliberately: the closed generated runtime surfaces (WorkflowFacts record, <aggregate>CommandCategory, closed jobOutcomeFor sums) - no concept documented the old Text-based API, so there is no stale claim, and the generated-API detail belongs to keiro-runtime-docs."
+      "last_checked_commit": "89090cc803f7ab87da75896d384f676cfeda6d5c",
+      "last_checked_at": "2026-08-10T14:13:15Z",
+      "notes": "Reconciled e796227..89090cc from the watched source and package changelogs. The released baseline remains the tagged Keiro 0.11.0.0 five-package cohort. Post-release source adds exact workflow discovery and terminal arbitration, bounded concurrent resume and timer drains, UTF-8 deterministic identities, typed projection catalogs and resumable group rebuilds, candidate DSL Language 5 mapped consumers and semantic-local generation, Kiroku 0.4 checkpoint integration, and the unreleased keiro-ops package. Added six concepts and corrected the affected runtime, architecture, and messaging standards. The final 89090cc parser-benchmark commit changes benchmark coverage only and requires no catalog rule."
     },
     {
       "project": "shinzui/kiroku",
@@ -54,9 +55,9 @@
         "migrations",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "3009dda7238f7d05b1d0c97b04ec5d4c55031304",
-      "last_checked_at": "2026-07-30T00:43:08Z",
-      "notes": "Catalog-wide model review baseline."
+      "last_checked_commit": "6b6d6377360fa985b155f84ddf13f8abf9e83535",
+      "last_checked_at": "2026-08-10T14:13:16Z",
+      "notes": "Reconciled 3009dda..6b6d637 from kiroku-store source, migrations, changelogs, Hackage, and tags. Kiroku Store 0.4.0.0 adds the public one-statement, member-aware durable subscription checkpoint inventory. Added kiroku/checkpoint-inventory and corrected subscription, telemetry, runtime-assembly, and operations guidance. Remaining commits are packaging, documentation, and capability-bundle changes with no additional runtime contract."
     },
     {
       "project": "shinzui/shibuya",
@@ -71,9 +72,9 @@
         "shibuya-pgmq",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "172df245f40a454af46dd7f4cde855eaa4414c5a",
-      "last_checked_at": "2026-07-30T00:43:08Z",
-      "notes": "Catalog-wide model review baseline."
+      "last_checked_commit": "8c6ed5bf43eb57c5ba9e8c2ce2afc1a5b490fad5",
+      "last_checked_at": "2026-08-10T14:13:16Z",
+      "notes": "Reconciled 172df24..8c6ed5b. The range adds only the Shibuya OKF capability bundle; watched runtime source and package behavior are unchanged, so no catalog concept changed."
     },
     {
       "project": "shinzui/pgmq-hs",
@@ -90,9 +91,9 @@
         "pgmq-migration/migrations",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "b4cab751198b5012f025353610dfb4f3782c6eea",
-      "last_checked_at": "2026-07-30T00:43:08Z",
-      "notes": "Catalog-wide model review baseline. Watch paths corrected 2026-08-05: pgmq-hs is a five-package monorepo, so the previous bare `src` matched nothing and --files scoping reported only the CHANGELOG. Everything after this watermark is unreleased 0.5.0.0 work (all five .cabal files still read 0.4.0.1, latest tag v0.4.0.1); hold the catalog at released behaviour until it ships. On release, messaging/gotchas item 13 becomes false: isTransient will whitelist SQLSTATEs 40001, 40P01, 55P03, 57P01/02/03 and class 53 inside StatementSessionError."
+      "last_checked_commit": "9ee9a2f30fc461244ed7539fbfe2165d9f80df91",
+      "last_checked_at": "2026-08-10T14:13:16Z",
+      "notes": "Reconciled b4cab75..9ee9a2f from all five package source trees, migrations, changelogs, Hackage, and the v0.5.0.0 tag. Added messaging/pgmq-queue-reconciliation for validated names, additive drift-aware reconciliation, notification crash recovery, Maybe-returning VT races, and the transient SQLSTATE whitelist; corrected PGMQ jobs and messaging gotchas. The watch paths intentionally cover each package rather than a nonexistent monorepo-level src directory."
     },
     {
       "project": "shinzui/pg-migrate",

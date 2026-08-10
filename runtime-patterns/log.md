@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-08-10
+* **Update**: Route projection catalogs, DSL semantic locality, mapped consumers, operations, checkpoints, and PGMQ reconciliation.
+
 ## 2026-08-09
 * **Update**: New-service navigation now routes TypeID prefix selection to the ubiquitous-language naming standard.
 

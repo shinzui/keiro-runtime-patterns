@@ -1,11 +1,11 @@
 ---
 type: Guide
 title: "Keiro-dsl adoption"
-description: "When to adopt keiro-dsl, including composable service workspaces, brownfield structural mappings, the generated-code firewall, conformance evidence, and evolution gates"
-timestamp: 2026-08-06T02:47:25Z
+description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -41,14 +41,15 @@ Keiro-dsl is a build-time parser, checker, scaffolder, harness emitter, and evol
 
 The rule is one sentence: put mechanically checkable identity, policy, and evolution relationships in the specification instead of reconstructing them in modules or prose.
 
-The grammar covers aggregates and upcasters, projections and snapshots, process managers and timers, routers, integration contracts, inbox/outbox nodes, publishers, PGMQ work queues and dispatch, read models, and durable workflows. The checker verifies, among other contracts:
+The released grammar covers aggregates and upcasters, projections and snapshots, process managers and timers, routers, integration contracts, inbox/outbox nodes, publishers, PGMQ work queues and dispatch, read models, and durable workflows. Candidate Language 5 additionally declares typed projection catalogs and mapped workqueue/query/projection consumer surfaces. The checker verifies, among other contracts:
 
 - complete intake and work-queue disposition tables, including dangerous retry/ack inversions;
 - FIFO group-key requirements and captured opaque derivations;
 - snapshot codec identity, live shape hashes, status-map totality, and contiguous upcasters;
 - duplicate and incomplete aggregate upcaster chains, and the mutually exclusive `retiring event` marker;
 - event retirement discipline: a deprecated event with no replay-only emitter, and a replay-only transition that emits nothing or has no live sibling;
-- structural and opaque consumer mappings: total resolved type graphs, canonical and binding identities, injective wire policy, register initials, and complete consumer obligations;
+- structural and opaque consumer mappings: total resolved type graphs, canonical and binding identities, injective wire policy, register initials, complete consumer obligations, and the exact queue/query/projection roots that consume them;
+- projection catalogs: single target ownership, resolved query/group/source identities, acyclic target dependencies, handler ordering, and replay policy compatible with reset policy;
 - workflow signal/await matching, unique labels, and terminal `continueAsNew`;
 - resolved cross-node references and rejection handling that never marks `CommandAmbiguous` benign.
 
@@ -62,7 +63,9 @@ Generated modules carry `-- @generated` and are overwritten on every scaffold. `
 
 That firewall has exactly one exemption: the version-2 generated `Expressions` and `Transducer` modules, which are the intended generated authority for declared scalar guards and writes. Under language version 2 the spec, not a hand-written module, owns scalar decide logic for a generated transition; behavior the scalar language cannot express is marked `implementation hole` and stays hand-owned. Under version 1 every aggregate decide body remains hand-owned as before. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
 
-The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Structural mappings additionally emit private `Structural.Shape.*` modules and one `StructuralProjections` facade. Their binding, fixture, and optional register-initial modules are create-once, hand-owned files at the qualified modules named by the mapping declarations.
+The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Structural mappings additionally emit private `Structural.Shape.*` modules, one `StructuralProjections` facade, one service-wide `StructuralConformance`, and one source-only `BehaviorSourceMap`. Binding, fixture, optional register-initial, and behavior-witness modules are create-once, hand-owned files at the qualified modules named by the declarations.
+
+Aggregate harnesses carry only declarations in their checked semantic closure. `StructuralConformance` carries declaration-wide laws once for the service, including unused declarations. `BehaviorSourceMap` is the only generated authority for current file/line/column locations; moving source must not change stable behavior keys or aggregate contracts. Adopt that layout through [semantic-local regeneration](dsl-semantic-locality.md), not by moving assertions between generated files.
 
 Scaffolding reports stale paths but never deletes them; review stale generated and hand-owned files separately. It also reports newly required structural binding fields, constructors, fixtures, and initials without parsing or rewriting filled Haskell bodies.
 
@@ -97,6 +100,8 @@ Use `mapped nominal`, a bound `id`, or a bound `enum` when the consumer type is 
 
 Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. Under language version 2 the generated expression modules use the same witnesses for checked dotted paths. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
 
+Candidate Language 5 extends the same mapped type graph to persisted workqueue fields, paired read-model query input/results, and projections derived from an aggregate event source. Those surfaces have different rollout consequences; follow [mapped consumer surfaces](mapped-consumer-surfaces.md) and never use a green aggregate harness as evidence that an old queued payload or query caller is compatible.
+
 ## Use the complete CLI loop
 
 Run these commands from the Git repository containing the specification:
@@ -127,8 +132,8 @@ keiro-dsl diff INPUT --since GIT-REF \
 - `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
 - `behavior-obligations` inventories every live transition, reachable rejection cell, and replay-only transition of the composed service, for a file or a workspace. See [behavior conformance and obligations](behavior-conformance.md).
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
-- `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
-- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
+- `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. Read `semantic impact` independently from `generated-artifact impact`: the first names checked consumers and durable consequences; the second names changed bytes. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
+- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector and adds the same independent semantic-impact projection for mapped declarations. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
 
 ## Make warnings fail CI
 
@@ -156,6 +161,8 @@ These are not stylistic. Each one names a declaration a reader would reasonably 
 
 Three surfaces are explicitly descriptive-only and are checked only for well-formedness: timer dead-letter text, pgmq fanout function names, and pgmq top-level dedupe keys. Do not read them as configuration; see [PGMQ jobs](../messaging/pgmq-jobs.md).
 
+Candidate Language 5 does not make every accepted surface executable. Public integration contracts, category/all-history projection decoders, application SQL and DDL, queue-drain timing, and release coordination stay application-owned. Keep those boundaries visible in coverage rather than inferring consumers the checked graph cannot prove.
+
 `diff` resolves the prior input with `git show`, including a workspace's historical manifest and member set, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, and `WorkspaceAuthorityChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
 
 Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data. For a brownfield migration, capture genuine stored JSON before writing the new declaration and compare the historical and generated codecs explicitly; synthesized fixtures cannot prove a candidate codec agrees with production history.
@@ -177,3 +184,6 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 - [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Typed field projections](../keiki/typed-field-projections.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)
+- [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md)
+- [Mapped consumer surfaces](mapped-consumer-surfaces.md)
+- [Typed projection catalogs](projection-catalogs.md)

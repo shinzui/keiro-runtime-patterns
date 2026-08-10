@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Kiroku Event-Store Standards"
-description: "Index of kiroku event-store standards for keiro services; start here"
-timestamp: 2026-07-22T16:52:58Z
+description: "Index of Kiroku 0.4 event-store standards for Keiro services, including durable checkpoint inventory"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-overview
 tags: [kiroku, overview]
 status: current
@@ -39,6 +39,7 @@ This area is the fleet’s prescriptive Kiroku guide for Keiro services. It cove
 
 - [Connection Settings](./connection-settings.md) — schema, search path, pool, timeouts, and callbacks.
 - [Subscriptions](./subscriptions.md) — at-least-once delivery, checkpoints, overflow, and consumer groups.
+- [Durable Checkpoint Inventory](./checkpoint-inventory.md) — one coherent, member-aware read of durable positions without private table queries.
 - [Observability](./observability.md) — metrics, tracing, endpoints, and health probes.
 - [Lifecycle and Deletion](./lifecycle-and-deletion.md) — soft delete, hard delete, compaction, and linked streams.
 

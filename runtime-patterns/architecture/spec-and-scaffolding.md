@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Specification And Scaffolding"
-description: "Placing a single-file or workspace Keiro source of truth, declaring consumer mappings, and running whole-service check/scaffold/conformance idempotently"
-timestamp: 2026-08-06T02:47:25Z
+description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -39,7 +39,7 @@ context ticket
 layout collocated
 ```
 
-The `language` clause must be the first significant clause and is required of every new source. Version 4 is the sole stable authoring contract; versions 1 through 3 remain readable as compatibility-only and make the CLI emit a stderr contract notice. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+The `language` clause must be the first significant clause and is required of every new source. Version 4 is the sole published stable authoring contract; versions 1 through 3 remain readable as compatibility-only and make the CLI emit a stderr contract notice. Post-0.11 source also recognizes candidate version 5 for projection catalogs and mapped queue/query/projection surfaces. A development `keiro-dsl new` follows `currentAuthoringLanguageVersion` and may print that candidate, so verify the preamble before using a generated skeleton in a production service. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
 
 Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its spec and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
 
@@ -64,6 +64,8 @@ When a private aggregate payload or register uses an application type, declare i
 
 Do not create a second generated domain type merely to satisfy the DSL, and do not let both a consumer `ToJSON` instance and generated structural codec write current events. The generated codec is authoritative for structural private-event JSON; the binding converts domain values without owning wire rules.
 
+Candidate Language 5 carries the same mapped declarations through persisted workqueue payloads, paired read-model query contracts, and aggregate-sourced projection handlers. Declare those consumers in the specification and apply their independent drain, caller-build, handler-review, and group-rebuild consequences from [mapped consumer surfaces](../keiro/mapped-consumer-surfaces.md).
+
 ## Check, Scaffold, Format, Test
 
 Always run `check` before scaffolding, explain consumer bindings when mappings exist, target the core package's `src` directory, format the result, and run the generated domain harness. Here `SERVICE_INPUT` is the repository-relative `domain/<service>.keiro` or `domain/<service>.keiro-workspace` path. Danwa realizes the workflow by running the CLI from a keiro checkout because the executable is not installed globally:
@@ -84,9 +86,9 @@ nix fmt
 cabal test <service>-core:<service>-core-domain
 ```
 
-`check` resolves cross-node and mapped-type references and rejects incomplete or unsafe policy. `--explain-bindings` lists the exact binding, fixture, and initial signatures with consumer owners and aggregate use sites. The coverage report inventories named structural, opaque, `Json`, snapshot, and unsupported boundaries; it intentionally emits no aggregate percentage.
+`check` resolves cross-node and mapped-type references and rejects incomplete or unsafe policy. `--explain-bindings` lists the exact binding, fixture, and initial signatures with consumer owners and typed roots. The coverage report inventories named structural, opaque, `Json`, snapshot, and unsupported boundaries; it intentionally emits no aggregate percentage.
 
-`scaffold` validates again before writing, reports created, overwritten, skipped, stale, and newly required paths or obligations, then emits the generated layer, aggregate holes, and consumer binding skeletons. Formatting is deterministic, so re-scaffold plus format is a no-op when neither the spec nor the generator has changed.
+`scaffold` validates again before writing, reports created, overwritten, skipped, stale, and newly required paths or obligations, then emits the generated layer, aggregate holes, and consumer binding skeletons. It reports checked `semantic impact` independently from `generated-artifact impact`; do not infer one from the other. Formatting is deterministic, so re-scaffold plus format is a no-op when neither the spec nor the generator has changed.
 
 ## Preserve The Firewall
 
@@ -102,7 +104,7 @@ Each successful single-file run writes informational sidecars named for the role
 | Cabal fragment | `keiro-dsl-cabal-fragment.context.<context>.txt` | `keiro-dsl-cabal-fragment.workspace.<service>.txt` |
 | Conformance ledger | `keiro-dsl-conformance-ledger.txt` | `keiro-dsl-conformance-ledger.txt` |
 
-The workspace ledger attributes aggregate modules to their member and marks service-wide modules as context-level. The Cabal fragment includes `other-modules`, dependencies, consumer package/module requirements, `default-language`, `default-extensions`, and an `exposed-modules` block for the conformance facade — the complete fragment, which consumers repaste rather than merge by hand. Gitignore it. The stale-path report is advisory: keiro-dsl never deletes modules that a changed service input no longer emits. Review each stale generated and hand-owned candidate, remove obsolete files deliberately, and keep any adopted hand code under an appropriate non-generated name.
+The workspace ledger attributes aggregate modules to their member, marks service-wide modules as context-level, and persists a source-independent `semantic-impact` snapshot. A ledger predating that row reports an unavailable baseline on the first new run; it does not infer an empty prior graph. The Cabal fragment includes `other-modules`, dependencies, consumer package/module requirements, `default-language`, `default-extensions`, and an `exposed-modules` block for the conformance facade — the complete fragment, which consumers repaste rather than merge by hand. Gitignore it. The stale-path report is advisory: keiro-dsl never deletes modules that a changed service input no longer emits. Review each stale generated and hand-owned candidate, remove obsolete files deliberately, and keep any adopted hand code under an appropriate non-generated name.
 
 The conformance ledger uses the versioned `keiro-dsl conformance ledger v1` format with typed JSON file rows. Its parser ignores unknown row kinds and JSON keys, so a newer toolchain's ledger stays readable, but it still refuses a bad service key, a malformed record, an unsafe path, or a case-folded duplicate path.
 
@@ -122,13 +124,15 @@ The same run migrates generated Haskell names. Keiro 0.11 moved generated module
 
 The first structural scaffold emits private `Structural.Shape.*` modules and one `StructuralProjections` facade and creates the declared binding module. Fill total conversion functions, deterministic fixtures, and required initials, then run the generated harness. Exact nominal types may opt into `genericStructuralBinding`; any constructor, selector, order, arity, or field-type mismatch must use the explicit skeleton. A nominal binding additionally emits create-once binding skeletons, a context-level `NominalProjections` facade, and any private enum-representation leaf modules, and records them in additive `nominal-mapping` rows.
 
+The semantic-local scaffold additionally emits one context `StructuralConformance` and one context `BehaviorSourceMap`. The former owns declaration-wide laws once for the service; aggregate harnesses retain only use-specific evidence in their checked closures. The latter maps stable behavior keys to current source positions so source movement does not churn semantic contracts. Repaste both from the Cabal fragment and run the generated service conformance target after adoption. See [semantic-local regeneration](../keiro/dsl-semantic-locality.md).
+
 From language version 2 each aggregate also gets generated `Expressions` and `Transducer` modules. They are the one exemption to the symbolic-operator firewall, because they are the generated authority that builds Keiki terms from declared guards and writes. Every such transition is generated-owned or explicitly `implementation hole`; see [aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md).
 
 A configured service additionally scaffolds at most one local conformance package behind a single generated `<Generated prefix>.Conformance` facade. See [the generated compilation contract](generated-compilation-contract.md) for the package, its runtime-package authority, and the language pragmas generated modules may declare.
 
 ## Evolve The Specification, Not Generated Haskell
 
-Change node or mapped-type structure in the owning member, run `check` and `scaffold` against the service input, and review the whole-service report. For a release, also apply the evolution gate from the [keiro-dsl adoption standard](../keiro/dsl-adoption.md): run `keiro-dsl diff SERVICE_INPUT --since <git-ref> --explain` from the repository containing the service contract, review its six-surface compatibility vector, and block deployment on every finding breaking the configured gate.
+Change node or mapped-type structure in the owning member, run `check` and `scaffold` against the service input, and review both the semantic and artifact projections of the whole-service report. For a release, also apply the evolution gate from the [keiro-dsl adoption standard](../keiro/dsl-adoption.md): run `keiro-dsl diff SERVICE_INPUT --since <git-ref> --explain` from the repository containing the service contract, review its six-surface compatibility vector and mapped consequences, and block deployment on every finding breaking the configured gate.
 
 For a brownfield structural mapping, capture production JSON before declaring the shape and request an explicit non-production comparison module with `--codec-comparison TYPE --comparison-out FILE`. Compile it beside the historical codec and require canonical JSON parity or explicit version/upcaster work. See [brownfield Keiro adoption](../keiro/brownfield-adoption.md).
 
@@ -142,3 +146,5 @@ For a brownfield structural mapping, capture production JSON before declaring th
 - [Composable service workspaces](../keiro/service-workspaces.md)
 - [Keiro DSL language versions](../keiro/language-versions.md)
 - [Aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md)
+- [Semantic-local Keiro DSL regeneration](../keiro/dsl-semantic-locality.md)
+- [Mapped consumer surfaces](../keiro/mapped-consumer-surfaces.md)

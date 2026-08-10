@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Messaging Gotchas"
-description: "Consolidated messaging gotcha catalogue across shibuya, pgmq, Kafka, kiroku, and keiro"
-timestamp: 2026-07-22T18:27:32Z
+description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.5, Kafka, Kiroku, and Keiro"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:27:32Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Messaging Gotchas
 
-**Eighteen ways the messaging stack will bite you, and the rule that prevents each.**
+**Twenty-one ways the messaging stack will bite you, and the rule that prevents each.**
 
 Treat these as design-review checks, not trivia.
 
@@ -53,7 +53,7 @@ Treat these as design-review checks, not trivia.
 
 12. **`QueueRef` sanitization is lossy.** `a.b` and `a_b` collide, long or `_dlq`-ending names are hashed, and a rename can point workers at a new empty queue while messages remain in the old one. Freeze logical names and drain before migration. See [PGMQ jobs](pgmq-jobs.md).
 
-13. **Most SQL and authentication errors are permanent.** `Pgmq.Effectful.isTransient` retries acquisition, networking, other-connection, and connection-session errors; authentication, compatibility, statement, script, missing-types, and driver errors are not transient. Fix a SQL or configuration defect instead of expecting retry to heal it. See [transport selection](transport-selection.md).
+13. **PGMQ retries only a statement-error whitelist.** In pgmq-hs 0.5, `Pgmq.Effectful.isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01/02/03, and class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure are permanent. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
 14. **`CommandAmbiguous` is never success.** Multiple matching edges are an aggregate-definition defect; process-manager workers halt, and the DSL rejects an ambiguity outcome of `Fired`. See [process managers](process-managers.md) and the [command error standard](../keiro/command-cycle-and-errors.md).
 
@@ -65,9 +65,16 @@ Treat these as design-review checks, not trivia.
 
 18. **Keep transactional continuations minimal.** An appending transaction retains Kiroku's global `$all` row lock until commit. Slow outbox mapping, inline projections, timer scheduling, or unrelated SQL inside that window stalls every writer. See [transactional outbox](outbox.md) and [process managers](process-managers.md).
 
+19. **PGMQ reconciliation is additive, not destructive repair.** A queue-type mismatch reports `DetectedQueueTypeDrift` and preserves the queue; partition interval and retention are not checked at all. Fail startup and resolve the drift deliberately. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+
+20. **A visibility-timeout update can lose a race.** `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Nothing` when the row was already deleted, archived, or popped. Settle that as a lost race rather than retrying it as infrastructure failure. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+
+21. **PGMQ notifications are hints.** They are fire-and-forget and throttled, and the missing throttle means 250 ms. Use `notifyChannelName`, keep a poll fallback, and install the 0.5 native migration component for crash-safe notification recovery and serialized enablement. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+
 ## Related Patterns
 
 - [Messaging standards index](overview.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Transport selection](transport-selection.md)
 - [Keiro gotchas](../keiro/gotchas.md)
+- [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md)

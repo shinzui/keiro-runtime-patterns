@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "The generated compilation contract"
-description: "The GHC2024 baseline generated Haskell compiles under, the closed extension set a module may request locally, and the conformance package and runtime-package authority a configured service scaffolds"
-timestamp: 2026-08-06T02:47:25Z
+description: "The GHC2024 baseline, closed module extension set, generated service-wide evidence modules, and conformance/runtime-package authority"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-generated-compilation-contract
 tags: [architecture, generated-compilation-contract]
 status: current
@@ -25,6 +25,8 @@ The scaffolder writes a complete Cabal fragment sidecar — `keiro-dsl-cabal-fra
 - `default-extensions:` carrying the shared baseline, currently `OverloadedStrings`;
 - `other-modules`, dependencies, and consumer package/module requirements;
 - an `exposed-modules` block for the conformance facade.
+
+For a mapped service on the semantic-local source contract, the fragment also carries the context-level `StructuralConformance` and `BehaviorSourceMap` modules. The first compiles declaration-wide laws once; the second resolves stable behavior keys to current source positions. Do not omit either because an individual aggregate harness happens to compile without it.
 
 Repaste the fragment whole on every regeneration. Hand-merging it is how a build acquires an extension the generator no longer emits, or loses one it started needing. See [specification and scaffolding](spec-and-scaffolding.md) for the other sidecars written beside it.
 
@@ -74,3 +76,4 @@ Aggregate Haskell types reach consumers through the typed `AggregateHaskellSourc
 - [Test layout](test-layout.md) places the generated conformance suite beside hand-written tests.
 - [Behavior conformance and obligations](../keiro/behavior-conformance.md) defines what the conformance report proves.
 - [Composable service workspaces](../keiro/service-workspaces.md) owns the manifest the `runtime-package` clause lives in.
+- [Semantic-local Keiro DSL regeneration](../keiro/dsl-semantic-locality.md) owns the service-wide evidence split.

@@ -1,5 +1,9 @@
 # architecture Update Log
 
+## 2026-08-10
+* **Update**: Adopt candidate Language 5 mapped consumers and separate semantic from generated-artifact impact.
+* **Update**: Include semantic-local context evidence modules in the generated compilation contract.
+
 ## 2026-08-06
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Test layout separates hand-owned dsl-test from the generated conformance package

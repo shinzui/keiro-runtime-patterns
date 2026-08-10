@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Composable service workspaces"
-description: "Splitting one Keiro service into single-owner .keiro members while preserving whole-service checking, atomic scaffolding, adoption history, and evolution reports"
-timestamp: 2026-08-06T02:47:25Z
+description: "Splitting one Keiro service into single-owner members while preserving checked source provenance, semantic-local scaffolding, history, and evolution reports"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-service-workspaces
 tags: [keiro, service-workspaces]
 status: current
@@ -77,7 +77,7 @@ keiro-dsl diff domain/service.keiro-workspace --since HEAD^ --explain \
   --replay-impact-out build/replay-impact.json
 ```
 
-`parse` and `check` resolve cross-member references and report diagnostics at the original member path and line. `scaffold` plans the complete member set before writing, emits context-level modules such as `StructuralProjections` and replay-audit assembly exactly once, and refuses any parse, validation, lowering, collision, cycle, or banner failure before the first output byte changes.
+`parse` and `check` resolve cross-member references and report diagnostics at the original member path, line, and column. Workspace composition keeps the semantic graph separate from its exact source index and rejects duplicate, missing, unexpected, or file-mismatched semantic subjects. `scaffold` plans the complete member set before writing, emits context-level modules such as `StructuralProjections`, `StructuralConformance`, `BehaviorSourceMap`, and replay-audit assembly exactly once, and refuses any parse, validation, lowering, provenance, collision, cycle, or banner failure before the first output byte changes.
 
 Reordering `spec` lines and repeating an unchanged scaffold must produce byte-identical output. Generated modules are reported as `unchanged`; create-once holes and bindings are `skipped`.
 
@@ -91,7 +91,7 @@ keiro-dsl-cabal-fragment.workspace.<service>.txt
 keiro-dsl-conformance-ledger.txt
 ```
 
-The ledger attributes aggregate-owned modules to their member and marks service-wide modules as context-level. Moving an aggregate or declaration between members is an ownership move, not stale/new churn.
+The ledger attributes aggregate-owned modules to their member, marks service-wide modules as context-level, and persists the source-independent semantic-impact snapshot. Moving an aggregate or declaration between members is an ownership move, not stale/new churn. Moving unchanged source may rewrite `BehaviorSourceMap`; it must not change stable behavior keys, semantic impact, or aggregate contracts.
 
 A workspace still holding the pre-0.11 `keiro-dsl-scaffold-record.workspace.*` and `keiro-dsl-manifest.workspace.*` names refuses to scaffold until `scaffold --apply-name-migrations` renames them. The single-file forms were renamed in the same change; see [specification and scaffolding](../architecture/spec-and-scaffolding.md) for the full table and the migration mechanics.
 
@@ -125,3 +125,5 @@ Moving unchanged declarations or aggregates between members emits `OwnershipMove
 - [Keiro DSL language versions](language-versions.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)
 - [Vertical-slice modules](../architecture/vertical-slice-modules.md)
+- [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md)
+- [Mapped consumer surfaces](mapped-consumer-surfaces.md)

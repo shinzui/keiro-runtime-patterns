@@ -1,5 +1,20 @@
 # keiro Update Log
 
+## 2026-08-10
+* **Added**: Add the schema-checked, preview-before-force Keiro operations runbook.
+* **Added**: Add mapped queue, query, and projection consumer rollout rules.
+* **Added**: Add the semantic-local regeneration and source-stable provenance standard.
+* **Added**: Add the closed-world typed projection inventory and dependency-group rebuild standard.
+* **Update**: Codify exact discovery, terminal append arbitration, concurrent resume, and custom wake obligations.
+* **Update**: Rename projection cursor subtraction to global position distance and route durable inventory.
+* **Update**: Separate the semantic graph from exact source provenance and generated-artifact impact.
+* **Update**: Derive projection and operations inventories from one catalog and observe checkpoints publicly.
+* **Update**: Separate query and snapshot rules from the projection-catalog rebuild standard.
+* **Update**: Route the post-0.11 workflow, projection, DSL, and operations contracts behind their release gate.
+* **Update**: Distinguish stable Language 4 from candidate authoring Language 5 and its generated skeletons.
+* **Update**: Document exact discovery, bounded concurrent resume, batched timers, custom wakes, and UTF-8 identities.
+* **Update**: Cover candidate Language 5 catalogs, mapped consumers, and semantic-local conformance ownership.
+
 ## 2026-08-09
 * **Update**: The overview marks typed projection catalogs as post-0.11 source that must ship in a coherent release before becoming a new-service baseline, and routes TypeID prefix naming.
 * **Update**: Identifier-domain guidance now routes prefix selection to the ubiquitous-language TypeID naming standard.

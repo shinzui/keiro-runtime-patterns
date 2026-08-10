@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Keiro DSL language versions"
-description: "Declaring an explicit language keiro-dsl preamble, adopting the stable version 4 contract, and auditing compatibility-only sources"
-timestamp: 2026-08-06T02:47:25Z
+description: "Declaring a Keiro DSL language contract, separating published stable version 4 from candidate version 5, and auditing compatibility-only sources"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -24,13 +24,13 @@ language keiro-dsl 4
 context hospital-capacity
 ```
 
-The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares the current stable version.
+The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares `currentAuthoringLanguageVersion`, which may be an active candidate on a development revision rather than the published stable version.
 
 Failures at this boundary are reported before any body grammar runs, with their own stable codes: `InvalidLanguageVersion`, `UnsupportedLanguageVersion`, `DuplicateLanguagePreamble`, `MisplacedLanguagePreamble`, and `LanguageFeatureRequiresVersion`. Branch automation on the code, not on the rendered sentence.
 
-## Author every new source at version 4
+## Keep production on stable version 4 unless evaluating the candidate
 
-Version 4 is the sole stable authoring contract. Versions 1 through 3 are `compatibility-only`: they keep their released semantics forever and are never silently upgraded, but they are not where new work belongs.
+Version 4 is the sole published stable authoring contract. Versions 1 through 3 are `compatibility-only`: they keep their released semantics forever and are never silently upgraded, but they are not where new work belongs. Version 5 is the active candidate in post-0.11 source; it is recognized for deliberate development and may still be corrected in place before publication.
 
 | Version | Syntax profile | Runtime semantics | Support | Admits |
 |---|---|---|---|---|
@@ -38,6 +38,7 @@ Version 4 is the sole stable authoring contract. Versions 1 through 3 are `compa
 | 2 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/1` | compatibility-only | Everything in version 1, plus [consumer-owned nominal bindings](nominal-bindings.md) and [authoritative typed scalar aggregate expressions](aggregate-expressions.md) with explicit per-transition ownership. |
 | 3 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/2` | compatibility-only | Version 2's grammar exactly, with every prefix-bearing ID moved onto the enforced [TypeID-v7 identifier domain](identifier-domains.md) and made abstract in generated code. |
 | 4 | `keiro-dsl/syntax-profile/3` | `keiro-dsl/runtime-semantics/3` | **stable** | Version 3's semantics plus field aliases, contract-level TypeID admission, and strict spec-surface validation. |
+| 5 | `keiro-dsl/syntax-profile/4` | `keiro-dsl/runtime-semantics/4` | **candidate** | Version 4 plus typed projection catalogs and mapped workqueue, read-model query, and aggregate-sourced projection consumers. |
 
 Version 3 remains the clearest case that syntax and runtime behavior are separate axes: it admits exactly the same grammar as version 2 and still changes what the runtime accepts. Read the two identifiers, not the version number.
 
@@ -53,6 +54,14 @@ Runtime semantics 3 adds two capabilities to semantics 2's TypeID-v7 generated I
 - **`StrictSpecSurfaceValidation`** closes accepted-but-unenforced surfaces: numeric floors, duplicate and shadowing rules, stable runtime-identity uniqueness, Kafka and PostgreSQL naming, intake envelope and schema coupling, contract topic aliases, and the aggregate wire convention. Values that cannot lower to working generated code are rejected under *every* version; these additional rules apply only at version 4.
 
 Version 4 also resolves every internally decidable process, router, projection, publisher, queue, pgmq source-key, read-model identity, and timer-ID reference, and rejects duration values that cannot fit the runtime `Int` seconds representation. Sources that previously scaffolded broken code now fail during `check`.
+
+## Treat version 5 as one candidate contract
+
+Candidate version 5 adds `ProjectionCatalogSyntax` and `MappedConsumerSurfaceSyntax` together in syntax profile 4. Its runtime profile adds `ProjectionCatalogRuntime` and the `keiro-dsl/projection-catalog/1` fold discriminator. It can declare physical projection targets, atomic rebuild groups, projection owners, typed workqueue fields, and paired read-model query input/result types; generated projection consumers are derived from authoritative aggregate event sources.
+
+Do not copy candidate clauses into a version-4 source or widen the version-4 parser locally. Keep a production service on the released 0.11 toolchain and `--min-language 4` until the next coherent Keiro package cohort publishes. For an explicit evaluation, pin the exact Keiro revision, move every workspace member to version 5 in one change, and apply [mapped consumer surfaces](mapped-consumer-surfaces.md), [semantic-local regeneration](dsl-semantic-locality.md), and [projection catalogs](projection-catalogs.md) as one adoption gate.
+
+`currentStableLanguageVersion` remains 4. `currentAuthoringLanguageVersion` selects the sole active candidate when one exists and otherwise falls back to the stable version; `keiro-dsl new` follows the authoring value. Inspect a generated skeleton before committing it rather than assuming that a development binary prints the published contract.
 
 ## Expect a stderr notice on a compatibility-only source
 
@@ -70,17 +79,17 @@ keiro-dsl check domain/service.keiro --min-language 4
 
 `DiagnosticCode` now derives `Ord`, `Enum`, and `Bounded`, so tooling can enumerate the full code set rather than hardcoding a list.
 
-## Query the registry instead of hardcoding version numbers
+## Query both registry selections instead of hardcoding version numbers
 
 From Keiro 0.8 every registry entry selects an immutable `SyntaxProfile` and a runtime-semantics identity explicitly; nothing is inherited from numeric ordering, so version 3 reusing version 2's profile is a stated fact rather than an accident of arithmetic. Tooling must read the registry:
 
-- `currentStableLanguageVersion` for the version new sources must declare, and `languageSupportForVersion` for whether a given version is `Stable` or `CompatibilityOnly`;
+- `currentStableLanguageVersion` for the published production baseline, `currentAuthoringLanguageVersion` for the active development authoring choice, and `languageSupportForVersion` for `Stable`, `CompatibilityOnly`, or `Candidate`;
 - `syntaxProfileIdentifier` and `syntaxProfileSupportsFeature` for what a profile admits;
 - `languageVersionsSupportingFeature` for every version that owns a `LanguageFeature`, and `languageFeatureMinimumVersion` for the first;
 - `languageSupportsFeature` for the direct question about one version;
 - `sourceLanguageDiagnosticMessage` for the message behind a `SourceLanguageErrorCode`.
 
-Never write `4` into tooling. The registry holds exactly one stable version and enforces that invariant; read it and the number follows the toolchain.
+Never write `4` or `5` into tooling. The registry holds exactly one stable version and at most one candidate; select the one the operation actually means.
 
 `LanguageDefinition` is exported with all its fields, which makes positional construction and non-wildcard record patterns fail to compile — match with a wildcard. `definitionBodyParser` survives only as a compatibility projection and no longer drives parser dispatch; never branch on it.
 
@@ -132,7 +141,7 @@ Workspace composition compares member effective versions **before** merging the 
 1. Change the preamble in the owning source, or in every member of a workspace at once.
 2. Canonicalize with `keiro-dsl pretty`, the explicit alias for canonical parse-and-render.
 3. Run `keiro-dsl check INPUT --explain-bindings` and resolve every new obligation.
-4. Re-scaffold and run the generated compiled harness.
+4. Re-scaffold and run the generated service conformance target, including context-level structural conformance and source mapping.
 5. Run `keiro-dsl diff INPUT --since <ref>` and read the source-language finding.
 6. Raise `--min-language` in CI to the version you just adopted, in the same change.
 
@@ -154,3 +163,6 @@ Sidecar ledgers carry additive source-language rows. A ledger written before thi
 - [Composable service workspaces](service-workspaces.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
 - [Specification and scaffolding](../architecture/spec-and-scaffolding.md)
+- [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md)
+- [Mapped consumer surfaces](mapped-consumer-surfaces.md)
+- [Typed projection catalogs](projection-catalogs.md)

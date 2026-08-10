@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Read models and projections"
-description: "Typed projection catalogs, group fencing, deterministic resumable rebuilds, consistency, and snapshot limits"
-timestamp: 2026-08-09T16:56:58Z
+description: "Typed read-model queries and consistency, catalog-backed projection application, and snapshot limits"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -25,24 +25,15 @@ reviews:
 
 # Read models and projections
 
-**Declare one validated projection catalog, fence and rebuild whole dependency groups through it, and treat snapshots as advisory until history is truncated.**
+**Register typed queries before serving them, apply projections through the validated catalog, and treat snapshots as advisory until history is truncated.**
 
 This standard governs projection ownership, registration, consistency waits, asynchronous fencing, rebuilds, and the one condition that makes snapshots load-bearing.
 
 ## Declare one read-side inventory
 
-Every new service must build one `ProjectionCatalog`, validate it, and use only the resulting `ValidatedProjectionCatalog` for registration, live projection selection, rebuilds, and operator inventory. The catalog keeps four identities separate:
+Every service must build and validate one `ProjectionCatalog`, then use the resulting `ValidatedProjectionCatalog` for registration, live projection selection, rebuilds, and operator inventory. The catalog keeps query-model bindings, physical targets, rebuild groups, owners, source identities, and reset and replay policies explicit.
 
-- a typed query-model binding describes what a query observes;
-- a physical target identifies one application-owned table and its reset policy;
-- a rebuild group orders targets that must fence, reset, verify, and promote together; and
-- one projection owner describes the source, targets, live handlers, and explicit replay behavior.
-
-Catalog validation must prove that every target has exactly one owner, every reference resolves, no owner crosses rebuild groups, target dependencies are acyclic and correctly ordered, and clear-before-replay targets have replayable owners. Persist and compare the catalog inventory so deleting a target and its owner together cannot disappear undetected. Validation is closed-world: inventory arbitrary application SQL and every external writer separately.
-
-Candidate Language 5 generates the catalog facade and create-once handler holes. Until that language is released and adopted, a hand-written catalog is the supported bridge; unmanaged compatibility wrappers are migration tools, not the baseline for a new service.
-
-This catalog contract is the unreleased source outcome of `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds`. Its explicit missing-checkpoint lifecycle follow-up is tracked by `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`; complete both before treating the next package cohort as a new-service baseline.
+The full closed-world validation and group-rebuild rules live in [typed projection catalogs and rebuild groups](projection-catalogs.md). Candidate Language 5 can generate the catalog facade and mapped query aliases; until that contract is released and adopted, a hand-written catalog is the supported bridge.
 
 ## Register before serving queries
 
@@ -64,15 +55,9 @@ Handlers must derive time-dependent values from recorded event time or payload d
 
 ## Rebuild one dependency group behind the fence
 
-The rule is one sentence: drive rebuilds from the validated catalog, never from caller-supplied table, subscription, or projection lists.
+Drive rebuilds through `ProjectionCatalogOperations`, never caller-supplied table, subscription, or projection lists. Fence the complete dependency group, capture one immutable event-store head, replay deterministic bounded pages, persist resumable evidence, run every declared verification, and promote only when all sources prove exhaustion. A failed or abandoned run stays fenced.
 
-1. `startCatalogRebuild` invokes the group preparation lifecycle to fence the whole group, capture its declared identities, clear every `ClearBeforeReplay` target with one foreign-key-safe multi-table `TRUNCATE`, preserve reconcile-only targets, and reset only replayable subscription and dedup identities.
-2. The runner captures an immutable event-store head and replays deterministic bounded pages through explicit catalog adapters. It persists source cursors, adapter counts, the catalog fingerprint, and failure evidence so `resumeCatalogRebuild` can continue the same run.
-3. Run every declared verification hook. Promote only when all sources prove exhaustion through the captured head and all verification passes. On failure, abandon the run and keep the group fenced.
-
-`PreserveAndReconcile` and `LiveOnly` are honest brownfield policies, not lesser forms of `ClearBeforeReplay` and `Replayable`. Reset policy says what preparation does to a target; replay policy says whether history can reconstruct it. Keep those decisions independent. The legacy single-read-model lifecycle is a compatibility path and cannot safely coordinate foreign-key-linked targets.
-
-This is an offline rebuild for the group, not a zero-downtime shadow-table swap. Preview and operate it through the catalog-backed operations adapter so application CLIs do not maintain a second rebuild map.
+This is an offline rebuild, not a zero-downtime shadow-table swap. Preview and operate it through the mounted [Keiro operations console](operations-console.md); the complete lifecycle is specified by [typed projection catalogs and rebuild groups](projection-catalogs.md).
 
 ## Keep snapshots advisory—with one exception
 
@@ -101,6 +86,9 @@ For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `doc
 ## Related Patterns
 
 - [Runtime assembly](runtime-assembly.md)
+- [Typed projection catalogs and rebuild groups](projection-catalogs.md)
+- [Mapped consumer surfaces](mapped-consumer-surfaces.md)
+- [Keiro operations console](operations-console.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [The two-schema arrangement](two-schema-arrangement.md)

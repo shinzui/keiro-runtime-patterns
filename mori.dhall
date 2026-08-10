@@ -226,8 +226,17 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "At-least-once subscriptions, per-batch checkpoints, overflow policies, and Serial consumer groups"
+            "At-least-once subscriptions, explicit first-run intent, durable checkpoint inventory, overflow policies, and Serial consumer groups"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/subscriptions.md"
+        }
+      , Schema.DocRef::{
+        , key = "kiroku-checkpoint-inventory"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Reading one coherent member-aware durable checkpoint snapshot and naming cursor distance honestly"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/kiroku/checkpoint-inventory.md"
         }
       , Schema.DocRef::{
         , key = "kiroku-operational-invariants"
@@ -350,16 +359,25 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Read-model registration, consistency, async fencing, rebuilds, and snapshot limits"
+            "Typed read-model queries, consistency, catalog-backed application, and snapshot limits"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/read-models-and-projections.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-projection-catalogs"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "One validated projection inventory, catalog-derived writers, group fencing, and deterministic resumable rebuilds"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/projection-catalogs.md"
         }
       , Schema.DocRef::{
         , key = "keiro-durable-workflows"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Durable workflow journals, capability-based workers, stable steps, and evolution"
+            "Durable workflow journals, exact discovery, bounded progress workers, custom wakes, and evolution"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/durable-workflows.md"
         }
       , Schema.DocRef::{
@@ -367,7 +385,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Lease sizing, the failure budget, terminal-failure resurrection, and the durable wake-source lifecycle"
+            "Exact wake discovery, bounded concurrent resume, terminal arbitration, and supported recovery"
         , location =
             Schema.DocLocation.LocalFile
               "runtime-patterns/keiro/workflow-reliability.md"
@@ -377,7 +395,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Keiro tracing, metrics, W3C propagation, Kiroku bridging, and logging seams"
+            "Keiro tracing, global-position-distance metrics, W3C propagation, Kiroku bridging, and logging seams"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/telemetry.md"
         }
       , Schema.DocRef::{
@@ -387,6 +405,33 @@ in  Schema.Project::{
         , description = Some
             "When to adopt keiro-dsl, its generated-code firewall, holes, CLI, and evolution gate"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/dsl-adoption.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-dsl-semantic-locality"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Separating semantic consumer impact, generated-artifact churn, and source provenance during regeneration"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/dsl-semantic-locality.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-mapped-consumer-surfaces"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Mapped declarations across private events, snapshots, work queues, query contracts, and projections"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/mapped-consumer-surfaces.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-operations-console"
+        , kind = Schema.DocKind.Runbook
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Operating keiro-ops with schema checks, preview-before-force mutations, application hooks, and stable JSON"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/operations-console.md"
         }
       , Schema.DocRef::{
         , key = "keiro-language-versions"
@@ -540,8 +585,17 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
+            "Typed background jobs on keiro-pgmq: outcomes, retry and VT rules, and pgmq-hs 0.5 reconciliation"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/pgmq-jobs.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-pgmq-queue-reconciliation"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Validated PGMQ names, additive queue reconciliation, notification recovery, and retry classification"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/messaging/pgmq-queue-reconciliation.md"
         }
       , Schema.DocRef::{
         , key = "messaging-kiroku-subscriptions"
@@ -556,7 +610,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Notes
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Consolidated messaging gotcha catalogue across shibuya, pgmq, Kafka, kiroku, and keiro"
+            "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.5, Kafka, Kiroku, and Keiro"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/gotchas.md"
         }
       , Schema.DocRef::{

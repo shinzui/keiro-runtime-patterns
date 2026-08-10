@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Typed Background Jobs On PGMQ"
-description: "Typed background jobs on keiro-pgmq: Job, JobOutcome, RetryPolicy, VT rules, queue-name pitfalls"
-timestamp: 2026-08-06T02:47:25Z
+description: "Typed background jobs on keiro-pgmq: job outcomes, retry and VT rules, and pgmq-hs 0.5 queue reconciliation"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -58,7 +58,7 @@ Use `enqueue` for ordinary work, `enqueueWithHeaders` for JSON metadata, and `en
 
 `jobProcessor` builds a default Shibuya processor; `jobProcessorWithContext` adds lease extension, attempt, and headers to the handler. The continuous worker path exposes `JobContext.headers = Nothing` because the adapter does not flatten unordered JSONB into Shibuya's ordered, duplicate-preserving header type. The one-shot path exposes the raw JSON header object.
 
-Use `runJobWorkers` for supervised continuous service workers. Use `runJobOnce` or `runJobOnceWithContext` for bounded CLI or scheduled drains. Provision at startup with `ensureJobQueue`; it reconciles the main queue and optional DLQ idempotently through pgmq-config. Use `ensureOrderedJobQueue` when grouped reads need the FIFO index.
+Use `runJobWorkers` for supervised continuous service workers. Use `runJobOnce` or `runJobOnceWithContext` for bounded CLI or scheduled drains. Provision at startup with `ensureJobQueue`; it reconciles the main queue and optional DLQ idempotently through pgmq-config. Use `ensureOrderedJobQueue` when grouped reads need the FIFO index. Treat every reconciliation action as operational evidence and apply the [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) standard.
 
 ## Set Visibility Timeout From Runtime, Not Hope
 
@@ -84,6 +84,8 @@ Configure fanout and deduplication in the runtime, as this standard describes. I
 
 Treat logical queue and job names as durable identifiers. Renaming can point new workers at an empty physical queue while the old queue still contains messages. Check collisions before launch and drain before a rename.
 
+At the lower pgmq-hs boundary, every physical `QueueName` is validated as non-empty, at most 47 characters, and lowercase ASCII letters, digits, or underscore. Do not add another normalizer around it. Before a 0.5 upgrade, remediate historical mixed-case metadata with the upstream transactional runbook; never hand-edit `pgmq.meta`.
+
 ## Know Which DLQ Path You Run
 
 The supervised worker delegates direct-queue or topic-route dead-lettering to shibuya-pgmq-adapter, which sends the DLQ row and deletes the source row in one database transaction. With no configured DLQ it archives the source row.
@@ -97,3 +99,4 @@ PGMQ integration events are a separate, deferred transport concern. A future imp
 - [Transport selection](transport-selection.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Messaging gotchas](gotchas.md)
+- [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md)

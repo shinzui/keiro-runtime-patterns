@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Kiroku Subscription Patterns"
-description: "At-least-once subscriptions, explicit first-run checkpoint intent, per-batch checkpoints, overflow policies, and Serial consumer groups"
-timestamp: 2026-08-09T16:56:58Z
+description: "At-least-once subscriptions, explicit first-run checkpoint intent, durable checkpoint inventory, overflow policies, and Serial consumer groups"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-subscriptions
 tags: [kiroku, subscriptions]
 status: current
@@ -49,6 +49,8 @@ For every subscription, record one intended first-run policy in the runtime inve
 
 Until Kiroku exposes these choices as an atomic public subscription policy, treat a required `from current head` or `fail if missing` behavior as a library gap and block that worker's startup. The owning request and implementation plan are `mori://shinzui/kiroku/okf/improvement-requests/concepts/IR-3` and `mori://shinzui/kiroku/plans/70-make-subscription-checkpoint-initialization-and-reset-semantics-explicit`. Do not hide a private checkpoint-table insert in ordinary application wiring. If a brownfield cutover must seed a checkpoint, make it an explicit, reviewed, idempotent migration tied to the subscription identity, and prove with a checkpoint drill that no historical side effect runs.
 
+Kiroku Store 0.4.0.0 adds `subscriptionCheckpointInventory` for read-only observation. It returns the captured store position and every durable member-aware checkpoint in one snapshot, including rows whose workers are stopped. It does not initialize or reset anything, so it is evidence for the decision above, not a substitute for it. See [durable checkpoint inventory](checkpoint-inventory.md).
+
 ## Choose overflow behavior only where it applies
 
 `queueCapacity` and `OverflowPolicy` apply only to non-group `AllStreams` subscriptions. Category and consumer-group subscriptions fetch directly from PostgreSQL and ignore them.
@@ -77,4 +79,5 @@ The broader transport, process-manager, and messaging standards live in the mess
 
 - [Operational Invariants](./operational-invariants.md)
 - [Observability](./observability.md)
+- [Durable Checkpoint Inventory](./checkpoint-inventory.md)
 - [Append and Read Patterns](./append-and-read.md)

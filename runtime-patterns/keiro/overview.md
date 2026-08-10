@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro runtime patterns"
-description: "Index of prescriptive Keiro runtime and DSL standards, including the post-0.11 typed projection catalog release gate"
-timestamp: 2026-08-09T17:02:27Z
+description: "Index of released Keiro 0.11 standards and the gated post-release workflow, projection, DSL 5, and operations contracts"
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T17:02:27Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -42,7 +42,7 @@ Use this area as the fleet standard for application wiring and operating boundar
 
 Keiro 0.11.0.0 is the current release. All five packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, and `keiro-migrations` — move together and are tagged upstream as one set; mixed versions across that set are unsupported. Upgrade the whole set at once and verify the registry and upstream tags before choosing bounds.
 
-Current post-0.11 source under `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` adds the validated typed projection catalog, dependency-group fencing, deterministic resumable replay, candidate Language 5 catalog generation, and catalog-backed operations described by [read models and projections](read-models-and-projections.md). Those APIs are not in the 0.11.0.0 Hackage cohort. Publish and adopt the next coherent Keiro package set before using that guidance as a new service's runtime baseline; do not pin a service to 0.11 and recreate the catalog in application code.
+Current post-0.11 source changes several boundaries together. It adds [typed projection catalogs](projection-catalogs.md), candidate Language 5 [mapped consumer surfaces](mapped-consumer-surfaces.md), [semantic-local regeneration](dsl-semantic-locality.md), exact and concurrently bounded [workflow recovery](workflow-reliability.md), and the new application-mountable [keiro-ops console](operations-console.md). Those APIs are not in the 0.11.0.0 Hackage cohort, and `keiro-ops` was not part of that five-package release. Publish and adopt the next coherent package set before using them as a new-service baseline; do not pin an application to 0.11 and recreate them locally.
 
 Seven cycles arrived in quick succession, and every one of them is dominated by `keiro-dsl`:
 
@@ -77,8 +77,12 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Brownfield Keiro adoption](brownfield-adoption.md) — keep existing types and historical wire values while moving to one generated codec authority and a replay-audited cutover.
 - [Command cycle and errors](command-cycle-and-errors.md) — classify command failures and reject ambiguity as a definition bug.
 - [Read models and projections](read-models-and-projections.md) — validate one typed read-side catalog, honor group fences, and rebuild deterministically and resumably.
+- [Typed projection catalogs and rebuild groups](projection-catalogs.md) — own every query, target, handler, source, reset, replay, and operator action through one validated inventory.
+- [Mapped consumer surfaces](mapped-consumer-surfaces.md) — carry mapped types through queues, query contracts, and aggregate-sourced projections with explicit rollout consequences.
+- [Semantic-local DSL regeneration](dsl-semantic-locality.md) — separate semantic consumer impact, generated-file churn, and movable source provenance.
 - [Durable workflows](durable-workflows.md) — journal side effects and deploy the progress mechanisms each workflow uses.
 - [Workflow reliability and recovery](workflow-reliability.md) — size leases, budget failures, and resurrect terminal instances.
+- [Keiro operations console](operations-console.md) — mount code-dependent hooks, preview every mutation, and operate through public APIs.
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) — pass every gate before deploying a change to a service that holds data.
 - [Telemetry](telemetry.md) — connect tracing, metrics, propagation, and application logging hooks.
 - [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, silent-failure, and Kafka integration traps.

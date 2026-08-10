@@ -1,5 +1,10 @@
 # kiroku Update Log
 
+## 2026-08-10
+* **Added**: Add the member-aware durable checkpoint snapshot and global-position-distance standard.
+* **Update**: Add read-only member-aware checkpoint inventory without weakening explicit first-run intent.
+* **Update**: Route the Kiroku 0.4 durable checkpoint inventory.
+
 ## 2026-08-09
 * **Update**: Subscription guidance now requires explicit first-run checkpoint intent and blocks future-only side-effect workers until from-head behavior is provided atomically.
 

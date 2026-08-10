@@ -2,10 +2,10 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order"
-timestamp: 2026-08-09T16:56:58Z
+timestamp: 2026-08-10T13:59:20Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-08-10T13:59:20Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -97,7 +97,7 @@ Apply the same pattern to subscription, projection, and workflow options.
 
 Construct and validate the complete projection catalog after event streams and application-owned handlers are available. Refuse startup on catalog diagnostics or persisted fingerprint drift. Register the validated catalog before serving queries or starting projection workers, and derive live inline/async handlers and operator rebuild operations from that same value.
 
-Do not keep separate registration, worker, and rebuild inventories. They drift precisely where correctness matters: target ownership, foreign-key rebuild groups, source codecs, subscription resets, and replay-only behavior. See [read models and projections](read-models-and-projections.md).
+Do not keep separate registration, worker, rebuild, and operations inventories. They drift precisely where correctness matters: target ownership, foreign-key rebuild groups, source codecs, subscription resets, and replay-only behavior. See [typed projection catalogs and rebuild groups](projection-catalogs.md).
 
 ## Startup order
 
@@ -118,7 +118,7 @@ guardMigrations provider plan = do
 
 `missingMigrations` is a read-only status query, so every replica may call it at boot. `StartupHandshake` reports `pendingMigrations` and `ledgerIssues`; `handshakePassed` requires both to be empty. Open Kiroku with schema initialization disabled afterwards.
 
-Catalog registration and worker startup should fail the process rather than leave a partially assembled runtime alive. Before starting any worker against a populated event store, also resolve its missing-checkpoint policy explicitly; see [Kiroku subscription patterns](../kiroku/subscriptions.md).
+Catalog registration and worker startup should fail the process rather than leave a partially assembled runtime alive. Before starting any worker against a populated event store, resolve its missing-checkpoint policy explicitly; the read-only [durable checkpoint inventory](../kiroku/checkpoint-inventory.md) can prove what exists but cannot choose or mutate that lifecycle.
 
 ## Related Patterns
 
@@ -127,5 +127,7 @@ Catalog registration and worker startup should fail the process rather than leav
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Keiro gotchas](gotchas.md)
 - [Read models and projections](read-models-and-projections.md)
+- [Typed projection catalogs and rebuild groups](projection-catalogs.md)
+- [Keiro operations console](operations-console.md)
 - [Migration Operations](../migrations/operations.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)

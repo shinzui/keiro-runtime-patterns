@@ -1,5 +1,12 @@
 # messaging Update Log
 
+## 2026-08-10
+* **Added**: Add pgmq-hs 0.5 queue identity, reconciliation, notification, and retry rules.
+* **Update**: Freeze UTF-8 deterministic ids and use bounded timer drains.
+* **Update**: Connect Keiro jobs to validated PGMQ names and additive reconciliation.
+* **Update**: Route pgmq-hs 0.5 queue lifecycle and reconciliation.
+* **Update**: Correct pgmq-hs 0.5 retry classification and add reconciliation, VT-race, and notification traps.
+
 ## 2026-08-06
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Process-manager release claim moves to the current 0.11.0.0 set
