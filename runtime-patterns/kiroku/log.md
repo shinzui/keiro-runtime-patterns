@@ -1,5 +1,8 @@
 # kiroku Update Log
 
+## 2026-08-11
+* **Update**: Replace provisional missing-checkpoint guidance with Kiroku Store 0.5's explicit atomic initialization policies, existing-row precedence, and transaction-composable reset boundary
+
 ## 2026-08-10
 * **Added**: Add the member-aware durable checkpoint snapshot and global-position-distance standard.
 * **Update**: Add read-only member-aware checkpoint inventory without weakening explicit first-run intent.

@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Subscription Patterns"
 description: "At-least-once subscriptions, explicit first-run checkpoint intent, durable checkpoint inventory, overflow policies, and Serial consumer groups"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-11T20:09:03Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-11T20:09:03Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-subscriptions
 tags: [kiroku, subscriptions]
 status: current
@@ -39,17 +39,17 @@ Handlers return `Continue`, `Stop`, `Retry delay`, or `DeadLetter reason`. The d
 
 ## Decide what a missing checkpoint means
 
-A missing checkpoint is a deployment decision, not ordinary worker state. The current public subscription API starts a missing subscription at global position zero. That is correct for a projection that must derive all retained history, but it can repeat external effects when a side-effecting worker is added to a populated store or its checkpoint name changes.
+A missing checkpoint is a deployment decision, not ordinary worker state. Kiroku Store 0.5 makes that decision explicit through `MissingCheckpointPolicy` on `SubscriptionConfig`. The policy applies only when the exact `(SubscriptionName, consumer-group member)` row is absent; an existing durable row always wins and is never moved by startup initialization.
 
 For every subscription, record one intended first-run policy in the runtime inventory:
 
-- **from beginning** for replayable, idempotent derivations that require all retained history;
-- **from current head** for intentionally future-only processing; or
-- **fail if missing** when an operator must resolve ambiguity before startup.
+- `FromBeginning` for replayable, idempotent derivations that require all retained history; it atomically materializes position zero;
+- `FromCurrentHead` for intentionally future-only processing; it atomically materializes the current `$all` store head; or
+- `FailIfMissing` when an operator must resolve ambiguity before startup; it returns a typed refusal without inserting a row.
 
-Until Kiroku exposes these choices as an atomic public subscription policy, treat a required `from current head` or `fail if missing` behavior as a library gap and block that worker's startup. The owning request and implementation plan are `mori://shinzui/kiroku/okf/improvement-requests/concepts/IR-3` and `mori://shinzui/kiroku/plans/70-make-subscription-checkpoint-initialization-and-reset-semantics-explicit`. Do not hide a private checkpoint-table insert in ordinary application wiring. If a brownfield cutover must seed a checkpoint, make it an explicit, reviewed, idempotent migration tied to the subscription identity, and prove with a checkpoint drill that no historical side effect runs.
+Choose the policy in the same reviewed inventory that owns the subscription name. Changing the policy affects the next startup only when the exact row is absent; it does not rewind, fast-forward, rename, or delete an existing checkpoint. `initializeSubscriptionCheckpoint` exposes the same atomic resolution for explicit startup orchestration. Coordinated rebuild code may deliberately rewind existing member rows only through `resetSubscriptionCheckpointsTx`, which composes with the caller's transaction and reports the exact member keys reset. Do not issue private SQL against Kiroku's subscription table, synthesize group members, delete checkpoints, or treat the reset API as permission for arbitrary forward movement. The owning contract is `mori://shinzui/kiroku/plans/70-make-subscription-checkpoint-initialization-and-reset-semantics-explicit`.
 
-Kiroku Store 0.4.0.0 adds `subscriptionCheckpointInventory` for read-only observation. It returns the captured store position and every durable member-aware checkpoint in one snapshot, including rows whose workers are stopped. It does not initialize or reset anything, so it is evidence for the decision above, not a substitute for it. See [durable checkpoint inventory](checkpoint-inventory.md).
+`subscriptionCheckpointInventory`, introduced in Kiroku Store 0.4, remains the read-only observation surface. It returns the captured store position and every durable member-aware checkpoint in one snapshot, including rows whose workers are stopped. Inventory does not initialize or reset anything; use the explicit 0.5 policy and mutation APIs for those statements. See [durable checkpoint inventory](checkpoint-inventory.md).
 
 ## Choose overflow behavior only where it applies
 
