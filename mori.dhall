@@ -448,7 +448,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Runbook
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Operating the released keiro-ops with schema checks, preview-before-force mutations, application hooks, and stable JSON"
+            "Operating the released keiro-ops with schema checks, preview-before-force mutations, per-group operating rules, application hooks, and stable JSON"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/operations-console.md"
         }

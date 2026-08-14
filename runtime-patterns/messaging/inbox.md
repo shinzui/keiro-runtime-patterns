@@ -2,10 +2,10 @@
 type: Standard
 title: "Idempotent Inbox"
 description: "Consuming integration events idempotently: runInboxTransaction variants and disposition completeness"
-timestamp: 2026-07-22T18:21:13Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:21:13Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-inbox
 tags: [messaging, inbox]
 status: current
@@ -68,11 +68,14 @@ The Keiro DSL `intake` checker enforces a complete disposition table. Hand-writt
 
 Use `lookupInbox` and `listInbox` for inspection, `countInboxBacklog` or `sampleInboxBacklog` for monitoring, and `garbageCollectCompleted` for retention. The inbox also retains trace context so the consumer can continue the producer's trace.
 
+Inspect and repair the same rows through the [Keiro operations console](../keiro/operations-console.md) rather than direct SQL: `inbox backlog|list|show` for state, `inbox gc` for retention, and `inbox mark-failed` for a deliberate decision never to process a message.
+
 Completed-row retention defines the deduplication window. Once garbage collection removes a row, the same integration identity can run again; a concurrent cleanup can also shorten the effective window. Size retention beyond maximum expected redelivery and replay delay, and keep the handler's business effect idempotent even with an inbox.
 
 ## Related Patterns
 
 - [Integration event contracts](integration-events.md)
+- [Keiro operations console](../keiro/operations-console.md)
 - [Transactional outbox](outbox.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Messaging gotchas](gotchas.md)

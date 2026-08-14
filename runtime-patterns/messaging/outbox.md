@@ -2,10 +2,10 @@
 type: Standard
 title: "Transactional Outbox"
 description: "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
-timestamp: 2026-07-22T18:21:13Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:21:13Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-outbox
 tags: [messaging, outbox]
 status: current
@@ -62,9 +62,12 @@ Schedule `outboxMaintenancePass` less frequently than publishing. It reclaims st
 
 Retention is a separate job: call `garbageCollectSent` on an explicit schedule and keep dead rows for operator review. `outboxMaintenancePass` does not garbage-collect sent rows.
 
+For interactive repair, drive the same APIs through the [Keiro operations console](../keiro/operations-console.md): `outbox backlog|list|show` and `dead-letters list` to inspect, `requeue-stuck` for rows a crashed publisher stranded, `gc-sent` for retention, and `maintenance-pass` for one bounded default pass. Reclaiming stuck rows is not a remedy for a failing destination.
+
 ## Related Patterns
 
 - [Integration event contracts](integration-events.md)
+- [Keiro operations console](../keiro/operations-console.md)
 - [Idempotent inbox](inbox.md)
 - [Process managers](process-managers.md)
 - [Messaging gotchas](gotchas.md)

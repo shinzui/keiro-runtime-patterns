@@ -162,9 +162,14 @@ Start at the lowest rung that holds. Promote when the required behavior crosses 
 
 A reactor that accumulates state or hand-written deadline logic is a process manager wearing a costume—promote it.
 
+## Repair Stuck Timers By Classification
+
+A timer left in `firing` by an interrupted worker is an operator decision, not a retry. Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the terminal transition, so write the one an on-call reader will need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
+
 ## Related Patterns
 
 - [Kiroku subscriptions](kiroku-subscriptions.md)
+- [Keiro operations console](../keiro/operations-console.md)
 - [Transactional outbox](outbox.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Messaging gotchas](gotchas.md)

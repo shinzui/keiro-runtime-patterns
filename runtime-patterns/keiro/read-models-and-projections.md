@@ -113,6 +113,10 @@ The glossary rule is normative: snapshots accelerate hydration but do not define
 
 The exception is history truncation. Once Kiroku hides a per-stream prefix, a valid snapshot must cover that prefix; deleting it produces `HydrationGapDetected`. Restore visibility with the store's truncation controls or install a covering snapshot before resuming commands.
 
+Prove coverage before creating the gap rather than diagnosing it afterwards. `snapshot truncation-preflight --before VERSION` in the [operations console](operations-console.md) checks the advisory snapshot row against a proposed truncate marker; pass the current `--state-codec-version`, `--regfile-shape-hash`, and `--state-shape-hash` so it answers for the codec actually deployed. Moving a marker without that check is how a stream becomes unhydratable in production.
+
+Async projection dedup rows have their own retention decision. `projection prune-dedup --projection NAME --before UTC` deletes redelivery-safety evidence: choose a cutoff older than the longest redelivery window that can still reach the projection, and never prune while its group has an active rebuild.
+
 ## Match all three snapshot discriminator components
 
 An aggregate snapshot is loaded only when three independent components agree:

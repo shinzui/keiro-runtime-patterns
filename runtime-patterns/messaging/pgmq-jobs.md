@@ -94,11 +94,14 @@ Every DLQ payload it writes carries three reason fields: the compatibility `dead
 
 The `runJobOnce*` implementation sends to the job DLQ and then deletes the main row as separate effects. A crash between them can leave both copies. Keep handlers idempotent and give one-shot drains reconciliation tooling.
 
+Operate a job DLQ through the [Keiro operations console](../keiro/operations-console.md): `pgmq dlq read` decodes entries, `redrive` returns them to the main queue once the cause is fixed, and `archive` retains evidence where `purge` destroys it.
+
 PGMQ integration events are a separate, deferred transport concern. A future implementation must use `Keiro.PGMQ.Runtime`; do not model integration contracts as `Job` values.
 
 ## Related Patterns
 
 - [Transport selection](transport-selection.md)
+- [Keiro operations console](../keiro/operations-console.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Messaging gotchas](gotchas.md)
 - [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md)

@@ -59,7 +59,7 @@ Use `traceContextFromCurrentSpan`, `injectTraceContext`, and `traceContextFromHe
 
 Keiro intentionally ships no structured-logging framework and no request logger. Production services must connect both available runtime seams to their chosen logger:
 
-- Set subscription shard `onShardError` to record `ShardWorkerError`; the default is no hook.
+- Set subscription shard `onShardError` to record `ShardWorkerError`; the default is no hook. It is the signal behind a shard intervention: inspect ownership with `shard status`, and use `shard relinquish` only for a worker known dead, because releasing a live worker's buckets produces concurrent processing. See the [operations console](operations-console.md).
 - Set workflow resume `logEvent` to record `ResumeLogEvent`; its default is a compact stderr renderer.
 
 Metrics and traces do not replace these diagnostic events, and the hooks must remain non-blocking enough for their workers.

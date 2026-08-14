@@ -80,6 +80,8 @@ The verdict is `{"verdict":"replay-neutral"}` or `{"verdict":"affected","aggrega
 
 Run the candidate binary's audit against a production copy or staging database. Selection is read-only, indexed, budget-bounded, parallel, and resumable; the audit never appends, snapshots, or calls `verifyAndSnapshot`. Correctness compares RFC 8785 canonical bytes and SHA-256 digests serve as review identifiers. **`auditExitCode` returning non-zero means do not deploy.**
 
+Drive it from the application binary's mounted [operations console](operations-console.md), where the `replayAudit` hook supplies the candidate codecs and audit targets. `replay-audit --target` runs the set the differ named; `--category` narrows to one configured target, and `--budget`, `--parallelism`, and `--resume-from POSITION` bound and resume one invocation. The command is absent when the hook is not mounted, so a console without application authority cannot claim a green audit.
+
 Reserve `AuditFull` for one-time runtime cutovers and forensics. It is not a routine deployment gate. Hand-written services have no specification to derive an affected set from, so they supply a conservative set explicitly or choose `AuditFull`.
 
 A first brownfield cutover is the deliberate `AuditFull` case. Capture historical bytes, pass structural or opaque mapping evidence, construct validated streams, then audit a production copy before switching exclusive ownership of the affected categories. See [brownfield Keiro adoption](brownfield-adoption.md).

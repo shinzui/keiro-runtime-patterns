@@ -15,7 +15,7 @@
 
 # Runbook
 
-- [Keiro operations console](operations-console.md) - Mounting and operating keiro-ops with schema checks, preview-before-force mutations, application hooks, and stable JSON
+- [Keiro operations console](operations-console.md) - Mounting and operating keiro-ops with schema checks, preview-before-force mutations, per-group operating rules, application hooks, and stable JSON
 
 # Standard
 

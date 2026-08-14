@@ -51,6 +51,8 @@ After appending a snapshot at version V, `setStreamTruncateBefore stream V` make
 
 Do not call this retention or erasure. It is a reversible read-start marker for snapshot-based rehydration.
 
+Move the marker only after proving snapshot coverage. The [Keiro operations console](../keiro/operations-console.md) enforces that order: `snapshot truncation-preflight --before VERSION` checks coverage against the discriminators you supply, and `stream truncate-before set` is the previewed mutation that follows it. `stream clear` restores full per-stream reads. Route soft delete, undelete, and hard delete through the same console rather than ad-hoc SQL, so each one carries a preview, a typed confirmation, and durable operator evidence.
+
 ## Avoid building new patterns on linked streams
 
 `linkToStream` shares existing events into another stream and assigns target-stream versions while preserving original identity and global position. The API is provisional: the Keiro codebase has zero known consumers, and future Kiroku storage changes may remove or redesign it. Do not introduce a fleet pattern that depends on linked streams without a new architecture decision.
@@ -58,5 +60,7 @@ Do not call this retention or erasure. It is a reversible read-start marker for 
 ## Related Patterns
 
 - [Append and Read Patterns](./append-and-read.md)
+- [Replay-History Retention](./history-retention.md)
+- [Keiro operations console](../keiro/operations-console.md)
 - [Operational Invariants](./operational-invariants.md)
 - [Subscriptions](./subscriptions.md)

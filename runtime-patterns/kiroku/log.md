@@ -1,6 +1,7 @@
 # kiroku Update Log
 
 ## 2026-08-14
+* **Update**: Require snapshot truncation preflight before moving a marker and route lifecycle mutations through the console
 * **Update**: Route the frozen checkpoint relation and replay-history retention
 * **Update**: Record retention-lease refusal of hard delete and direct destructive SQL, and the ascending stream lock order
 * **Update**: Publish the frozen subscription\_checkpoints\_v1 relation for out-of-process readers and subtract from the visible head

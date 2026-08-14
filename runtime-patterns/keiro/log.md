@@ -1,6 +1,10 @@
 # keiro Update Log
 
 ## 2026-08-14
+* **Update**: Route shard ownership inspection and relinquish from the shard error seam
+* **Update**: Route the hook-mounted replay-audit console command and its bounding options
+* **Update**: Route snapshot truncation preflight and projection dedup pruning
+* **Update**: Give every keiro-ops command group an operating rule under the standard that owns its state
 * **Update**: Treat semantic-local regeneration as released generator behaviour
 * **Update**: Treat the mapped consumer surface as released stable Language 5
 * **Update**: Raise the CI language floor to 5 and describe the released Language 5 declarations

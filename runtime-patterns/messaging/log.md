@@ -1,6 +1,10 @@
 # messaging Update Log
 
 ## 2026-08-14
+* **Update**: Add stuck-timer repair by classification through the operations console
+* **Update**: Route the console PGMQ dead-letter read, redrive, archive, and purge commands
+* **Update**: Route the console inbox inspection, retention, and mark-failed commands
+* **Update**: Route the console outbox inspection, stuck-row reclaim, and retention commands
 * **Update**: Route application dead-letter codes from the Shibuya processing standard
 * **Update**: Move the process-manager release claim to the 0.12.0.0 set
 * **Update**: Move the supervised-runner claim to Shibuya 0.9.0.0
