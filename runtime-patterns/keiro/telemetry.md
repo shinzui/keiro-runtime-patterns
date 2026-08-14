@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Telemetry"
-description: "Keiro tracing, metrics including global-position distance, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-08-10T13:59:20Z
+description: "Keiro tracing, command-decision and position-distance metrics, W3C propagation, Kiroku bridging, and logging seams"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -37,7 +37,11 @@ The rule is one sentence: create telemetry instruments once at startup, before t
 
 Call `newKeiroMetrics meter` once to construct `KeiroMetrics`, whose instruments cover commands, snapshots, projection rebuilds and position distance, inbox/outbox, timers, dispatch, and workflows. Thread `Maybe KeiroMetrics` through `#metrics` on command, worker, and workflow options as shown in [runtime assembly](runtime-assembly.md).
 
-The preferred projection gauge is `keiro.projection.global_position_distance`, recorded with `recordProjectionGlobalPositionDistance`. It subtracts the slowest durable member checkpoint from the store position captured in the same Kiroku inventory snapshot. It is an opaque cursor distance, not event lag or backlog. `keiro.projection.lag` and `recordProjectionLag` remain only as deprecated compatibility aliases; do not use their historical name in new dashboards. See [Kiroku durable checkpoint inventory](../kiroku/checkpoint-inventory.md).
+The preferred projection gauge is `keiro.projection.global_position_distance`, recorded with `recordProjectionGlobalPositionDistance`. It subtracts the slowest durable member checkpoint from the newest **visible** store head, in `{position}` units. It is an opaque cursor distance, not event lag or backlog, and it returns zero when no visible work remains. `keiro.projection.lag` and `recordProjectionLag` remain only as deprecated compatibility aliases carrying the same value; do not use their historical name in new dashboards. See [Kiroku durable checkpoint inventory](../kiroku/checkpoint-inventory.md).
+
+Command decisions have their own bounded surface. The `keiro.command.decision` span attribute and the `keiro.command.decisions` counter take exactly `accepted`, `rejected`, or `no_op`; application rejection and no-op payloads must never reach a label or an error description. See [command cycle and errors](command-cycle-and-errors.md).
+
+Projection rebuilds export starts, resumes, committed pages and events, failures, promotions, and page duration under `keiro.projection.rebuild.*`. Alert on failures and on a promotion that never arrives, not on page counts.
 
 Option records carry most of those instruments, but not all of them. `keiro.subscription.deadlettered` has no internal recorder anywhere in Keiro: its only source is `kirokuEventBridge metrics delegate`, composed into the Kiroku connection's `eventHandler`. It increments the counter only for `KirokuEventSubscriptionDeadLettered`, then invokes the delegate synchronously; keep that delegate fast. Query the durable dead-letter table for current depth rather than treating the counter as a gauge.
 

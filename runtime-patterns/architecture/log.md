@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-08-14
+* **Update**: Declare stable language version 5 in the preamble contract
+
 ## 2026-08-10
 * **Update**: Adopt candidate Language 5 mapped consumers and separate semantic from generated-artifact impact.
 * **Update**: Include semantic-local context evidence modules in the generated compilation contract.

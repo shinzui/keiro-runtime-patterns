@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Kiroku Event-Store Standards"
-description: "Index of Kiroku 0.4 event-store standards for Keiro services, including durable checkpoint inventory"
-timestamp: 2026-08-10T13:59:20Z
+description: "Index of Kiroku Store 0.7 event-store standards for Keiro services, including checkpoint inventory and replay-history retention"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-overview
 tags: [kiroku, overview]
 status: current
@@ -29,6 +29,8 @@ reviews:
 
 This area is the fleet’s prescriptive Kiroku guide for Keiro services. It covers the event-store rules shared by command handlers, projections, subscriptions, operations, and observability.
 
+Keiro 0.12.0.0 requires `kiroku-store >=0.7 && <0.8` and `kiroku-store-migrations ^>=0.3.2.0`. Three cycles land in that range and each one adds a `Store` effect constructor, so an exhaustive custom or mock interpreter must be extended before upgrading: 0.5 makes the [first-run checkpoint decision explicit](./subscriptions.md) and adds the transactional reset; 0.6 adds the [visible global head](./append-and-read.md); 0.7 adds [replay-history retention leases](./history-retention.md), the transaction-scoped stream guard, and the `HistoryRetentionActive` refusal. On the migration side, `0009` publishes the frozen [checkpoint relation](./checkpoint-inventory.md) and `0010` installs the retention tables and destructive-statement guards.
+
 ## Start here
 
 1. [Operational Invariants](./operational-invariants.md) — the ten production rules every service must preserve.
@@ -42,6 +44,7 @@ This area is the fleet’s prescriptive Kiroku guide for Keiro services. It cove
 - [Durable Checkpoint Inventory](./checkpoint-inventory.md) — one coherent, member-aware read of durable positions without private table queries.
 - [Observability](./observability.md) — metrics, tracing, endpoints, and health probes.
 - [Lifecycle and Deletion](./lifecycle-and-deletion.md) — soft delete, hard delete, compaction, and linked streams.
+- [Replay-History Retention](./history-retention.md) — hold a renewable lease for a long replay, and know what it refuses.
 
 ## Related Patterns
 

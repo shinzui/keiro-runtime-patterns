@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Kiroku durable checkpoint inventory"
-description: "Reading one member-aware durable checkpoint snapshot without querying Kiroku-owned tables or mislabeling cursor distance as event lag"
-timestamp: 2026-08-10T13:59:20Z
+description: "Reading one member-aware durable checkpoint snapshot in-process or through the frozen v1 relation, without mislabeling cursor distance as event lag"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-checkpoint-inventory
 tags: [kiroku, checkpoint-inventory]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Read durable subscription positions through `subscriptionCheckpointInventory`; never query Kiroku's checkpoint tables or infer the store head from visible events.**
 
-Kiroku Store 0.4.0.0 publishes this operation. The package release is tagged and available from Hackage; upgrading an exhaustive custom or mock `Store` interpreter requires a `GetSubscriptionCheckpointInventory` arm.
+Kiroku Store 0.4.0.0 publishes this operation. Upgrading an exhaustive custom or mock `Store` interpreter requires a `GetSubscriptionCheckpointInventory` arm.
 
 ## Consume one coherent snapshot
 
@@ -25,9 +25,17 @@ The result is ordered by subscription name and consumer-group member. Preserve e
 
 For a named subscription, derive the durable floor as the minimum checkpoint across its matching members. A missing name is an empty result with no synthetic member, checkpoint, or zero.
 
+## Give a database reader the frozen relation, not the table
+
+An out-of-process reader must never receive access to `kiroku.subscriptions`. Migration `0009` publishes `kiroku.subscription_checkpoints_v1`, an owner-rights, structurally read-only relation whose four columns — `subscription_name`, `consumer_group_member`, `checkpoint_position`, `checkpoint_updated_at` — and their order are frozen. Grant schema usage and select on that relation, and nothing else; Kiroku creates no role and no grant automatically.
+
+Read it with the same care as the in-process inventory. Its rows are unordered unless the caller supplies `ORDER BY`; member zero does not distinguish a non-group subscription from member zero of a consumer group; `checkpoint_updated_at` is the time of the latest upsert and implies neither position advancement nor worker liveness; and an explicit reset may have moved a position backward.
+
 ## Name cursor distance honestly
 
-A global position is an opaque, strictly increasing cursor. Subtracting a checkpoint from the captured store cursor yields `global_position_distance`; it does not count relevant events. Category filters, consumer-group partitioning, linked or deleted history, and gaps in the cursor domain can all make the distance differ from work remaining.
+A global position is an opaque, strictly increasing cursor. Subtracting a checkpoint from a store head yields `global_position_distance`; it does not count relevant events. Category filters, consumer-group partitioning, linked or deleted history, and gaps in the cursor domain can all make the distance differ from work remaining.
+
+Subtract from the **visible** head, not the authoritative append frontier: hard deletion of the visible tail can leave a frontier no consumer will ever reach. Keep the frontier for operator reporting of how far the store has advanced. See [append and read patterns](append-and-read.md).
 
 Use `subscriptionPositionFromInventory` and `recordProjectionGlobalPositionDistance` in Keiro consumers. Retain the old projection-lag API only as a deprecated compatibility alias. Do not publish a metric or command named event lag until the owning projection supplies a compatible source frontier and definition.
 
@@ -38,6 +46,7 @@ The inventory is read-only. It does not initialize, reset, delete, or validate a
 ## Related Patterns
 
 - [Kiroku subscription patterns](subscriptions.md)
+- [Kiroku append and read patterns](append-and-read.md)
 - [Kiroku operational invariants](operational-invariants.md)
 - [Keiro operations console](../keiro/operations-console.md)
 - [Read models and projections](../keiro/read-models-and-projections.md)

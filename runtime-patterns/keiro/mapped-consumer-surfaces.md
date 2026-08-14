@@ -2,10 +2,10 @@
 type: Standard
 title: "Mapped consumer surfaces"
 description: "Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-mapped-consumer-surfaces
 tags: [keiro, mapped-consumer-surfaces]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Treat every mapped occurrence as a typed consumer with its own persisted or operational rollout consequence.**
 
-The complete surface is candidate Language 5 and post-0.11 source. Adopt it only from a revision completing both `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption` and `mori://shinzui/keiro/masterplans/35-make-mapped-types-first-class-across-queues-read-models-and-projections-before-fleet-adoption`. Keep production Language 4 services at `--min-language 4` until they intentionally take this candidate contract.
+The complete surface is stable [Language 5](language-versions.md), released in Keiro 0.12.0.0 and fixed by `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption` and `mori://shinzui/keiro/masterplans/35-make-mapped-types-first-class-across-queues-read-models-and-projections-before-fleet-adoption`. A service still on Language 4 keeps its released meaning, but the surface below is not available to it; move the service rather than emulating the surface locally.
 
 ## Declare the complete private consumer graph
 
@@ -39,7 +39,7 @@ Queue payloads keep the schema-version-1 envelope contract while their typed fie
 
 ## Establish a service baseline before changing a mapping
 
-Move the whole source or workspace to candidate Language 5, declare the complete queue/query/catalog authority, run `check` with binding and coverage evidence, and resolve every opaque or unsupported boundary. Scaffold once, fill the new create-once obligations, compile the runtime package, and run the generated service conformance target.
+Move the whole source or workspace to Language 5, declare the complete queue/query/catalog authority, run `check` with binding and coverage evidence, and resolve every opaque or unsupported boundary. Scaffold once, fill the new create-once obligations, compile the runtime package, and run the generated service conformance target.
 
 Persist the new semantic-impact baseline, then run `diff` against the deployed revision. A preamble-only edit is not adoption, and a green repository qualification does not authorize a queue drain, schema migration, projection rebuild, or fleet rollout.
 

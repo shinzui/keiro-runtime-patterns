@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Messaging Gotchas"
 description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.5, Kafka, Kiroku, and Keiro"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -39,7 +39,7 @@ Treat these as design-review checks, not trivia.
 
 5. **Raw PGMQ `maxRetries = 0` skips every handler.** First delivery already has `readCount = 1`, so the adapter dead-letters it immediately. Construct job policies with `mkRetryPolicy`. See [PGMQ jobs](pgmq-jobs.md).
 
-6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in v0.12.0.0; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
+6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in `shibuya-pgmq-adapter` 0.14.0.0; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
 
 7. **PGMQ prefetch can delay messages after shutdown.** It does not lose them; buffered, undispatched messages reappear only after VT. Keep `bufferSize * batchSize * average processing time` below visibility timeout. See [PGMQ jobs](pgmq-jobs.md).
 
@@ -47,7 +47,9 @@ Treat these as design-review checks, not trivia.
 
 9. **A throwing handler becomes `AckRetry 0`.** An always-throwing handler can produce an immediate redelivery storm. Decode, validate, and convert expected poison or permanent failures to explicit decisions. See [Shibuya processing](shibuya-processing.md).
 
-10. **Guard Kiroku handlers to avoid zero-delay spins.** On Shibuya 0.8.0.1 a throw is finalized, so it does not block forever; `guardKirokuHandler` improves the fallback from `AckRetry 0` to `AckRetry 1`, and group helpers install it automatically. See [Kiroku subscriptions](kiroku-subscriptions.md).
+10. **Guard Kiroku handlers to avoid zero-delay spins.** On Shibuya 0.9.0.0 a throw is finalized, so it does not block forever; `guardKirokuHandler` improves the fallback from `AckRetry 0` to `AckRetry 1`, and group helpers install it automatically. See [Kiroku subscriptions](kiroku-subscriptions.md).
+
+11. **Do not validate a dead-letter code per message.** `mkDeadLetterCode` is a startup-time gate; calling it inside a handler turns a naming mistake into a per-delivery failure on the exact path that is already failing. Validate the finite code set once and keep it in configuration. See [Shibuya processing](shibuya-processing.md).
 
 11. **PGMQ worker envelopes do not expose arbitrary headers.** JSONB headers are unordered, so the continuous adapter sets `Envelope.headers = Nothing`; raw headers are available only in the one-shot `JobContext`. See [PGMQ jobs](pgmq-jobs.md).
 

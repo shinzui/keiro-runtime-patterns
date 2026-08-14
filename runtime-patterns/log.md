@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-08-14
+* **Update**: Route the read-side lifecycle choice, targeted stream repair, and replay-history retention
+
 ## 2026-08-10
 * **Update**: Route projection catalogs, DSL semantic locality, mapped consumers, operations, checkpoints, and PGMQ reconciliation.
 

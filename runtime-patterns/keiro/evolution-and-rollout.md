@@ -2,10 +2,10 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -65,6 +65,8 @@ Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChai
 `IdDomainContractChanged` arrived with language version 3 and is the sharpest of the mapped-declaration codes: it is compatible on `private-history-read`, `old-binary-read-new-events`, and `persisted-identity`; advisory on `snapshot-hydration` and `consumer-build`; **breaking** on `public-consumer`; and it carries a producer-last rollout constraint. Old history stays readable through an internal legacy decoder while current command and public decoding reject the same text, so the rollout order is the whole safety argument. See [enforced identifier domains](identifier-domains.md).
 
 Three more code families arrived with the version-2 source language. `SourceLanguageDeclarationChanged` is a declaration-only change: an all-compatible vector and no semantic action. The nominal family lands on the surface its change actually reaches — `NominalRepresentationChanged` is wire-breaking, `NominalBindingChanged` points at binding laws and replay evidence, `NominalInitialChanged` and `NominalCanonicalTypeChanged` reach snapshot and consumer-build, and `NominalIdDecoderTightened` is an advisory that still obliges a committed old-payload fixture and a targeted audit. See [consumer-owned nominal bindings](nominal-bindings.md) and [Keiro DSL language versions](language-versions.md).
+
+Language 5 adds read-side families whose consequences leave the codebase entirely. `QueryFreshnessChanged` is **breaking** when a query weakens to `immediate` or narrows its waited head scope; a scope-preserving rewrite is equivalent and a strengthening reports the additive `CompatibilityStrengthened`. The catalog cursor, source-ordering, target-dependency, handler-order, and projection-owner codes each name a rebuild-group consequence rather than a wire change; a target-dependency or handler-order change means the group's replay order moved. External-read findings distinguish retirement, version addition, compatibility change, and result-shape change, and a result-shape change is a break for **out-of-process readers you do not build** — plan it as an announced consumer migration, not a deploy. See [read models and projections](read-models-and-projections.md) and [typed projection catalogs](projection-catalogs.md).
 
 ## Gate transducer changes with a targeted replay audit
 

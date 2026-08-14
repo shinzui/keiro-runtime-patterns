@@ -1,5 +1,8 @@
 # config Update Log
 
+## 2026-08-14
+* **Update**: Move Shibuya core and PGMQ adapter shutdown claims to the released 0.9.0.0 and 0.14.0.0 versions
+
 ## 2026-08-06
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 

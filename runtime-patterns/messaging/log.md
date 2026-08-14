@@ -1,5 +1,13 @@
 # messaging Update Log
 
+## 2026-08-14
+* **Update**: Route application dead-letter codes from the Shibuya processing standard
+* **Update**: Move the process-manager release claim to the 0.12.0.0 set
+* **Update**: Move the supervised-runner claim to Shibuya 0.9.0.0
+* **Update**: Record the structured dead-letter reason fields written by shibuya-pgmq-adapter 0.14.0.0
+* **Update**: Move adapter and Shibuya version claims to the 0.9 line and warn against per-message dead-letter code validation
+* **Update**: Add application-defined dead-letter codes, total reason projections, and their telemetry boundary
+
 ## 2026-08-10
 * **Added**: Add pgmq-hs 0.5 queue identity, reconciliation, notification, and retry rules.
 * **Update**: Freeze UTF-8 deterministic ids and use bounded timer drains.

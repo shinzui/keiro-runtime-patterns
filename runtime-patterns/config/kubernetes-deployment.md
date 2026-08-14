@@ -2,10 +2,10 @@
 type: Runbook
 title: "Kubernetes Deployment Standard"
 description: "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
-timestamp: 2026-07-30T01:11:55Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-30T01:11:55Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-kubernetes-deployment
 tags: [config, kubernetes-deployment]
 status: current
@@ -238,11 +238,11 @@ Set the pod grace period above the Warp timeout and any coordinated application 
 
 ## Drain Shibuya Workers on SIGTERM
 
-Translate SIGTERM into `stopAppGracefully shutdownConfig appHandle`. Released `shibuya-core` 0.8.0.1 first signals adapter shutdown, waits up to `drainTimeout`, stops the supervisor, and returns whether the drain completed. Its default drain timeout is 30 seconds, and the timed wait requires the executable to be linked with `-threaded`.
+Translate SIGTERM into `stopAppGracefully shutdownConfig appHandle`. Released `shibuya-core` 0.9.0.0 first signals adapter shutdown, waits up to `drainTimeout`, stops the supervisor, and returns whether the drain completed. Its default drain timeout is 30 seconds, and the timed wait requires the executable to be linked with `-threaded`.
 
 Use at least `terminationGracePeriodSeconds: 60` for a worker using the default 30-second drain, leaving time for signal dispatch, adapter shutdown, telemetry flush, and process exit. Increase both budgets together for workloads whose valid handler duration exceeds 30 seconds.
 
-PGMQ is at-least-once. With released `shibuya-pgmq-adapter` 0.12.0.0, the non-prefetch path releases a just-read undispatched batch by setting its visibility timeout to zero. Opt-in prefetch can leave up to `bufferSize * batchSize` already-read messages invisible until their configured visibility timeout expires. They are redelivered and are not lost, but failover is delayed. Keep prefetch disabled when prompt shutdown release matters, or budget its visibility timeout explicitly.
+PGMQ is at-least-once. With released `shibuya-pgmq-adapter` 0.14.0.0, the non-prefetch path releases a just-read undispatched batch by setting its visibility timeout to zero. Opt-in prefetch can leave up to `bufferSize * batchSize` already-read messages invisible until their configured visibility timeout expires. They are redelivered and are not lost, but failover is delayed. Keep prefetch disabled when prompt shutdown release matters, or budget its visibility timeout explicitly.
 
 ## Use the Fleet Probe Contract
 

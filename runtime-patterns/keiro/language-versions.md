@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Keiro DSL language versions"
-description: "Declaring a Keiro DSL language contract, separating published stable version 4 from candidate version 5, and auditing compatibility-only sources"
-timestamp: 2026-08-10T13:59:20Z
+description: "Declaring a Keiro DSL language contract, adopting published stable version 5, and auditing compatibility-only sources"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -20,25 +20,25 @@ The preamble selects a frozen released grammar before the body is parsed. It is 
 ## Declare the version before the context
 
 ```text
-language keiro-dsl 4
+language keiro-dsl 5
 context hospital-capacity
 ```
 
-The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares `currentAuthoringLanguageVersion`, which may be an active candidate on a development revision rather than the published stable version.
+The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares `currentAuthoringLanguageVersion`, which selects an active candidate when the registry holds one and otherwise the published stable version.
 
 Failures at this boundary are reported before any body grammar runs, with their own stable codes: `InvalidLanguageVersion`, `UnsupportedLanguageVersion`, `DuplicateLanguagePreamble`, `MisplacedLanguagePreamble`, and `LanguageFeatureRequiresVersion`. Branch automation on the code, not on the rendered sentence.
 
-## Keep production on stable version 4 unless evaluating the candidate
+## Author every new source at stable version 5
 
-Version 4 is the sole published stable authoring contract. Versions 1 through 3 are `compatibility-only`: they keep their released semantics forever and are never silently upgraded, but they are not where new work belongs. Version 5 is the active candidate in post-0.11 source; it is recognized for deliberate development and may still be corrected in place before publication.
+Version 5 is the sole published stable authoring contract. Versions 1 through 4 are `compatibility-only`: they keep their released semantics forever, are immutable, and are never silently upgraded, but they are not where new work belongs. The registry currently holds no candidate.
 
 | Version | Syntax profile | Runtime semantics | Support | Admits |
 |---|---|---|---|---|
 | 1 | `keiro-dsl/syntax-profile/1` | `keiro-dsl/runtime-semantics/1` | compatibility-only | The frozen released grammar as of Keiro 0.6.0.0. Aggregate transitions keep the create-once whole-transducer hole. |
 | 2 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/1` | compatibility-only | Everything in version 1, plus [consumer-owned nominal bindings](nominal-bindings.md) and [authoritative typed scalar aggregate expressions](aggregate-expressions.md) with explicit per-transition ownership. |
 | 3 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/2` | compatibility-only | Version 2's grammar exactly, with every prefix-bearing ID moved onto the enforced [TypeID-v7 identifier domain](identifier-domains.md) and made abstract in generated code. |
-| 4 | `keiro-dsl/syntax-profile/3` | `keiro-dsl/runtime-semantics/3` | **stable** | Version 3's semantics plus field aliases, contract-level TypeID admission, and strict spec-surface validation. |
-| 5 | `keiro-dsl/syntax-profile/4` | `keiro-dsl/runtime-semantics/4` | **candidate** | Version 4 plus typed projection catalogs and mapped workqueue, read-model query, and aggregate-sourced projection consumers. |
+| 4 | `keiro-dsl/syntax-profile/3` | `keiro-dsl/runtime-semantics/3` | compatibility-only | Version 3's semantics plus field aliases, contract-level TypeID admission, and strict spec-surface validation. |
+| 5 | `keiro-dsl/syntax-profile/4` | `keiro-dsl/runtime-semantics/4` | **stable** | Version 4 plus typed projection catalogs, versioned external-read contracts, mapped workqueue and read-model-query consumers, aggregate-sourced projections, typed domain command outcomes, declarative router selection, and separated projection delivery from query freshness. |
 
 Version 3 remains the clearest case that syntax and runtime behavior are separate axes: it admits exactly the same grammar as version 2 and still changes what the runtime accepts. Read the two identifiers, not the version number.
 
@@ -55,17 +55,28 @@ Runtime semantics 3 adds two capabilities to semantics 2's TypeID-v7 generated I
 
 Version 4 also resolves every internally decidable process, router, projection, publisher, queue, pgmq source-key, read-model identity, and timer-ID reference, and rejects duration values that cannot fit the runtime `Int` seconds representation. Sources that previously scaffolded broken code now fail during `check`.
 
-## Treat version 5 as one candidate contract
+## Know what version 5 adds
 
-Candidate version 5 adds `ProjectionCatalogSyntax` and `MappedConsumerSurfaceSyntax` together in syntax profile 4. Its runtime profile adds `ProjectionCatalogRuntime` and the `keiro-dsl/projection-catalog/1` fold discriminator. It can declare physical projection targets, atomic rebuild groups, projection owners, typed workqueue fields, and paired read-model query input/result types; generated projection consumers are derived from authoritative aggregate event sources.
+Syntax profile 4 adds six grammar features over profile 3: `ProjectionCatalogSyntax`, `ExternalReadContractSyntax`, `MappedConsumerSurfaceSyntax`, `DomainCommandOutcomeSyntax`, `DeclarativeRouterSelectionSyntax`, and `SeparatedProjectionQueryPolicySyntax`. Runtime semantics 4 adds three capabilities to semantics 3: `ProjectionCatalogRuntime` — which contributes the `keiro-dsl/projection-catalog/1` fold discriminator — `TypedDomainCommandOutcomes`, and `SeparatedProjectionQueryPolicy`.
 
-Do not copy candidate clauses into a version-4 source or widen the version-4 parser locally. Keep a production service on the released 0.11 toolchain and `--min-language 4` until the next coherent Keiro package cohort publishes. For an explicit evaluation, pin the exact Keiro revision, move every workspace member to version 5 in one change, and apply [mapped consumer surfaces](mapped-consumer-surfaces.md), [semantic-local regeneration](dsl-semantic-locality.md), and [projection catalogs](projection-catalogs.md) as one adoption gate.
+Together they let a source declare physical projection targets, atomic rebuild groups, projection owners and their ordered handlers, executable projection revisions with provisioner, validator, live, replay, and verification holes, bounded versioned external-read contracts, typed workqueue fields, paired read-model query input/result types, and typed accepted/rejected/no-op command outcomes. Generated projection consumers are derived from authoritative aggregate event sources.
 
-`currentStableLanguageVersion` remains 4. `currentAuthoringLanguageVersion` selects the sole active candidate when one exists and otherwise falls back to the stable version; `keiro-dsl new` follows the authoring value. Inspect a generated skeleton before committing it rather than assuming that a development binary prints the published contract.
+Two of those features change the meaning of clauses a version-4 source already wrote:
+
+- A projection owner declares `delivery = inline | subscription`, and a catalog-bound read model declares `freshness = immediate | wait-for-head …`, deriving any durable cursor from its validated owner. Languages 1–4 keep byte-compatible `feed`/`consistency`/`scope` behavior; the public AST replaces `rmConsistency`/`rmScope`/`rmFeed`/`rmSubscription` with `rmFreshness`/`rmSupply` and `poFeed` with `poDelivery`, so exhaustive consumers and direct record construction must migrate. See [read models and projections](read-models-and-projections.md).
+- Catalog-bound read models reject read-model-local `table`/`schema` coordinates, treat observed `targets` as an unordered set, and require `backing = <target>` when that set has more than one member.
+
+`outcome` remains an ordinary identifier in every language, including 5; the outcome clause words are contextual rather than globally reserved.
+
+Adopting version 5 is one gate, not a preamble edit: move every workspace member in one change and apply [mapped consumer surfaces](mapped-consumer-surfaces.md), [semantic-local regeneration](dsl-semantic-locality.md), and [projection catalogs](projection-catalogs.md) together.
+
+`currentStableLanguageVersion` is 5, and `currentAuthoringLanguageVersion` resolves to the same value while the registry holds no candidate. `keiro-dsl new` follows the authoring value; inspect a generated skeleton before committing it rather than assuming a development binary prints the published contract.
 
 ## Expect a stderr notice on a compatibility-only source
 
-`check`, `scaffold`, and the working-tree side of `diff` write one stderr line for any source whose effective contract is not stable, naming the effective version, the source form, the support level, the runtime-semantics identity, and the fact that language-4 strict spec-surface validation is not being applied. A stable source stays silent, so adopting version 4 removes the noise rather than adding it.
+`check`, `scaffold`, and the working-tree side of `diff` write one stderr line for any source whose effective contract is not stable, naming the effective version, the source form, the support level, and the runtime-semantics identity. Version 4 now sits on that path too: a service that has not moved to version 5 sees the notice where it previously stayed silent. Adopting the stable version removes the noise rather than adding it.
+
+Released compatibility diagnostics stay byte-stable across a publication: the version a `LanguageFeatureRequiresVersion` message recommends is the latest published *compatibility-only* contract, so publishing a successor does not rewrite the predecessor those messages name.
 
 The line goes to stderr, not stdout, and it is not a diagnostic. Automation that asserts on exact stderr must be updated; automation that reads diagnostics is unaffected.
 
@@ -74,7 +85,7 @@ The line goes to stderr, not stdout, and it is not a diagnostic. Automation that
 `keiro-dsl check INPUT --min-language N` fails any source or workspace whose *effective* version is below `N`, with the stable code `LanguageVersionBelowMinimum`. Set the floor to the version your service has actually adopted so a source cannot silently regress, and raise it as part of the adoption change rather than afterwards.
 
 ```bash
-keiro-dsl check domain/service.keiro --min-language 4
+keiro-dsl check domain/service.keiro --min-language 5
 ```
 
 `DiagnosticCode` now derives `Ord`, `Enum`, and `Bounded`, so tooling can enumerate the full code set rather than hardcoding a list.
@@ -106,6 +117,8 @@ replayImpactServices :: CheckedService -> CheckedService -> Either FoldSurfaceEr
 ```
 
 `legacyCheckedService` still exists for a genuinely version-1 source, but constructing one is now an explicit assertion that the version-1 contract applies. Do not reach for it to satisfy a type.
+
+Keiro 0.12 closes the same hole in planning. Behavior provenance is part of planning, so the semantic-only entry points `planServiceScaffold`, `planServiceScaffoldWithGoldens`, `planServiceScaffoldWithRuntimePackage`, `planServiceScaffoldWithRuntimePackageAndGoldens`, `planScaffold`, `planScaffoldWithGoldens`, and `checkServiceDiagnostics` are removed — they could only derive a `CompatibilityLineOnly` source index, whose behavior-source join refused every transition-bearing service they had planned cleanly under 0.11. Parse with `parseSourceDocument` and pass the document's `documentSourceIndex` to `planIndexedServiceScaffold`, its goldens and runtime-package variants, or `checkIndexedServiceDiagnostics`. A programmatically constructed `Spec` can still be planned by building a complete exact index with `Keiro.Dsl.SourceIndex.exactSemanticSourceIndex` over `semanticSourceSubjects`, which is an explicit assertion about the spans it claims. The zero-caller `pureRefusals` and `constraintPlan` shims are gone; use `pureRefusalsForService` and `constraintPlanForService`. Every execution entry point and the `Spec`-only module-set builders are unchanged.
 
 These APIs return `Either FoldSurfaceError` rather than throwing or silently producing a wrong fingerprint. `FoldSurfaceError` names which part of the surface failed to resolve — type graph, nominal, register type, register initial, guard, or event output — and `renderFoldSurfaceError` gives the message. Scaffold planning refuses the same error before generating any module, so a resolution failure can no longer reach generated code.
 
@@ -150,6 +163,8 @@ The tool never upgrades a file for you, and it never translates hand-owned behav
 ## Read the declaration change as its own diff class
 
 Adding or changing the preamble alone is reported as `SourceLanguageDeclarationChanged` with an all-compatible six-surface vector and a no-semantic-action remedy: generated bytes, fold fingerprints, and replay impact are unchanged by the declaration itself. Any *behavior* difference travels under its own findings, so do not read a compatible source-language finding as clearance for the version-2 features it unlocks.
+
+`diff` classifies the version 4-to-5 query-policy migration on its own terms. Weakening a legacy `consistency = Strong` to `freshness = immediate`, or narrowing the waited head scope, is a **breaking** `QueryFreshnessChanged` finding; a scope-preserving rewrite is equivalent; a strengthening is an additive `CompatibilityStrengthened` finding. Same-language classification is unchanged.
 
 Sidecar ledgers carry additive source-language rows. A ledger written before this contract has no such row and is interpreted as legacy, so an old ledger does not force a spurious rescaffold.
 

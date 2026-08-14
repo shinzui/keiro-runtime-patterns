@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Append and Read Patterns"
 description: "ExpectedVersion semantics, idempotent retries via supplied event ids, and streaming reads"
-timestamp: 2026-07-22T16:52:58Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-append-and-read
 tags: [kiroku, append-and-read]
 status: current
@@ -75,6 +75,15 @@ Kiroku read cursors are exclusive. `readStreamForward name (StreamVersion 0) lim
 Use `readStreamForward` when the caller wants one bounded page. Use `readStreamForwardStream name cursor 256` for an unbounded replay: it pages through Streamly in constant memory. Adjust the recommended page size of 256 only when event width or measured round-trip cost justifies it.
 
 Treat `GlobalPosition` as an opaque `$all` cursor. Kiroku promises only a strictly increasing, total order. Positions need not be contiguous, so never add one or infer event counts from position differences.
+
+## Separate the append frontier from the visible head
+
+Two different "heads" exist and they answer different questions.
+
+- The authoritative append frontier is monotonic. It is the right basis for operator reporting and for describing how far the store has ever advanced.
+- `visibleGlobalHeadPosition` returns the greatest global position **still visible** in `$all`, or zero when no event remains. It is a payload-free scalar query: no event payload is read and the configured decode hook is not invoked.
+
+Hard deletion of the visible tail can make the visible head regress while the append frontier does not. Anything that waits for a consumer to catch up — a read-model freshness wait, a projection distance gauge — must use the visible head, or it will wait forever for a position no reader can ever reach. Anything that reports how far the store has advanced should use the frontier and say so. Never subtract one from the other and call the result a backlog.
 
 Use `eventExistsInStream` for a cheap event-id membership check. For fan-in reads, batch the distinct `RecordedEvent.originalStreamId` values and resolve them with `lookupStreamNames`; do not query Kiroku’s internal tables or add a stream-name lookup per event.
 

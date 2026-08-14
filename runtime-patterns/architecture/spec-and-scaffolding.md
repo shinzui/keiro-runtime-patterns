@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -39,7 +39,7 @@ context ticket
 layout collocated
 ```
 
-The `language` clause must be the first significant clause and is required of every new source. Version 4 is the sole published stable authoring contract; versions 1 through 3 remain readable as compatibility-only and make the CLI emit a stderr contract notice. Post-0.11 source also recognizes candidate version 5 for projection catalogs and mapped queue/query/projection surfaces. A development `keiro-dsl new` follows `currentAuthoringLanguageVersion` and may print that candidate, so verify the preamble before using a generated skeleton in a production service. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+The `language` clause must be the first significant clause and is required of every new source. Version 5 is the sole published stable authoring contract; versions 1 through 4 remain readable as compatibility-only and make the CLI emit a stderr contract notice. `keiro-dsl new` follows `currentAuthoringLanguageVersion`, which selects a candidate contract when the registry holds one, so verify the preamble before using a generated skeleton in a production service. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
 
 Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its spec and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
 
@@ -64,7 +64,7 @@ When a private aggregate payload or register uses an application type, declare i
 
 Do not create a second generated domain type merely to satisfy the DSL, and do not let both a consumer `ToJSON` instance and generated structural codec write current events. The generated codec is authoritative for structural private-event JSON; the binding converts domain values without owning wire rules.
 
-Candidate Language 5 carries the same mapped declarations through persisted workqueue payloads, paired read-model query contracts, and aggregate-sourced projection handlers. Declare those consumers in the specification and apply their independent drain, caller-build, handler-review, and group-rebuild consequences from [mapped consumer surfaces](../keiro/mapped-consumer-surfaces.md).
+Language 5 carries the same mapped declarations through persisted workqueue payloads, paired read-model query contracts, and aggregate-sourced projection handlers. Declare those consumers in the specification and apply their independent drain, caller-build, handler-review, and group-rebuild consequences from [mapped consumer surfaces](../keiro/mapped-consumer-surfaces.md).
 
 ## Check, Scaffold, Format, Test
 

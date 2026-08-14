@@ -2,10 +2,10 @@
 type: Standard
 title: "Workflow reliability and recovery"
 description: "Exact wake discovery, bounded concurrent resume, terminal arbitration, failure recovery, and durable wake-source obligations"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-workflow-reliability
 tags: [keiro, workflow-reliability]
 status: current
@@ -79,7 +79,7 @@ Parent and child recover independently. A failure sentinel already delivered int
 These are runtime invariants, not things a service configures. Know them because they define what an operator may assume when a workflow looks stuck.
 
 - **Discovery is exact.** `findUnfinishedWorkflowIds` returns only `running` instances and `suspended` instances whose `wake_after` is due. A workflow parked on an awakeable, child, or future sleep is quiescent until its wake source updates the instance row.
-- **Awakeable ids are signalable as soon as they are observable.** The row is registered inside the journaled allocation step's action, before the id can be returned or handed to an external system, so an immediate external signal is no longer rejected as an unknown id.
+- **Awakeable ids are opaque and signalable as soon as they are observable.** Allocation generates a random id and commits its `pending` row inside the journaled allocation step, before the id can be returned or handed to an external system, so an immediate external signal is not rejected as unknown. Nothing outside the workflow can derive the id of a fresh allocation; it must be published. See [durable workflows](durable-workflows.md).
 - **Cancellation and completion are mutually exclusive.** `signalAwakeable` re-reads status inside its transaction; if a cancel won the race it appends nothing and returns `False`. Compensation and completion can no longer both fire.
 - **A failed child is observable across rotation.** The child link persists its terminal failure reason, so `awaitChild` raises `WorkflowChildFailed` even after the parent rotates past the generation that held the original failure sentinel.
 - **A sleep belongs to the generation that armed it.** A stale timer re-fire after `continueAsNew` becomes an idempotent append check on its original generation and can never resolve a same-named sleep on the next one. Re-arming a due sleep no longer postpones `wake_after`, and firing clears that hint atomically with the journal append, so a fired sleeper is rediscovered promptly.
@@ -98,7 +98,7 @@ A third-party wake source owes four things:
 3. Re-check and re-deliver from the await arm, repairing a delivery stranded by `continueAsNew` rotation.
 4. Update the owning instance row in every lifecycle transition transaction. `appendJournalEntryReturningId` does this for a delivered result; an abandonment path that appends nothing must do it itself.
 
-If the append returns `JournalRefusedTerminal`, settle the wake-source row and deliver nothing. Do not interpret a quiet append wrapper as proof that the workflow received the value. Also remember that `continueAsNew` abandons awakeable ids already handed out; the next generation allocates a fresh id and the allocation step must notify its holder again.
+If the append returns `JournalRefusedTerminal`, settle the wake-source row and deliver nothing. Do not interpret a quiet append wrapper as proof that the workflow received the value. Also remember that `continueAsNew` abandons awakeable ids already handed out; the next generation allocates a fresh opaque id and must republish it to its holder through an idempotent, id-keyed callback.
 
 ## Freeze deterministic identity
 
@@ -107,6 +107,7 @@ Workflow journal, sleep-timer, awakeable, and process-manager ids now hash the U
 ## Operate the checklist
 
 - Use `resumeWorkflowsOnceUpTo` for bounded operator passes. For service workers, start with `maxConcurrentAdvances = 1`; raise it only against measured connection-pool headroom, and make `logEvent` thread-safe because concurrent advances call it from several threads. Export every `ResumeSummary` field; `failed`, `leaseSkipped`, and `transientErrors` distinguish a code defect from worker contention from a database problem.
+- Terminate a bounded drain on durable progress, not on the discoverable pool. `advanced` is the continuation signal; `paced`, `sleepDue`, `unregisteredNames`, foreign leases, and transient errors each name a blocked remedy and must stop the loop rather than let it spin. A workflow suspended on a due sleep while no timer worker runs reports `advanced = 0` and `sleepDue = 1` — the fix is to run the timer worker, not another resume pass.
 - Schedule workflow timer polling whenever any body sleeps, and drain backlogs with `drainWorkflowSleepTimers`/`drainDueTimersWith` rather than one timer per poll tick.
 - Configure `runWorkflowGcWorker` from a deliberate `WorkflowGcPolicy`. It is retention housekeeping, not a progress mechanism, but it is what keeps collected workflows from leaving armed timers behind.
 - Treat a skipped crash record as an ordinary terminal race and keep the pass running. Run GC with per-instance isolation and a logging hook so one bad deletion or pass does not kill the worker.

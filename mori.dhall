@@ -20,6 +20,7 @@ in  Schema.Project::{
       , "shinzui/kiroku"
       , "shinzui/settei"
       , "shinzui/shibuya"
+      , "shinzui/shibuya-pgmq-adapter"
       , "shinzui/pg-migrate"
       , "shinzui/pgmq-hs"
       , "shinzui/okf"
@@ -234,7 +235,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Reading one coherent member-aware durable checkpoint snapshot and naming cursor distance honestly"
+            "Reading one coherent member-aware durable checkpoint snapshot, in-process or through the frozen v1 relation, and naming cursor distance honestly"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/kiroku/checkpoint-inventory.md"
         }
@@ -260,9 +261,18 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Soft and hard deletion, the advisory hard-delete GUC, truncateBefore compaction, and provisional linkToStream"
+            "Soft and hard deletion, the advisory hard-delete GUC, retention-lease refusal, truncateBefore compaction, and provisional linkToStream"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/kiroku/lifecycle-and-deletion.md"
+        }
+      , Schema.DocRef::{
+        , key = "kiroku-history-retention"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Holding a renewable retention lease so a long replay sees stable history, and how that lease refuses destructive work"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/kiroku/history-retention.md"
         }
       , Schema.DocRef::{
         , key = "migrations-overview"
@@ -350,7 +360,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Command hydration, decision, append, projection, and prescriptive error handling"
+            "Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/command-cycle-and-errors.md"
         }
@@ -359,7 +369,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Typed read-model queries, consistency, catalog-backed application, and snapshot limits"
+            "Truthful read-model freshness, guarded external SQL contracts, catalog-backed application, and snapshot limits"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/read-models-and-projections.md"
         }
@@ -368,16 +378,25 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "One validated projection inventory, catalog-derived writers, group fencing, and deterministic resumable rebuilds"
+            "One validated projection inventory, delivery-bound revision writers, group fencing, and deterministic resumable rebuilds"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/projection-catalogs.md"
+        }
+      , Schema.DocRef::{
+        , key = "keiro-stream-scoped-repair"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Declaring a StreamScopedReplay policy and repairing one stream's projection rows under admission limits without a group rebuild"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/stream-scoped-repair.md"
         }
       , Schema.DocRef::{
         , key = "keiro-durable-workflows"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Durable workflow journals, exact discovery, bounded progress workers, custom wakes, and evolution"
+            "Durable workflow journals, at-least-once step effects, opaque awakeable publication, bounded progress workers, custom wakes, and evolution"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/durable-workflows.md"
         }
       , Schema.DocRef::{
@@ -429,7 +448,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Runbook
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Operating keiro-ops with schema checks, preview-before-force mutations, application hooks, and stable JSON"
+            "Operating the released keiro-ops with schema checks, preview-before-force mutations, application hooks, and stable JSON"
         , location =
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/operations-console.md"
         }
@@ -438,7 +457,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Declaring the language keiro-dsl preamble, choosing among versions 1 through 3, and carrying the checked contract through tooling"
+            "Declaring the language keiro-dsl preamble, adopting stable version 5, and carrying the checked contract through tooling"
         , location = Schema.DocLocation.LocalFile
             "runtime-patterns/keiro/language-versions.md"
         }
@@ -513,7 +532,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Notes
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Shared-stream, global-lock, resource-effect, and bring-your-own Kafka traps"
+            "Shared-stream, global-lock, opaque-awakeable, resource-effect, and bring-your-own Kafka traps"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/gotchas.md"
         }
       , Schema.DocRef::{
@@ -569,7 +588,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown"
+            "Shibuya processing semantics every worker inherits: ack decisions, application dead-letter codes, retries, batching, supervision, shutdown"
         , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/shibuya-processing.md"
         }
       , Schema.DocRef::{

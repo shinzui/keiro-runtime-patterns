@@ -1,11 +1,11 @@
 ---
 type: Guide
 title: "Kiroku Lifecycle and Deletion"
-description: "Soft and hard deletion, the advisory hard-delete GUC, truncateBefore compaction, and provisional linkToStream"
-timestamp: 2026-07-22T16:52:58Z
+description: "Soft and hard deletion, the advisory hard-delete GUC, retention-lease refusal, truncateBefore compaction, and provisional linkToStream"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-lifecycle-and-deletion
 tags: [kiroku, lifecycle-and-deletion]
 status: current
@@ -40,6 +40,10 @@ Use this guide for soft deletion, physical erasure, logical prefix compaction, a
 That GUC is advisory protection against accidental SQL, not a security boundary: any session with `DELETE` privilege can set it. The normal application role should not have `DELETE` on Kiroku data tables. Route erasure through a separately privileged and authorized operation.
 
 Before hard deletion, append an application-level erasure-decision event that records who authorized the action, why it was required, and when it occurred. Kiroku’s physical deletion does not create an in-band audit event of its own.
+
+Hard deletion also checks replay-history retention before it mutates anything, and fails with `HistoryRetentionActive` while any lease is live. Direct `DELETE` or `TRUNCATE` against `kiroku.events`, `kiroku.stream_events`, or `kiroku.streams` raises SQLSTATE `KR001` from a statement-level trigger even with the GUC enabled. The two controls are independent: plan an erasure window around active leases rather than expecting either one to override the other. See [replay-history retention](history-retention.md).
+
+Supported hard delete locks every affected stream in ascending stream-ID order, including streams holding links to target-originated events. A hand-written deletion that acquires those rows in another order can deadlock against it.
 
 ## Use `truncateBefore` only for read compaction
 

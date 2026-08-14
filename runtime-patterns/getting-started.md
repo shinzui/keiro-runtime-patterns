@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -58,7 +58,7 @@ need the surrounding rules.
   to decide what the spec generates and what stays hand-owned.
 - **Writing or upgrading a `.keiro` source:** start with
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
-  the language contract. For candidate Language 5, follow
+  the language contract. On stable Language 5, follow
   [semantic-local regeneration](keiro/dsl-semantic-locality.md) and inventory
   every [mapped consumer surface](keiro/mapped-consumer-surfaces.md); use
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
@@ -79,6 +79,14 @@ need the surrounding rules.
   [runtime assembly](keiro/runtime-assembly.md) for resource acquisition,
   validated streams, handlers, workers, and startup order. Build read-side
   ownership through [typed projection catalogs](keiro/projection-catalogs.md).
+- **Serving and evolving the read side:** declare freshness and publish external
+  SQL access through [read models and projections](keiro/read-models-and-projections.md);
+  choose between the offline, schema-versioned, and
+  [targeted stream](keiro/stream-scoped-repair.md) lifecycles before touching a
+  serving target.
+- **Protecting a long replay:** hold a
+  [Kiroku replay-history retention lease](kiroku/history-retention.md) for the
+  whole run, and abandon rather than reacquire when it lapses.
 - **Inspecting or repairing a live runtime:** use the
   [Keiro operations console](keiro/operations-console.md) so schema checks,
   previews, stable JSON, bounded passes, and application-owned hooks wrap the

@@ -4,7 +4,7 @@
 
 # Guide
 
-- [Shibuya Processing Semantics](shibuya-processing.md) - Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown
+- [Shibuya Processing Semantics](shibuya-processing.md) - Shibuya processing semantics every worker inherits: ack decisions, application dead-letter codes, retries, batching, supervision, shutdown
 
 # Overview
 

@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Subscriptions Through Shibuya"
 description: "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
-timestamp: 2026-07-22T18:25:02Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:25:02Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-kiroku-subscriptions
 tags: [messaging, kiroku-subscriptions]
 status: current
@@ -40,7 +40,7 @@ reviews:
 
 ## Guard Exceptions To Avoid A Spin
 
-With Shibuya 0.8.0.1, the supervised runner catches a thrown handler and finalizes it as `AckRetry 0`; a bare handler does not leave the Kiroku reply unfilled. It can, however, retry immediately and create a hot loop. Prefer the adapter guard:
+With Shibuya 0.9.0.0, the supervised runner catches a thrown handler and finalizes it as `AckRetry 0`; a bare handler does not leave the Kiroku reply unfilled. It can, however, retry immediately and create a hot loop. Prefer the adapter guard:
 
 ```haskell
 -- CORRECT: thrown synchronous failures retry after one second.

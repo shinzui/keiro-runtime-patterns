@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Subscription Patterns"
 description: "At-least-once subscriptions, explicit first-run checkpoint intent, durable checkpoint inventory, overflow policies, and Serial consumer groups"
-timestamp: 2026-08-11T20:09:03Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-11T20:09:03Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-subscriptions
 tags: [kiroku, subscriptions]
 status: current
@@ -49,7 +49,7 @@ For every subscription, record one intended first-run policy in the runtime inve
 
 Choose the policy in the same reviewed inventory that owns the subscription name. Changing the policy affects the next startup only when the exact row is absent; it does not rewind, fast-forward, rename, or delete an existing checkpoint. `initializeSubscriptionCheckpoint` exposes the same atomic resolution for explicit startup orchestration. Coordinated rebuild code may deliberately rewind existing member rows only through `resetSubscriptionCheckpointsTx`, which composes with the caller's transaction and reports the exact member keys reset. Do not issue private SQL against Kiroku's subscription table, synthesize group members, delete checkpoints, or treat the reset API as permission for arbitrary forward movement. The owning contract is `mori://shinzui/kiroku/plans/70-make-subscription-checkpoint-initialization-and-reset-semantics-explicit`.
 
-`subscriptionCheckpointInventory`, introduced in Kiroku Store 0.4, remains the read-only observation surface. It returns the captured store position and every durable member-aware checkpoint in one snapshot, including rows whose workers are stopped. Inventory does not initialize or reset anything; use the explicit 0.5 policy and mutation APIs for those statements. See [durable checkpoint inventory](checkpoint-inventory.md).
+`subscriptionCheckpointInventory`, introduced in Kiroku Store 0.4, remains the read-only observation surface. It returns the captured store position and every durable member-aware checkpoint in one snapshot, including rows whose workers are stopped. Inventory does not initialize or reset anything; use the explicit 0.5 policy and mutation APIs for those statements. An out-of-process reader gets the frozen `kiroku.subscription_checkpoints_v1` relation instead of either. See [durable checkpoint inventory](checkpoint-inventory.md).
 
 ## Choose overflow behavior only where it applies
 
@@ -78,6 +78,7 @@ The broader transport, process-manager, and messaging standards live in the mess
 ## Related Patterns
 
 - [Operational Invariants](./operational-invariants.md)
+- [Replay-History Retention](./history-retention.md)
 - [Observability](./observability.md)
 - [Durable Checkpoint Inventory](./checkpoint-inventory.md)
 - [Append and Read Patterns](./append-and-read.md)

@@ -2,10 +2,10 @@
 type: Standard
 title: "Semantic-local Keiro DSL regeneration"
 description: "Separating checked semantic consumers, generated-artifact churn, and source provenance while keeping service conformance complete"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-semantic-locality
 tags: [keiro, dsl-semantic-locality]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Regenerate from the checked dependency graph, keep source positions out of semantic identity, and review semantic impact separately from changed files.**
 
-This contract is post-0.11 source qualified by `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption`. Do not infer it from the 0.11.0.0 release or reproduce it in application scaffolding.
+This contract shipped in Keiro 0.12.0.0 and is fixed by `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption`. It is a property of the generator; do not reproduce any part of it in application scaffolding.
 
 ## Establish the new generated baseline once
 

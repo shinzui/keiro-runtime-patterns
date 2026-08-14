@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -41,7 +41,7 @@ Keiro-dsl is a build-time parser, checker, scaffolder, harness emitter, and evol
 
 The rule is one sentence: put mechanically checkable identity, policy, and evolution relationships in the specification instead of reconstructing them in modules or prose.
 
-The released grammar covers aggregates and upcasters, projections and snapshots, process managers and timers, routers, integration contracts, inbox/outbox nodes, publishers, PGMQ work queues and dispatch, read models, and durable workflows. Candidate Language 5 additionally declares typed projection catalogs and mapped workqueue/query/projection consumer surfaces. The checker verifies, among other contracts:
+The released grammar covers aggregates and upcasters, projections and snapshots, process managers and timers, routers, integration contracts, inbox/outbox nodes, publishers, PGMQ work queues and dispatch, read models, and durable workflows. [Language 5](language-versions.md) additionally declares typed projection catalogs and revisions, versioned external-read contracts, typed domain command outcomes, and mapped workqueue/query/projection consumer surfaces. The checker verifies, among other contracts:
 
 - complete intake and work-queue disposition tables, including dangerous retry/ack inversions;
 - FIFO group-key requirements and captured opaque derivations;
@@ -100,7 +100,7 @@ Use `mapped nominal`, a bound `id`, or a bound `enum` when the consumer type is 
 
 Generated `StructuralProjections` witnesses let a hand-owned Keiki transducer use `regProj` and `inpProj` for eligible scalar guards while commands, registers, and events retain the consumer type. Projections are direct-base and guard-only; they do not lower nested `.keiro` paths into the transducer. Under language version 2 the generated expression modules use the same witnesses for checked dotted paths. See [Brownfield Keiro Adoption](brownfield-adoption.md) for the end-to-end choice and migration sequence.
 
-Candidate Language 5 extends the same mapped type graph to persisted workqueue fields, paired read-model query input/results, and projections derived from an aggregate event source. Those surfaces have different rollout consequences; follow [mapped consumer surfaces](mapped-consumer-surfaces.md) and never use a green aggregate harness as evidence that an old queued payload or query caller is compatible.
+Language 5 extends the same mapped type graph to persisted workqueue fields, paired read-model query input/results, and projections derived from an aggregate event source. Those surfaces have different rollout consequences; follow [mapped consumer surfaces](mapped-consumer-surfaces.md) and never use a green aggregate harness as evidence that an old queued payload or query caller is compatible.
 
 ## Use the complete CLI loop
 
@@ -141,7 +141,7 @@ A `keiro-dsl` warning is a real finding, and until 0.11 nothing stopped a reposi
 
 ```sh
 keiro-dsl check domain/service.keiro \
-  --min-language 4 \
+  --min-language 5 \
   --deny-warnings \
   --report-out build/keiro-check.json
 ```
@@ -157,11 +157,11 @@ A denial that could never match is refused rather than silently ignored. `check 
 
 Keiro 0.11 started warning on spec surfaces the grammar accepts but no runtime implements — accepted intake bind flags, emit derivations, optional queue markers, and inline subscriptions. Scaffold reports additionally list emit, pgmq dispatch, and operation nodes that contribute no modules.
 
-These are not stylistic. Each one names a declaration a reader would reasonably expect to have an effect and which has none. Delete it or replace it with the surface that does the work. Under language 4 several of them are errors rather than warnings, so the warning is a preview of what adopting the stable contract will reject.
+These are not stylistic. Each one names a declaration a reader would reasonably expect to have an effect and which has none. Delete it or replace it with the surface that does the work. From language 4 onward several of them are errors rather than warnings, so on an older source the warning is a preview of what adopting a current contract will reject.
 
 Three surfaces are explicitly descriptive-only and are checked only for well-formedness: timer dead-letter text, pgmq fanout function names, and pgmq top-level dedupe keys. Do not read them as configuration; see [PGMQ jobs](../messaging/pgmq-jobs.md).
 
-Candidate Language 5 does not make every accepted surface executable. Public integration contracts, category/all-history projection decoders, application SQL and DDL, queue-drain timing, and release coordination stay application-owned. Keep those boundaries visible in coverage rather than inferring consumers the checked graph cannot prove.
+Language 5 does not make every accepted surface executable. Public integration contracts, category/all-history projection decoders, application SQL and DDL, queue-drain timing, and release coordination stay application-owned. Keep those boundaries visible in coverage rather than inferring consumers the checked graph cannot prove.
 
 `diff` resolves the prior input with `git show`, including a workspace's historical manifest and member set, so repository context is mandatory. Any `BREAKING` result exits non-zero and is a deployment gate, not an informational warning. Review `WARNING` changes as behavior changes even though they do not fail the command; advisories such as `AggGuardTightened`, `AggFoldSurfaceChanged`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, and `WorkspaceAuthorityChanged` each carry an operator obligation described in [evolution gates and rollout ordering](evolution-and-rollout.md). Branch automation on the `DiagnosticCode`, not on the rendered text.
 

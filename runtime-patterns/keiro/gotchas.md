@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, structural-mapping, codec-authority, silent-workflow-failure, and bring-your-own Kafka traps"
-timestamp: 2026-07-29T02:53:40Z
+description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, and bring-your-own Kafka traps"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-29T02:53:40Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Keiro gotchas
 
-**Eight traps that cost real debugging time.**
+**Nine traps that cost real debugging time.**
 
 This checklist captures cross-cutting runtime constraints that are easy to miss when reading one subsystem at a time.
 
@@ -52,6 +52,12 @@ See [runtime assembly](runtime-assembly.md).
 Once a workflow exhausts `maxAttempts`, the runtime appends `WorkflowFailed`, marks the instance `failed`, and removes it from resume discovery. No worker will ever touch it again. There is no log line at the moment it *stops* being retried, only the crash that pushed it over the ceiling.
 
 Alert on `ResumeSummary.failed` and recover with `resurrectFailedWorkflow`, never with hand-written SQL against the instance and step-index tables. See [workflow reliability and recovery](workflow-reliability.md).
+
+## A fresh awakeable id cannot be recomputed from workflow coordinates
+
+Allocation returns an opaque random `AwakeableId` journaled under `awkid:<label>`. Any code that derived the id from the workflow name, id, and label — the old `deterministicAwakeableId`/`awaitAwakeableId` shape — is now computing an id that will never be allocated, so its signal silently resolves nothing and the workflow stays suspended until its attempt budget or an operator intervenes.
+
+Publish the id the allocation returned, through an idempotent action keyed on that id, and republish after `continueAsNew`. `Keiro.Workflow.Awakeable.Compatibility` reproduces generation-0 identifiers for adopting pre-0.12 rows only. See [durable workflows](durable-workflows.md).
 
 ## Unvalidated stream construction now skips more than transducer checks
 

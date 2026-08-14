@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Typed projection catalogs and rebuild groups"
-description: "One validated projection inventory, guarded external read contracts, revision-aware live writers, and deterministic rebuilds"
-timestamp: 2026-08-14T05:58:34Z
+description: "One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T05:58:34Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-projection-catalogs
 tags: [keiro, projection-catalogs]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Build one closed-world `ProjectionCatalog`, validate it once, and derive every live writer and rebuild action from that same value.**
 
-This is a post-0.11 source contract. It is not part of the released Keiro 0.11.0.0 package cohort. Adopt it only from a coherent Keiro revision that completes `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and its checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
+This is the read-side baseline for a new service on Keiro 0.12.0.0. Its design is fixed by `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and the checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
 
 ## Keep every identity explicit
 
@@ -26,12 +26,14 @@ The catalog must declare all of these separately:
 - a rebuild group for targets that fence, prepare, verify, and promote together;
 - a projection owner for one source, its ordered handlers, owned targets, and replay policy;
 - every asynchronous subscription and deduplication identity used by those handlers;
-- every executable projection revision, including per-target schema/provisioner/validator identity, physical-target live and replay handlers, verification, and ordered canonical promotion-object names; and
+- every executable projection revision, including per-target schema/provisioner/validator identity, delivery-bound live handlers, replay adapters, verification, ordered canonical promotion-object names, and any stream-scoped repair policy; and
 - every versioned external-read contract, including query binding, stable composite result type and shape, compatible revisions, surface generation, and any typed private keyed implementation.
 
 Validation must reject duplicate ownership, unresolved references, cross-group ownership, dependency cycles, wrong handler order, and a clear-before-replay target with no replayable owner. Persist and compare the inventory so removing a target and its owner together cannot disappear as an apparently clean startup. Inventory application SQL and external writers separately; catalog validation is closed-world only over what the application declares.
 
-Candidate Language 5 can generate the catalog facade and create-once handler holes. A hand-written catalog is the bridge for earlier language contracts; unmanaged wrappers are migration aids, not the new-service baseline.
+[Language 5](language-versions.md) generates the catalog facade and create-once handler holes. A hand-written catalog is the bridge for earlier language contracts; unmanaged wrappers are migration aids, not the new-service baseline.
+
+Validate the catalog once at startup and share that one `ValidatedProjectionCatalog` value. It carries the precomputed revision, delivery, and async-registration indexes the command and subscription paths use, so rebuilding or revalidating it per command is a measurable cost on the hot path, not a stylistic choice.
 
 ## Register before any reader or writer starts
 
@@ -43,6 +45,12 @@ Use `runCommandWithCatalogProjections` for inline state that must commit with it
 
 Once a group adopts schema-versioned generations, the group lock must return its persisted serving revision, monotonically increasing serving epoch, and total physical-target binding as one fact. A missing compiled revision, missing generation, or extra target is a refusal before application SQL; never fall back to an unversioned handler after promotion.
 
+## Bind every live handler to one delivery capability
+
+A revision's live handlers are not an unordered bag applied to everything. Each `RevisionLiveHandler` declares its exact `RevisionLiveDelivery` — inline for one projection and query model, or subscription for one projection, subscription, and dedup identity — and the command and subscription paths dispatch only the closure matching the capability they are executing.
+
+Validation requires exactly one handler per declared capability and restricts that handler's required targets to its supplying projection's owned targets, reporting `ProjectionRevisionLiveCapabilityMismatch` and `ProjectionRevisionLiveTargetOwnershipMismatch` otherwise. This is what keeps revision selection a change of physical SQL: a new revision must not promote a subscription-delivered effect into command-time work, demote command-time work into a subscription, or reach a target its projection does not own. The canonical identity carrying these facts is `catalog-v7:` and `slice-v6:`.
+
 ## Make external read contracts catalog identity
 
 An external SQL reader must never receive raw projection-table privilege. Declare an `ExternalReadContract` whose identity and positive version form `keiro_read.<contract>_v<version>`. The declaration binds one query model to a stable application-owned composite result type, result-shape hash, compatible projection revisions, and monotonic surface generation. A keyed contract also declares its typed arguments and versioned private implementation function.
@@ -51,7 +59,7 @@ Catalog validation rejects unresolved query or revision references, invalid SQL 
 
 Registration and reviewed adoption reconcile the serving-compatible surface transactionally. Keiro verifies that the result type exists and is composite, verifies a keyed implementation's argument signature, persists candidate metadata without prematurely installing its wrapper, and reconciles managed objects individually rather than recreating `keiro_read`. The public wrapper holds the group lifecycle row `FOR SHARE` while checking availability and compatibility and then reading the private binding. This makes the authorization decision and data read one lock-coupled operation.
 
-All-row contracts are intentionally bounded; high-cardinality access uses an application-owned keyed implementation. The consumer receives only the public wrapper and result-type privileges. Stable `KR001`, `KR002`, and `KR003` SQLSTATEs distinguish temporary fencing, unknown or retired contracts, and serving incompatibility. See [read models and projections](read-models-and-projections.md) for client transaction, grant, versioning, and error-handling rules.
+All-row contracts are intentionally bounded — the wrapper raises `KR004` above 100 rows — and high-cardinality access uses an application-owned keyed implementation whose declared composite set-result type is verified at reconciliation. The consumer receives only the public wrapper and result-type privileges, and a retirement preview reports the execute grants of the selected overload alone. Stable `KR001`, `KR002`, `KR003`, and `KR004` SQLSTATEs distinguish retryable unavailability (including a promotion that crossed this statement's snapshot), unknown or retired contracts, serving incompatibility, and an over-limit all-row read. See [read models and projections](read-models-and-projections.md) for client transaction, grant, versioning, and error-handling rules.
 
 ## Separate reset policy from replay policy
 
@@ -81,8 +89,9 @@ For online schema evolution, keep both serving and candidate `ProjectionRevision
 1. Begin allocates one deterministic staging generation per target, acquires Kiroku history retention, invokes each application `TargetProvisioner`, and reconciles the serving-compatible external contracts in the metadata transaction. Failed DDL, validation, or contract reconciliation rolls back every candidate object and lease.
 2. Replay uses the candidate revision and its total physical-target map while live inline and async writers continue through the persisted serving revision.
 3. Resume converges in bounded pages. Near the head, Keiro fences writers, captures a durable final head, and replays to it without exposing staging names.
-4. Promotion locks all serving and staging relations in deterministic order under one overall deadline, revalidates relation OIDs and schema/object evidence, runs candidate verification, reconciles async deduplication and subscription checkpoints, renames every target and canonical object, changes the serving revision and epoch, rebinds compatible external wrappers, activates new versions, and retires V1 in one transaction.
-5. A lock timeout or DDL race rolls the whole promotion back. Repair the owned cause and resume the same stored contract, or abandon staging and restart when retention or identity evidence is no longer trustworthy.
+4. Candidate verification, set-based dedup installation, checkpoint reconciliation, and lease release complete in a resumable preparation phase **before** any target relation is locked, and async redelivery evidence is staged incrementally in PostgreSQL and admitted against a persisted operator limit.
+5. Promotion then acquires every serving and staging relation in one cumulative lock statement under an absolute database-clock deadline, revalidates relation OIDs and schema/object evidence, renames every target and canonical object, changes the serving revision and epoch, rebinds compatible external wrappers, activates new versions, and retires V1 in one transaction.
+6. Writer-fence and promotion lock attempts are bounded by that deadline and fail with typed phase-specific errors naming the phase that ran out of time. A lock timeout or DDL race rolls the whole promotion back. Repair the owned cause and resume the same stored contract, or abandon staging and restart when retention or identity evidence is no longer trustworthy.
 
 Applications own desired DDL and compatibility meaning. Keiro owns the transaction, generation, replay, fence, promotion, and retirement machinery. `RestrictedClone` is a typed, exact-shape convenience that refuses external `nextval` defaults, foreign keys, triggers, rules, policies/RLS, inheritance or partitioning, publications, non-default ownership/ACL or replica identity, and unmodelled dependencies. Use `ApplicationProvisioned` for a changed schema.
 
@@ -90,9 +99,17 @@ Retired generations no longer receive live writes and are not rollback-ready mer
 
 The generation boundary is fixed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-34` and `mori://shinzui/keiro/plans/256-rebuild-into-versioned-targets-with-atomic-cutover`. The external-read privilege and compatibility boundary is fixed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-36` and `mori://shinzui/keiro/plans/255-fence-out-of-process-read-model-reads-behind-a-sanctioned-sql-surface`.
 
+## Repair one stream without fencing the group
+
+A revision may additionally declare a `StreamScopedReplay` policy per projection: the projection's exact owned targets, a stream-row clearer, a per-event replay closure, a verification, and the async dedup identities it affects. Validation rejects a duplicate, cross-group, unknown-projection, target-mismatched, dedup-mismatched, or unversioned policy.
+
+That declaration is what makes one stream's rows repairable in place against the persisted serving revision, under an admission limit and without moving subscription checkpoints. It is not a replacement for either group lifecycle; see [targeted stream-scoped projection repair](stream-scoped-repair.md).
+
 ## Related Patterns
 
 - [Read models and projections](read-models-and-projections.md)
+- [Targeted stream-scoped projection repair](stream-scoped-repair.md)
+- [Kiroku replay-history retention](../kiroku/history-retention.md)
 - [Runtime assembly](runtime-assembly.md)
 - [Keiro operations console](operations-console.md)
 - [Mapped consumer surfaces](mapped-consumer-surfaces.md)

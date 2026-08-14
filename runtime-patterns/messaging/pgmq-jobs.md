@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq: job outcomes, retry and VT rules, and pgmq-hs 0.5 queue reconciliation"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -88,7 +88,9 @@ At the lower pgmq-hs boundary, every physical `QueueName` is validated as non-em
 
 ## Know Which DLQ Path You Run
 
-The supervised worker delegates direct-queue or topic-route dead-lettering to shibuya-pgmq-adapter, which sends the DLQ row and deletes the source row in one database transaction. With no configured DLQ it archives the source row.
+The supervised worker delegates direct-queue or topic-route dead-lettering to `shibuya-pgmq-adapter` 0.14.0.0, which sends the DLQ row and deletes the source row in one database transaction. With no configured DLQ it archives the source row.
+
+Every DLQ payload it writes carries three reason fields: the compatibility `dead_letter_reason` string, the machine-queryable `dead_letter_reason_code`, and an always-present `dead_letter_reason_detail` that encodes as JSON `null` for a reason with no detail. Query and alert on the code; the adapter transports application-owned codes and details verbatim through Shibuya's public projections and no longer renders constructors itself. See [Shibuya processing](shibuya-processing.md).
 
 The `runJobOnce*` implementation sends to the job DLQ and then deletes the main row as separate effects. A crash between them can leave both copies. Keep handlers idempotent and give one-shot drains reconciliation tooling.
 

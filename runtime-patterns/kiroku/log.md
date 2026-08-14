@@ -1,5 +1,13 @@
 # kiroku Update Log
 
+## 2026-08-14
+* **Update**: Route the frozen checkpoint relation and replay-history retention
+* **Update**: Record retention-lease refusal of hard delete and direct destructive SQL, and the ascending stream lock order
+* **Update**: Publish the frozen subscription\_checkpoints\_v1 relation for out-of-process readers and subtract from the visible head
+* **Update**: Separate the authoritative append frontier from the visible global head
+* **Update**: Target the Kiroku Store 0.7 line and route replay-history retention
+* **Added**: Add the replay-history retention lease standard and its destructive-statement refusals
+
 ## 2026-08-11
 * **Update**: Replace provisional missing-checkpoint guidance with Kiroku Store 0.5's explicit atomic initialization policies, existing-row precedence, and transaction-composable reset boundary
 

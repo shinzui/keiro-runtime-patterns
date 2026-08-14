@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Messaging Patterns"
 description: "Index of messaging standards for Keiro services, including pgmq-hs 0.5 queue lifecycle and reconciliation"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -45,7 +45,7 @@ Use this area for process managers, public integration contracts, transactional 
 
 ## The Processing Substrate
 
-- [Shibuya processing](shibuya-processing.md) — acknowledgement intent, finalization, concurrency, batching, supervision, and shutdown.
+- [Shibuya processing](shibuya-processing.md) — acknowledgement intent, application dead-letter codes, finalization, concurrency, batching, supervision, and shutdown.
 - [Transport selection](transport-selection.md) — choose among PGMQ, Kafka, and Kiroku subscriptions.
 - [Typed PGMQ jobs](pgmq-jobs.md) — background work, retry policy, visibility timeout, FIFO groups, and queue identity.
 - [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) — validated physical names, additive provisioning, drift, notifications, and retry classification.

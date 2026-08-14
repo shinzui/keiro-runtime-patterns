@@ -1,6 +1,21 @@
 # keiro Update Log
 
 ## 2026-08-14
+* **Update**: Treat semantic-local regeneration as released generator behaviour
+* **Update**: Treat the mapped consumer surface as released stable Language 5
+* **Update**: Raise the CI language floor to 5 and describe the released Language 5 declarations
+* **Update**: Classify the Language 5 query-freshness, catalog, and external-read diff families
+* **Update**: Add the opaque awakeable identifier trap
+* **Update**: Record the bounded command-decision surface, rebuild metrics, and visible-head position distance
+* **Update**: Cover the released keiro-ops rebuild, external-read, stream-reprojection, and subscription command surface
+* **Update**: Terminate bounded resume drains on durable progress and name every blocked remedy
+* **Update**: Teach at-least-once step effects and opaque awakeable allocation, publication, and republication after continueAsNew
+* **Update**: Add typed accepted, rejected, and no-op domain command outcomes and their worker and telemetry rules
+* **Update**: Bind revision live handlers to one delivery capability, bound promotion lock attempts, and declare stream-scoped repair policies
+* **Update**: Replace deprecated consistency modes with truthful query freshness and cursor authority, and harden the guarded external-read contract
+* **Update**: Adopt Language 5 as the sole stable authoring contract and demote Language 4 to compatibility-only
+* **Update**: Target the released Keiro 0.12.0.0 six-package cohort on Keiki 0.9, Kiroku Store 0.7, and Shibuya 0.9
+* **Added**: Add the targeted stream-scoped projection repair standard for declared StreamScopedReplay policies
 * **Update**: Make external read signatures catalog identity and reconcile serving-compatible wrappers during registration, versioned rebuild start, and atomic promotion.
 * **Update**: Require versioned guarded SQL contracts, execute-only grants, stable KR SQLSTATE handling, and explicit retirement for out-of-process read-model consumers.
 * **Update**: Define projection revisions, physical generations, bounded atomic cutover, and safe retired-generation destruction.

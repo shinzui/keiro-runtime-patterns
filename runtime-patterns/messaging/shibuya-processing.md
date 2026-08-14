@@ -1,11 +1,11 @@
 ---
 type: Guide
 title: "Shibuya Processing Semantics"
-description: "Shibuya processing semantics every worker inherits: ack decisions, retries, batching, supervision, shutdown"
-timestamp: 2026-07-22T18:25:02Z
+description: "Shibuya processing semantics every worker inherits: ack decisions, application dead-letter codes, retries, batching, supervision, shutdown"
+timestamp: 2026-08-14T17:48:00Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:25:02Z"
+  at: "2026-08-14T17:48:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-shibuya-processing
 tags: [messaging, shibuya-processing]
 status: current
@@ -43,10 +43,22 @@ Return exactly the intent you mean:
 
 - `AckOk`: processing succeeded;
 - `AckRetry (RetryDelay d)`: redeliver after the adapter-specific delay mechanism;
-- `AckDeadLetter (PoisonPill reason | InvalidPayload reason | MaxRetriesExceeded)`: permanently dispose through the adapter's dead-letter behavior;
+- `AckDeadLetter (PoisonPill reason | InvalidPayload reason | MaxRetriesExceeded | ApplicationFailure code detail)`: permanently dispose through the adapter's dead-letter behavior;
 - `AckHalt (HaltOrderedStream reason | HaltFatal reason)`: stop this processor without advancing the failed delivery.
 
 Core Shibuya has no universal retry counter or dead-letter store. The adapter determines what retry, dead-letter, and halt do, so transport selection is part of failure semantics.
+
+## Give a policy rejection its own dead-letter code
+
+`ApplicationFailure` (Shibuya 0.9) is for a syntactically valid message that application policy permanently rejects — not a parse failure and not exhausted retries. Its `DeadLetterCode` constructor is private: **validate a finite set of codes once at startup with `mkDeadLetterCode`, keep the results in configuration, and reuse them in handlers.** Validating on every message turns a naming mistake into a per-delivery failure.
+
+A valid code is at most 128 ASCII characters with at least two dot-separated segments, each matching `[a-z][a-z0-9_]*`. The first segment `shibuya` is reserved for framework-owned codes, so an application code can never collide with a built-in one.
+
+Consume reasons through the total projections rather than matching constructors: `deadLetterReasonCode` returns the stable machine-facing code for **every** reason including the built-ins, `deadLetterReasonDetail` returns the optional human text, and `renderDeadLetterReason` produces the canonical `code: detail` form whose built-in strings are byte-for-byte unchanged. An adapter with structured storage should persist code and detail separately instead of parsing the rendered string.
+
+Detail is transported verbatim. Keep it operationally bounded and free of secrets, raw payloads, raw SQL, and unrestricted backend error text — a dead-letter row is read by more people than a log line. Single-message processing spans expose only the code, as `shibuya.dead_letter.reason.code`, and use the canonical rendered reason as the error status description; detail is never an attribute or a metric label, so a high-cardinality detail cannot damage the metric series.
+
+Exhaustive matches on `DeadLetterReason` must handle the new constructor or move to the projections. Downstream `shibuya-core ^>=0.8` bounds deliberately exclude 0.9 and must be reviewed before widening.
 
 ## Understand The Two Safety Substitutions
 
