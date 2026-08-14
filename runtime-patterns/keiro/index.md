@@ -28,8 +28,8 @@
 - [Keiro DSL language versions](language-versions.md) - Declaring a Keiro DSL language contract, separating published stable version 4 from candidate version 5, and auditing compatibility-only sources
 - [Mapped consumer surfaces](mapped-consumer-surfaces.md) - Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections
 - [Consumer-owned nominal bindings](nominal-bindings.md) - Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit
-- [Typed projection catalogs and rebuild groups](projection-catalogs.md) - One validated projection inventory, revision-aware live writers, dependency-group fencing, and deterministic offline or schema-versioned rebuilds
-- [Read models and projections](read-models-and-projections.md) - Typed read-model queries and consistency, catalog-backed projection application, and snapshot limits
+- [Typed projection catalogs and rebuild groups](projection-catalogs.md) - One validated projection inventory, guarded external read contracts, revision-aware live writers, and deterministic rebuilds
+- [Read models and projections](read-models-and-projections.md) - Typed read-model queries, guarded external SQL contracts, catalog-backed projection application, and snapshot limits
 - [Runtime assembly](runtime-assembly.md) - Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order
 - [Composable service workspaces](service-workspaces.md) - Splitting one Keiro service into single-owner members while preserving checked source provenance, semantic-local scaffolding, history, and evolution reports
 - [Telemetry](telemetry.md) - Keiro tracing, metrics including global-position distance, W3C propagation, Kiroku bridging, and logging seams

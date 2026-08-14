@@ -36,9 +36,9 @@
         "keiro-ops",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "89090cc803f7ab87da75896d384f676cfeda6d5c",
-      "last_checked_at": "2026-08-10T14:13:15Z",
-      "notes": "Reconciled e796227..89090cc from the watched source and package changelogs. The released baseline remains the tagged Keiro 0.11.0.0 five-package cohort. Post-release source adds exact workflow discovery and terminal arbitration, bounded concurrent resume and timer drains, UTF-8 deterministic identities, typed projection catalogs and resumable group rebuilds, candidate DSL Language 5 mapped consumers and semantic-local generation, Kiroku 0.4 checkpoint integration, and the unreleased keiro-ops package. Added six concepts and corrected the affected runtime, architecture, and messaging standards. The final 89090cc parser-benchmark commit changes benchmark coverage only and requires no catalog rule."
+      "last_checked_commit": "89ebe409c3c324763e1287ce93f0d7c41dc4d685",
+      "last_checked_at": "2026-08-14T06:00:10Z",
+      "notes": "Reconciled e796227..89090cc from the watched source and package changelogs. The released baseline remains the tagged Keiro 0.11.0.0 five-package cohort. Post-release source adds exact workflow discovery and terminal arbitration, bounded concurrent resume and timer drains, UTF-8 deterministic identities, typed projection catalogs and resumable group rebuilds, candidate DSL Language 5 mapped consumers and semantic-local generation, Kiroku 0.4 checkpoint integration, and the unreleased keiro-ops package. Added six concepts and corrected the affected runtime, architecture, and messaging standards. The final 89090cc parser-benchmark commit changes benchmark coverage only and requires no catalog rule. Reconciled 89090cc..89ebe409 for the guarded external-read work: versioned catalog contracts, execute-only SQL wrappers, lifecycle-lock authorization, composite result ABIs, KR001/KR002/KR003 handling, Language 5 bounded all-row declarations, atomic versioned cutover integration, explicit retirement, and the Jitsurei client proof."
     },
     {
       "project": "shinzui/kiroku",

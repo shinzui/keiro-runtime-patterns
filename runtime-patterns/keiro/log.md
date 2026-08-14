@@ -1,6 +1,8 @@
 # keiro Update Log
 
 ## 2026-08-14
+* **Update**: Make external read signatures catalog identity and reconcile serving-compatible wrappers during registration, versioned rebuild start, and atomic promotion.
+* **Update**: Require versioned guarded SQL contracts, execute-only grants, stable KR SQLSTATE handling, and explicit retirement for out-of-process read-model consumers.
 * **Update**: Define projection revisions, physical generations, bounded atomic cutover, and safe retired-generation destruction.
 * **Update**: Add online schema-versioned projection rebuild, retention, consumer compatibility, and retirement rules.
 

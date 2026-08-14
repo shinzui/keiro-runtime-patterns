@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Read models and projections"
-description: "Typed read-model queries and consistency, catalog-backed projection application, and snapshot limits"
-timestamp: 2026-08-14T01:59:13Z
+description: "Typed read-model queries, guarded external SQL contracts, catalog-backed projection application, and snapshot limits"
+timestamp: 2026-08-14T05:58:34Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T01:59:13Z"
+  at: "2026-08-14T05:58:34Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -33,7 +33,7 @@ This standard governs projection ownership, registration, consistency waits, asy
 
 Every service must build and validate one `ProjectionCatalog`, then use the resulting `ValidatedProjectionCatalog` for registration, live projection selection, rebuilds, and operator inventory. The catalog keeps query-model bindings, physical targets, rebuild groups, owners, source identities, and reset and replay policies explicit.
 
-The full closed-world validation and group-rebuild rules live in [typed projection catalogs and rebuild groups](projection-catalogs.md). Candidate Language 5 can generate the catalog facade and mapped query aliases; until that contract is released and adopted, a hand-written catalog is the supported bridge.
+The full closed-world validation and group-rebuild rules live in [typed projection catalogs and rebuild groups](projection-catalogs.md). Candidate Language 5 can generate the catalog facade, mapped query aliases, and bounded all-row external-read declarations; until that contract is released and adopted, a hand-written catalog is the supported bridge. Keyed external reads remain an application-owned catalog extension because their private indexed SQL is not part of the DSL.
 
 ## Register before serving queries
 
@@ -66,6 +66,24 @@ The restricted clone mode is only for exact-shape repair and refuses unsupported
 Kiroku's renewable history-retention lease protects the active replay from hard deletion. An expired or unrenewable lease invalidates the old candidate; abandon and restart rather than acquiring a new lease and guessing that history stayed unchanged.
 
 Preview and operate both lifecycles through the mounted [Keiro operations console](operations-console.md). The architecture is governed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-34` and implemented under `mori://shinzui/keiro/masterplans/41-make-read-models-safely-readable-by-out-of-process-consumers`.
+
+## Publish external reads only through the guarded SQL surface
+
+Never grant an out-of-process reader `SELECT` on a projection table, serving-name alias, retained generation, or Keiro private binding. A separate status check followed by a raw read races both offline fencing and online promotion. A retained generation is especially dangerous because it stays readable after it stops receiving writes.
+
+Declare a versioned `ExternalReadContract` in the validated catalog. Keiro publishes an execute-only security-definer function named `keiro_read.<contract>_v<version>`. Its outer guard takes the rebuild-group lifecycle lock `FOR SHARE`, then checks `reads_allowed`, contract state, serving revision, and result shape before invoking the private binding in the same transaction. The external client must use an ordinary read-write PostgreSQL transaction; read-only transactions cannot take this lock.
+
+Treat the application-owned composite result type as the public row ABI. The bounded all-row form selects exactly that type's ordered attributes, so a new physical column does not silently widen V1. Use it only for small bounded projections because an outer predicate cannot be pushed through the procedural wrapper. For high-cardinality access, provide a versioned private keyed function with typed arguments and indexes; Keiro wraps and guards it but never grants the consumer access to it.
+
+Grant the consumer only `USAGE` on `keiro_read` and the contract-type schema, `USAGE` on the result composite type, and `EXECUTE` on the selected wrapper. Grant no access to `keiro`, `kiroku`, the application projection schema, the private implementation schema, the shared guard, or generated private bindings. Deployment owns roles and grants; Keiro revokes `PUBLIC` execution from managed and private functions.
+
+Handle the stable SQLSTATEs as a closed operational contract: retry `KR001` with bounded backoff because the group is temporarily unavailable; treat `KR002` as an unknown or retired contract; and migrate or deploy an explicit compatibility implementation for `KR003`, which means the serving revision or result shape is incompatible. Do not branch on message text.
+
+During candidate replay, V1 remains bound to the serving generation. Promotion atomically rebinds an additive compatible version and activates a new breaking version. An incompatible old wrapper remains present but fails `KR003`; preserving its retired table does not preserve current reads. Keep V1 current only through an explicit implementation-backed compatibility contract that reads the new serving data while retaining the old public signature.
+
+Inspect with `rebuild external-read CONTRACT VERSION`. Retirement is a separate preview/force operation, `rebuild retire-external-read CONTRACT VERSION`, that reports execute grants and PostgreSQL dependents before marking the managed surface retired. Retiring a contract does not drop a retained target generation, and dropping a generation does not retire a public contract.
+
+This privilege and locking boundary is fixed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-36` and implemented by `mori://shinzui/keiro/plans/255-fence-out-of-process-read-model-reads-behind-a-sanctioned-sql-surface`.
 
 ## Keep snapshots advisory—with one exception
 
