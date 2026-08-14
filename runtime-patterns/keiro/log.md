@@ -1,5 +1,9 @@
 # keiro Update Log
 
+## 2026-08-14
+* **Update**: Define projection revisions, physical generations, bounded atomic cutover, and safe retired-generation destruction.
+* **Update**: Add online schema-versioned projection rebuild, retention, consumer compatibility, and retirement rules.
+
 ## 2026-08-10
 * **Added**: Add the schema-checked, preview-before-force Keiro operations runbook.
 * **Added**: Add mapped queue, query, and projection consumer rollout rules.

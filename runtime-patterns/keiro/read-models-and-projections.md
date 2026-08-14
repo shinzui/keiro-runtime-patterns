@@ -2,10 +2,10 @@
 type: Standard
 title: "Read models and projections"
 description: "Typed read-model queries and consistency, catalog-backed projection application, and snapshot limits"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-08-14T01:59:13Z
 generated:
   by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  at: "2026-08-14T01:59:13Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -53,11 +53,19 @@ Use `applyAsyncProjectionFromCatalog` in subscription workers. Its `AsyncApplyOu
 
 Handlers must derive time-dependent values from recorded event time or payload data. `NOW()`, wall-clock reads, random values, network calls, and other ambient effects make replay diverge from the live result. Keep external side effects out of replay adapters.
 
-## Rebuild one dependency group behind the fence
+## Choose the offline or online group lifecycle
 
 Drive rebuilds through `ProjectionCatalogOperations`, never caller-supplied table, subscription, or projection lists. Fence the complete dependency group, capture one immutable event-store head, replay deterministic bounded pages, persist resumable evidence, run every declared verification, and promote only when all sources prove exhaustion. A failed or abandoned run stays fenced.
 
-This is an offline rebuild, not a zero-downtime shadow-table swap. Preview and operate it through the mounted [Keiro operations console](operations-console.md); the complete lifecycle is specified by [typed projection catalogs and rebuild groups](projection-catalogs.md).
+Use the offline lifecycle for in-place reconstruction when planned unavailability is acceptable. It fences readers and writers, clears or preserves each serving target according to catalog policy, and returns the group to service only after replay and verification.
+
+Use the schema-versioned lifecycle when V1 must keep serving while an incompatible V2 schema is built. Deploy both executable `ProjectionRevision` values in the same validated catalog. Application-owned `TargetProvisioner` closures create and validate complete staging schemas under Keiro-allocated names; Keiro owns durable generations, source retention, converging replay, the bounded final writer/table-lock phase, async deduplication and checkpoint reconciliation, atomic all-target promotion, and retirement. Live writers select the persisted serving revision and complete physical-target map under the group lock, and fail closed when the running binary lacks that revision.
+
+The restricted clone mode is only for exact-shape repair and refuses unsupported PostgreSQL DDL and dependencies. It is not the schema-evolution mechanism. A retained V1 generation stops receiving writes after promotion: treat it as forensic or drain evidence, not an automatically current compatibility or rollback surface. Preview/drop must refuse active runs, compatible read contracts, and ordinary PostgreSQL dependencies.
+
+Kiroku's renewable history-retention lease protects the active replay from hard deletion. An expired or unrenewable lease invalidates the old candidate; abandon and restart rather than acquiring a new lease and guessing that history stayed unchanged.
+
+Preview and operate both lifecycles through the mounted [Keiro operations console](operations-console.md). The architecture is governed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-34` and implemented under `mori://shinzui/keiro/masterplans/41-make-read-models-safely-readable-by-out-of-process-consumers`.
 
 ## Keep snapshots advisory—with one exception
 
@@ -81,7 +89,7 @@ Rows written before the discriminator gained its third component carry an empty 
 
 Keiro 0.9 widened the fold fingerprint from a 16-hex-digit FNV-1a-64 to a 32-hex-digit FNV-1a-128 value. The widening is deliberate and invalidates every snapshot discriminated by the earlier token: after the upgrade each stream misses once and rebuilds from events. Plan the replay cost and refresh generated transducers; do not attempt to translate old tokens. Read-model, mapped-wire, and behavior-key identities are separate 64-bit values and did not move.
 
-For depth, see the keiro repo's `docs/user/read-models-and-projections.md`, `docs/user/snapshots.md`, and `docs/guides/project-read-models.md`.
+For depth, consult `mori://shinzui/keiro` at project-relative paths `docs/user/read-models-and-projections.md`, `docs/user/snapshots.md`, `docs/guides/project-read-models.md`, and `docs/guides/online-projection-rebuilds.md`; artifact-level Mori document handles for those repository-local guides are pending.
 
 ## Related Patterns
 
