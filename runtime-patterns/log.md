@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-09-01
+* **Update**: Start new-service guidance with domain newtypes and TypeIDs
 * **Update**: Route DSL authoring and service structure through the workspace-first standard
 
 ## 2026-08-14

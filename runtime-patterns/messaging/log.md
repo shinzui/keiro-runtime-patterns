@@ -1,5 +1,10 @@
 # messaging Update Log
 
+## 2026-09-01
+* **Update**: Require custom service-owned dedupe identities to remain nominal and TypeID-backed until the inbox boundary
+* **Update**: Keep outbox identities nominal and distinguish prescribed UUIDv5 derivation from allocated TypeID-v7 identity
+* **Update**: Keep envelope primitives at the boundary and payload domain values nominal and TypeID-backed
+
 ## 2026-08-14
 * **Update**: Add stuck-timer repair by classification through the operations console
 * **Update**: Route the console PGMQ dead-letter read, redrive, archive, and purge commands

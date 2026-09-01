@@ -2,10 +2,10 @@
 type: Standard
 title: "Integration Event Contracts"
 description: "The integration event contract: envelope, identity and dedupe rules, topic versioning, trace continuation"
-timestamp: 2026-07-22T18:21:13Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-07-22T18:21:13Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-integration-events
 tags: [messaging, integration-events]
 status: current
@@ -46,6 +46,8 @@ A service must not read another service's tables, Kiroku streams, or private eve
 
 The envelope is byte-oriented. Use `ApplicationJson` and `encodeJsonIntegrationEvent` for the v1 JSON convention, but do not assume JSON in storage or consumers: `OtherContentType` and `SchemaReference` permit registry-backed formats without changing the outbox or inbox shape. Decode JSON with `decodeJsonIntegrationEvent`.
 
+Text and bytes in the envelope are boundary representations. In service-owned payload and application types, follow [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md): keep IDs TypeID-backed and keep every key scalar nominal, then encode or decode the primitive form at the contract boundary. A language-version-4 contract field that carries an ID is declared `typeid "prefix"`, not `Text`.
+
 `integrationPayload` returns the wire body. `integrationHeaders` emits the `keiro-*` metadata headers plus W3C `traceparent` and `tracestate`; optional envelope fields produce optional headers.
 
 ## Identity And Evolution Rules
@@ -66,6 +68,7 @@ Capture the producing trace in `TraceContext`. The outbox persists `traceparent`
 ## Related Patterns
 
 - [Transactional outbox](outbox.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Idempotent inbox](inbox.md)
 - [Messaging glossary](glossary.md)
 - [Transport selection](transport-selection.md)

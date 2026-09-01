@@ -2,10 +2,10 @@
 type: Standard
 title: "Consumer-owned nominal bindings"
 description: "Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit"
-timestamp: 2026-08-03T02:56:33Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-03T02:56:33Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-nominal-bindings
 tags: [keiro, nominal-bindings]
 status: current
@@ -14,6 +14,8 @@ status: current
 # Consumer-owned nominal bindings
 
 **Bind a consumer-owned ID, enum, or scalar wrapper only when the conversion is a total isomorphism in both directions; anything that can reject or normalize a valid representation is `mapped opaque`, not nominal.**
+
+A consumer-owned domain value follows [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md): an ID is TypeID-backed by default, every key scalar has a dedicated `newtype`, and a bare `Text`, `Int`, or type synonym is not a domain type worth preserving through a nominal binding. The primitive named in `mapped nominal AccountNumber : Text` is the checked representation crossing Keiro, not the Haskell application's domain type.
 
 A nominal binding keeps an application's existing type in direct aggregate commands, events, and registers without generating a parallel wrapper. It is the third mapping kind, alongside `mapped structural` and `mapped opaque`, and it requires [language version 2](language-versions.md).
 
@@ -106,6 +108,7 @@ Nominal consumer provenance is fingerprinted and diff-visible. Scaffold and work
 ## Related Patterns
 
 - [Keiro DSL language versions](language-versions.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Enforced identifier domains](identifier-domains.md)
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)

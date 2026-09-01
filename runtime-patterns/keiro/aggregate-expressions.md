@@ -2,10 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -19,7 +19,7 @@ Version 2 introduced this contract and every later version keeps it: declared gu
 
 ## Use the six direct scalar types
 
-Aggregate commands, events, and registers share one checked type model. The direct scalars are `Text`, `Int`, `Integer`, `Bool`, `Time`, and `Natural`. `UTCTime` is an accepted source spelling; canonical output is `Time`.
+Aggregate commands, events, and registers share one checked DSL type model. The direct representation scalars are `Text`, `Int`, `Integer`, `Bool`, `Time`, and `Natural`. `UTCTime` is an accepted source spelling; canonical output is `Time`. These spellings do not license raw primitives in hand-owned application models: apply [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md) and use a mapped declaration when a key domain value must remain consumer-owned.
 
 | Capability | Types |
 |---|---|
@@ -134,6 +134,7 @@ Version-1 generated output is frozen, and version-1 whole-transducer holes are u
 ## Related Patterns
 
 - [Keiro DSL language versions](language-versions.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Behavior conformance and obligations](behavior-conformance.md)
 - [Keiro-dsl adoption](dsl-adoption.md)

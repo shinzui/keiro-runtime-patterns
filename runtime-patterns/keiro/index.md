@@ -24,7 +24,7 @@
 - [Command cycle and errors](command-cycle-and-errors.md) - Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling
 - [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md) - Separating checked semantic consumers, generated-artifact churn, and source provenance while keeping service conformance complete
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) - The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering
-- [Enforced identifier domains](identifier-domains.md) - The frozen TypeID-v7 admission contract for aggregate IDs from language version 3 and public contract fields from version 4, and the opposite rollouts they require
+- [Enforced identifier domains](identifier-domains.md) - Apply the TypeID default through the frozen v7 admission contract for aggregate IDs and public contract fields, with the rollout each surface requires
 - [Keiro DSL language versions](language-versions.md) - Declaring a Keiro DSL language contract, adopting published stable version 5, and auditing compatibility-only sources
 - [Mapped consumer surfaces](mapped-consumer-surfaces.md) - Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections
 - [Consumer-owned nominal bindings](nominal-bindings.md) - Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit

@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Enforced identifier domains"
-description: "The frozen TypeID-v7 admission contract for aggregate IDs from language version 3 and public contract fields from version 4, and the opposite rollouts they require"
-timestamp: 2026-08-09T16:56:58Z
+description: "Apply the TypeID default through the frozen v7 admission contract for aggregate IDs and public contract fields, with the rollout each surface requires"
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-identifier-domains
 tags: [keiro, identifier-domains]
 status: current
@@ -13,7 +13,9 @@ status: current
 
 # Enforced identifier domains
 
-**A prefix-bearing ID is a checked domain, not a `Text` field: construct it through the generated `parseX`/`mkX`, and treat adopting the domain as a public-consumer break whose rollout direction depends on which surface it lands on.**
+**Every service-owned ID is TypeID-backed by default, and a prefix-bearing ID is a checked domain rather than a `Text` field: construct it through the generated `parseX`/`mkX`, and treat adoption as a public-consumer break whose rollout direction depends on the surface.**
+
+The fleet-wide modeling rule is [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md). It also requires nominal wrappers for non-ID domain scalars and names the narrow exceptions for external identifiers and natural locators. This standard defines the stricter Keiro admission and migration contract once a declaration is an ID; it is not permission to model an application ID as raw text outside the DSL.
 
 Version 1 and version 2 generate an ID whose constructor is available and whose text is unvalidated. Version 3 selects `keiro-dsl/runtime-semantics/2` and binds every prefix-bearing *aggregate* ID to the frozen `keiro-dsl/id-domain/typeid-v7/1` contract published as `Keiro.Codec.IdDomain` in `keiro-core` and re-exported from `keiro`, so generated code keeps a single direct `keiro` dependency. [Version 4](language-versions.md) extends the same frozen contract to public *integration-contract* fields.
 
@@ -117,6 +119,7 @@ The ID-domain version is persisted in the sidecar ledgers and in `--explain-bind
 ## Related Patterns
 
 - [Keiro DSL language versions](language-versions.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [TypeID prefix naming](typeid-prefix-naming.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Behavior conformance and obligations](behavior-conformance.md)

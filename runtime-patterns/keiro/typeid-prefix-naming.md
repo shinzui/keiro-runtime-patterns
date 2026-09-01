@@ -2,10 +2,10 @@
 type: Standard
 title: "TypeID prefix naming"
 description: "Choose durable TypeID prefixes from the domain's ubiquitous language instead of an arbitrary abbreviation budget"
-timestamp: 2026-08-09T16:56:58Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-typeid-prefix-naming
 tags: [keiro, typeid, identity, ubiquitous-language]
 status: current
@@ -14,6 +14,8 @@ status: current
 # TypeID prefix naming
 
 **Use the singular, lowercase `snake_case` name from the domain's ubiquitous language; a TypeID prefix is a durable type label, not a short encoding budget.**
+
+The [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md) standard decides which values are service-owned identities and requires a TypeID-backed nominal type for each. This standard chooses the prefix once that decision is made.
 
 The prefix appears in database rows, URLs, logs, traces, fixtures, support conversations, and copied identifiers. It should tell a person what the identifier denotes without requiring a legend. The TypeID library admits lowercase ASCII letters and underscores and has a hard 63-character prefix ceiling. That ceiling is an interoperability limit, not a target.
 
@@ -61,6 +63,7 @@ Before accepting a new `typeid` prefix, verify that:
 ## Related Patterns
 
 - [Enforced identifier domains](identifier-domains.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Consumer-owned nominal bindings](nominal-bindings.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)

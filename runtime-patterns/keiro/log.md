@@ -1,6 +1,14 @@
 # keiro Update Log
 
 ## 2026-09-01
+* **Update**: Keep runtime-owned workflow identifiers nominal and apply the TypeID default to service-owned IDs carried by workflows
+* **Update**: Route the Keiro index to domain newtypes and TypeIDs
+* **Update**: Separate wire-preserving newtype adoption from identifier migration to TypeID
+* **Update**: Apply the newtype and TypeID standard to generated and retained consumer-owned types
+* **Update**: Clarify that DSL representation scalars do not permit raw primitives in hand-owned domain models
+* **Update**: Require consumer-owned IDs and scalar domains to be real newtypes rather than primitives or aliases
+* **Update**: Connect prefix selection to the service-owned TypeID default
+* **Update**: State the fleet TypeID default before the Keiro admission and rollout contract
 * **Update**: Route DSL adoption through the workspace-first source-layout default
 * **Update**: Make a versioned workspace the default Keiro DSL source layout, with a bare file only for a trivial single-aggregate domain
 

@@ -2,10 +2,10 @@
 type: Guide
 title: "Durable workflows"
 description: "Durable workflow journals, at-least-once step effects, opaque awakeable publication, bounded progress workers, custom wakes, and evolution"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T16:07:10Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T16:07:10Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-durable-workflows
 tags: [keiro, durable-workflows]
 status: current
@@ -31,7 +31,7 @@ This guide orients service owners to keiro's durable workflow runtime while leav
 
 ## Run and replay the journal
 
-The rule is one sentence: invoke `runWorkflowWith options name workflowId body` and put every side effect behind a recorded workflow operation.
+The rule is one sentence: invoke `runWorkflowWith options name workflowId body` and put every side effect behind a recorded workflow operation. `WorkflowId` and `AwakeableId` are runtime-owned nominal types: use them directly and never flatten them to `Text` in the domain. Service-owned identifiers carried by a workflow follow [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md).
 
 The runner drives the body until completion or suspension. Its ordinary event stream is named `wf:<name>-<id>` and decoded with `workflowJournalCodec`; generations opened by `continueAsNew` receive a generation suffix. A named `step` runs its action and then journals the result; once that record is durable, replay returns it without re-running the action.
 
@@ -94,6 +94,7 @@ For authoring, awaitables, children, and sleep semantics, see the keiro repo's `
 ## Related Patterns
 
 - [Workflow reliability and recovery](workflow-reliability.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Runtime assembly](runtime-assembly.md)
 - [Telemetry](telemetry.md)
 - [Keiro-dsl adoption](dsl-adoption.md)

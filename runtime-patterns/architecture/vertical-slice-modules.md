@@ -2,10 +2,10 @@
 type: Standard
 title: "Vertical-Slice Modules"
 description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
-timestamp: 2026-07-29T19:40:01Z
+timestamp: 2026-09-01T16:07:10Z
 generated:
   by: human:nadeem
-  at: "2026-07-29T19:40:01Z"
+  at: "2026-09-01T16:07:10Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -46,7 +46,7 @@ An aggregate is one event-sourced consistency boundary. Its standard module ring
 | `<Concept>.Handler` | server | hand | command and query route handlers |
 | `<Concept>.Worker` | workers | hand | a Shibuya processor that decodes events and applies the projection |
 
-The generated ring describes checked structure. `Holes` contains decisions: for danwa's Conversation aggregate, that is the keiki transducer plus `applyConversations`, the transaction that folds recorded events into query tables. `ReadModel` owns persistence shapes and statements without hiding domain decisions in generated code.
+The generated ring describes checked structure. Its generated IDs and declared nominal scalar wrappers satisfy [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) and are used directly; hand-owned modules must not erase them back to primitives or add redundant wrappers. `Holes` contains decisions: for danwa's Conversation aggregate, that is the keiki transducer plus `applyConversations`, the transaction that folds recorded events into query tables. `ReadModel` owns persistence shapes and statements without hiding domain decisions in generated code.
 
 ## Shared Structural Mapping Modules
 
@@ -101,6 +101,7 @@ The parallel hand modules retained by keiro-runtime-jitsurei—such as `Transduc
 ## Related Patterns
 
 - [Specification and scaffolding](spec-and-scaffolding.md)
+- [Domain newtypes and TypeIDs](domain-newtypes-and-typeids.md)
 - [Extended node verticals](extended-node-verticals.md)
 - [Cross-cutting modules](cross-cutting-modules.md)
 - [Worked Conversation example](worked-example-conversation.md)

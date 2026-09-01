@@ -2,10 +2,10 @@
 type: Guide
 title: "Brownfield Keiro Adoption"
 description: "Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates"
-timestamp: 2026-08-09T16:56:58Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-09T16:56:58Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -26,6 +26,8 @@ reviews:
 # Brownfield Keiro Adoption
 
 **Keep the domain types and historical bytes; replace implicit contracts with one checked structural schema, total bindings, and staged evidence.**
+
+Keeping the domain model does not preserve primitive obsession. Apply [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md): wrap key `Text`, `String`, and numeric values behind nominal types without changing their wire encoding, and treat any move from a legacy ID representation to TypeID as a separate identifier-domain migration with its own replay and rollout evidence.
 
 Keiro's structural consumer mappings let an existing service adopt the checked DSL without rewriting its Haskell domain model into generated types. The same path benefits new services whose domain types should remain hand-owned: the `.keiro` declaration owns the private-event wire schema, a total binding connects that schema to the application type, and generated field witnesses expose selected decision scalars to Keiki.
 
@@ -169,6 +171,7 @@ For later changes, use the diff's replay-impact file and `AuditTargeted`. Run `d
 ## Related Patterns
 
 - [Keiro-dsl Adoption](dsl-adoption.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Evolution Gates and Rollout Ordering](evolution-and-rollout.md)
 - [Runtime Assembly](runtime-assembly.md)
 - [Read models and projections](read-models-and-projections.md)

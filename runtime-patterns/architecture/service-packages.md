@@ -2,10 +2,10 @@
 type: Standard
 title: "Six Packages Per Deployed Service"
 description: "The six-package split standard for deployed keiro services and its dependency rules"
-timestamp: 2026-07-29T02:53:40Z
+timestamp: 2026-09-01T16:07:10Z
 generated:
   by: human:nadeem
-  at: "2026-07-29T02:53:40Z"
+  at: "2026-09-01T16:07:10Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-service-packages
 tags: [architecture, service-packages]
 status: current
@@ -33,7 +33,7 @@ The package split keeps domain decisions, HTTP types, HTTP execution, background
 
 ### `<service>-core`
 
-This package owns the domain. It contains the custom `Prelude`, `App.Config`, each concept's generated ring, `Holes`, and `ReadModel`, generated structural wire shapes and projection witnesses, hand-owned structural bindings and fixtures, the shared `Postgres.Pool` and `Postgres.Runner`, public `Integration.*` contracts, and `Diagrams` support. It may depend on keiki, kiroku, keiro, hasql, and domain-level libraries named by mapped declarations, but it depends on no sibling `<service>-*` package. Every other service package may depend on core.
+This package owns the domain. It contains the [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md), custom `Prelude`, `App.Config`, each concept's generated ring, `Holes`, and `ReadModel`, generated structural wire shapes and projection witnesses, hand-owned structural bindings and fixtures, the shared `Postgres.Pool` and `Postgres.Runner`, public `Integration.*` contracts, and `Diagrams` support. It may depend on keiki, kiroku, keiro, hasql, and domain-level libraries named by mapped declarations, but it depends on no sibling `<service>-*` package. Every other service package may depend on core.
 
 Danwa realizes this boundary under `danwa-core/src/Danwa/` and exposes the lifecycle-diagram program as the `danwa-diagrams` executable.
 
@@ -87,6 +87,7 @@ Keiro-runtime-jitsurei's one-cabal-package-per-service shape is acceptable only 
 ## Related Patterns
 
 - [Vertical-slice modules](vertical-slice-modules.md)
+- [Domain newtypes and TypeIDs](domain-newtypes-and-typeids.md)
 - [Cross-cutting modules](cross-cutting-modules.md)
 - [Test layout](test-layout.md)
 - [Migration service package](../migrations/service-package.md)

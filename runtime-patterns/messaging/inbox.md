@@ -2,10 +2,10 @@
 type: Standard
 title: "Idempotent Inbox"
 description: "Consuming integration events idempotently: runInboxTransaction variants and disposition completeness"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T16:07:10Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T16:07:10Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-inbox
 tags: [messaging, inbox]
 status: current
@@ -31,7 +31,7 @@ At-least-once delivery means a handler will see duplicates. The inbox turns the 
 
 ## Choose The Identity
 
-Use `PreferIntegrationMessageId` by default. It records `(source, messageId)` and collapses broker redelivery and publisher retry. `PreferSourceEventIdentity` deliberately collapses public republishes derived from one private event. `KafkaDeliveryIdentity` identifies only one topic/partition/offset delivery and is a fallback, never the fleet default. Use `CustomDedupeKey` only when the contract requires a different collision-resistant identity.
+Use `PreferIntegrationMessageId` by default. It records `(source, messageId)` and collapses broker redelivery and publisher retry. `PreferSourceEventIdentity` deliberately collapses public republishes derived from one private event. `KafkaDeliveryIdentity` identifies only one topic/partition/offset delivery and is a fallback, never the fleet default. Use `CustomDedupeKey` only when the contract requires a different collision-resistant identity. Keep a custom service-owned identity nominal and TypeID-backed under [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md), converting to the inbox key representation only at this boundary.
 
 Kafka delivery coordinates remain useful diagnostics and are persisted in `KafkaDeliveryRef`; they are not a substitute for a stable application identity.
 
@@ -75,6 +75,7 @@ Completed-row retention defines the deduplication window. Once garbage collectio
 ## Related Patterns
 
 - [Integration event contracts](integration-events.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Keiro operations console](../keiro/operations-console.md)
 - [Transactional outbox](outbox.md)
 - [Shibuya processing](shibuya-processing.md)

@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of the released Keiro 0.12.0.0 standards: projection catalogs, guarded external reads, stable DSL Language 5, durable workflows, and the operations console"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -70,6 +70,7 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) — declare guards and writes that generate the transducer, and mark what stays hand-owned.
 - [Consumer-owned nominal bindings](nominal-bindings.md) — keep existing ID, enum, and scalar-wrapper types in checked aggregate fields.
 - [Enforced identifier domains](identifier-domains.md) — put prefix-bearing aggregate IDs and public contract fields on the frozen TypeID-v7 contract, and roll each adoption out in its own direction.
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md) — use TypeID-backed nominal types for service-owned IDs and dedicated wrappers for every key domain scalar.
 - [TypeID prefix naming](typeid-prefix-naming.md) — use full ubiquitous-language type labels by default and treat renaming as a durable identity migration.
 - [Behavior conformance and obligations](behavior-conformance.md) — inventory every transition, rejection, and replay-only edge, and prove each with an executed witness.
 - [Composable service workspaces](service-workspaces.md) — split complete aggregates across single-owner members while keeping one atomic scaffold and evolution boundary.

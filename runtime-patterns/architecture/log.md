@@ -1,6 +1,11 @@
 # architecture Update Log
 
 ## 2026-09-01
+* **Update**: Place domain newtypes and TypeIDs in the core package
+* **Update**: Keep generated domain wrappers intact across the hand-owned module boundary
+* **Update**: Require consumer-owned mapped types to be nominal and service-owned identifiers to be TypeID-backed
+* **Update**: Route service architecture through the domain newtype and TypeID standard
+* **Added**: Make TypeID-backed newtypes the default for service-owned identifiers and require nominal types for every key domain scalar
 * **Update**: Make the workspace manifest the standard service input and document the trivial single-aggregate exception
 
 ## 2026-08-14

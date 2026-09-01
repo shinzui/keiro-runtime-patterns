@@ -2,10 +2,10 @@
 type: Standard
 title: "Transactional Outbox"
 description: "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T16:07:10Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T16:07:10Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-outbox
 tags: [messaging, outbox]
 status: current
@@ -40,7 +40,7 @@ That API is a producer definition and enqueue primitive, not a checkpoint-owning
 
 `enqueueOutboxTx` collapses a repeated `(source, messageId)` with `ON CONFLICT ... DO NOTHING`. Reuse both the message identity and `OutboxId` for an idempotent retry.
 
-For a saga or process manager already inside a Keiro SQL transaction, use `enqueueIntegrationEventTx`. Supply a stable `OutboxId`; do not call `freshOutboxId` on every redelivery. Danwa's addressed-message reactor derives a UUIDv5 from stable business facts. This deliberately matches Keiro's `deterministicCommandId` recipe: namespace a deterministic UUID over the triggering fact and emitted purpose.
+For a saga or process manager already inside a Keiro SQL transaction, use `enqueueIntegrationEventTx`. Supply a stable `OutboxId`; do not call `freshOutboxId` on every redelivery. Keep `OutboxId`, message IDs, and the service-owned IDs used to derive them as nominal types under [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md); render a primitive only at the outbox boundary. Danwa's addressed-message reactor derives a UUIDv5 from stable business facts. This deliberately matches Keiro's `deterministicCommandId` recipe: namespace a deterministic UUID over the triggering fact and emitted purpose. That prescribed deterministic identity retains its UUIDv5 semantics; it is not relabelled as an allocated UUIDv7 entity ID.
 
 ## Preserve Required Order
 
@@ -67,6 +67,7 @@ For interactive repair, drive the same APIs through the [Keiro operations consol
 ## Related Patterns
 
 - [Integration event contracts](integration-events.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Keiro operations console](../keiro/operations-console.md)
 - [Idempotent inbox](inbox.md)
 - [Process managers](process-managers.md)

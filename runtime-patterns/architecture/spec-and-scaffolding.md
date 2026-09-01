@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-09-01T15:35:02Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-09-01T15:35:02Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -61,7 +61,7 @@ The manifest owns the stable service identity and member set. Each aggregate sta
 
 ## Declare Consumer-Owned Types In The Same Source Of Truth
 
-When a private aggregate payload or register uses an application type, declare it before the aggregate as `mapped structural`, `mapped opaque`, or — under language version 2 — a nominal binding. A structural declaration owns the complete private-event wire policy and names a total hand-owned binding, deterministic fixtures, stable canonical/binding identities, and any register initial. An opaque declaration names the consumer codec identity and version and makes no nested compatibility claim. A nominal binding (`id … using`, `enum … using`, or `mapped nominal`) keeps a consumer type in a direct field across a total isomorphism; see [consumer-owned nominal bindings](../keiro/nominal-bindings.md).
+When a private aggregate payload or register uses an application type, first apply [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md): the application type must be nominal rather than a raw primitive or type synonym, and every service-owned ID must be TypeID-backed. Then declare it before the aggregate as `mapped structural`, `mapped opaque`, or — under language version 2 — a nominal binding. A structural declaration owns the complete private-event wire policy and names a total hand-owned binding, deterministic fixtures, stable canonical/binding identities, and any register initial. An opaque declaration names the consumer codec identity and version and makes no nested compatibility claim. A nominal binding (`id … using`, `enum … using`, or `mapped nominal`) keeps a consumer type in a direct field across a total isomorphism; see [consumer-owned nominal bindings](../keiro/nominal-bindings.md).
 
 Do not create a second generated domain type merely to satisfy the DSL, and do not let both a consumer `ToJSON` instance and generated structural codec write current events. The generated codec is authoritative for structural private-event JSON; the binding converts domain values without owning wire rules.
 
@@ -140,6 +140,7 @@ For a brownfield structural mapping, capture production JSON before declaring th
 ## Related Patterns
 
 - [Vertical-slice modules](vertical-slice-modules.md)
+- [Domain newtypes and TypeIDs](domain-newtypes-and-typeids.md)
 - [Keiro-dsl adoption](../keiro/dsl-adoption.md)
 - [ADR 0002: adopt keiro-dsl](https://github.com/shinzui/keiro-runtime-patterns/blob/master/docs/adr/0002-adopt-keiro-dsl-for-contracts-and-evolution.md)
 - [Checked composition](../keiki/checked-composition.md)

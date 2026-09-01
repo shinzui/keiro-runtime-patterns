@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-01T15:35:02Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-09-01T15:35:02Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Keiro-dsl adoption
 
-**Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain types.**
+**Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain newtypes.**
 
 This guide decides when a service should own a checked Keiro DSL contract and where generated structure stops and hand-written domain logic begins. The default source shape is one composed `.keiro-workspace`; a bare `.keiro` input is reserved for a trivial domain with exactly one aggregate.
 
@@ -33,7 +33,7 @@ This guide decides when a service should own a checked Keiro DSL contract and wh
 
 Adopt keiro-dsl when a service has more than one node family, any integration surface such as intake, emit, or queues, expected schema/workflow evolution, existing private-event history, or a consumer-owned value whose wire shape and decision fields must be checked. The checker, generated conformance harness, and evolution gate are the payoff, and their value grows with every durable contract edge.
 
-A trivial single-aggregate service may hand-write against the public API only when it has no queues, integration contracts, mapped persisted values, existing history, or expected evolution. Revisit that choice as soon as any of those appear. Structural mappings make retrofit adoption possible without replacing the service's Haskell domain types with generated equivalents.
+A trivial single-aggregate service may hand-write against the public API only when it has no queues, integration contracts, mapped persisted values, existing history, or expected evolution. Revisit that choice as soon as any of those appear. Structural mappings make retrofit adoption possible without replacing the service's Haskell domain types with generated equivalents. Whether generated or hand-owned, those types follow [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md); mapping a raw primitive does not turn it into a domain type.
 
 When a service does adopt the DSL, create its versioned workspace immediately. Keep each aggregate whole in a readable, single-owner member and give shared declarations an explicit owner. Do not defer the workspace merely because the first delivery has one aggregate: a non-trivial single-aggregate contract still benefits from stable workspace identity and can accept another aggregate without reorganizing the original source. See [composable service workspaces](service-workspaces.md).
 
@@ -174,6 +174,7 @@ For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-to
 ## Related Patterns
 
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
+- [Domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md)
 - [Behavior conformance and obligations](behavior-conformance.md)
 - [Enforced identifier domains](identifier-domains.md)
 - [Runtime assembly](runtime-assembly.md)

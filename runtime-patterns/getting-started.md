@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-01T15:35:02Z
+timestamp: 2026-09-01T15:59:19Z
 generated:
   by: human:nadeem
-  at: "2026-09-01T15:35:02Z"
+  at: "2026-09-01T15:59:19Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -40,8 +40,9 @@ Choose the task that brought you here. Each route starts with the narrowest
 normative document; follow its related links or the subject overview when you
 need the surrounding rules.
 
-- **Starting a new service:** begin with the
-  [six-package service standard](architecture/service-packages.md), then use the
+- **Starting a new service:** begin with
+  [domain newtypes and TypeIDs](architecture/domain-newtypes-and-typeids.md), then apply the
+  [six-package service standard](architecture/service-packages.md) and use the
   [architecture overview](architecture/overview.md) for module and test layout.
 - **Defining an aggregate:** begin with
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
