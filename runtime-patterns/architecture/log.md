@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-09-01
+* **Update**: Make the workspace manifest the standard service input and document the trivial single-aggregate exception
+
 ## 2026-08-14
 * **Update**: Declare stable language version 5 in the preamble contract
 

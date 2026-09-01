@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T15:35:02Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T15:35:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -25,38 +25,39 @@ reviews:
 
 # Specification And Scaffolding
 
-**Keep one service input — `domain/<service>.keiro` or `domain/<service>.keiro-workspace` — and regenerate the core package through the checked firewall.**
+**Keep one workspace service input at `domain/<service>.keiro-workspace` and regenerate the core package through the checked firewall; reserve a bare `.keiro` input for a trivial domain with exactly one aggregate.**
 
 Keiro-dsl is a build-time toolchain, not a runtime interpreter. It checks a typed service specification and emits structural Haskell modules while preserving create-once hand-owned holes. The standard workflow makes the spec's placement choices explicit so every developer and CI run produces the same tree.
 
 ## Place The Service Contract At The Repository Root
 
-A small service specification lives at `domain/<service>.keiro`. In the standard one-service-per-repository shape, begin it with the language preamble, then the context and collocated-layout clauses:
-
-```text
-language keiro-dsl 4
-context ticket
-layout collocated
-```
-
-The `language` clause must be the first significant clause and is required of every new source. Version 5 is the sole published stable authoring contract; versions 1 through 4 remain readable as compatibility-only and make the CLI emit a stderr contract notice. `keiro-dsl new` follows `currentAuthoringLanguageVersion`, which selects a candidate contract when the registry holds one, so verify the preamble before using a generated skeleton in a production service. See [Keiro DSL language versions](../keiro/language-versions.md). The context supplies the default Haskell module root (`ticket` becomes `Ticket`) and identifies the service's DSL namespace. `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
-
-Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its spec and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
-
-Keiro-runtime-jitsurei keeps specs under `services/<name>/spec/` because it is a multi-service teaching monorepo. That accommodation is not the deployed-service standard.
-
-When complete aggregates need separate source ownership, keep them as complete same-context `.keiro` files and make `domain/<service>.keiro-workspace` the service input:
+In the standard one-service-per-repository shape, version `domain/<service>.keiro-workspace` and keep its members under `domain/<service>/`. The manifest owns service-wide placement and lists each complete aggregate member plus any explicitly owned shared member:
 
 ```text
 service ticket
 module Ticket
 layout collocated
-spec ticket.keiro
-spec ticket-audit.keiro
-spec shared.keiro
+runtime-package ticket-service
+spec ticket/shared.keiro
+spec ticket/ticket.keiro
 ```
 
-The manifest owns the stable service identity and member set. Shared declarations have one owning member, and all file-taking commands target the manifest. Never run independent scaffolds for members that share one output tree: those runs see partial graphs and overwrite context-keyed history. See [composable service workspaces](../keiro/service-workspaces.md) for composition and adoption rules.
+Every member begins with the language preamble and context:
+
+```text
+language keiro-dsl 5
+context ticket
+```
+
+The `language` clause must be the first significant clause and is required of every new source. Version 5 is the sole published stable authoring contract; versions 1 through 4 remain readable as compatibility-only and make the CLI emit a stderr contract notice. `keiro-dsl new` follows `currentAuthoringLanguageVersion`, which selects a candidate contract when the registry holds one, so verify the preamble before using a generated skeleton in a production service. See [Keiro DSL language versions](../keiro/language-versions.md). The shared context identifies the service's DSL namespace. The manifest's `module` supplies the Haskell module root, while `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+
+Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its contract and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
+
+Keiro-runtime-jitsurei keeps specs under `services/<name>/spec/` because it is a multi-service teaching monorepo. That accommodation is not the deployed-service standard.
+
+Use a bare `domain/<service>.keiro` only for a trivial domain with exactly one aggregate whose entire contract remains comfortably readable in one file. In that exception, place `module` and `layout collocated` in the source itself. A non-trivial single-aggregate domain uses a workspace, and any bare source becomes a workspace as soon as a second aggregate or meaningful source boundary appears.
+
+The manifest owns the stable service identity and member set. Each aggregate stays whole in one member, shared declarations have one owning member, and all file-taking commands target the manifest. Never run independent scaffolds for members that share one output tree: those runs see partial graphs and overwrite context-keyed history. See [composable service workspaces](../keiro/service-workspaces.md) for composition, growth, and adoption rules.
 
 ## Declare Consumer-Owned Types In The Same Source Of Truth
 
@@ -68,7 +69,7 @@ Language 5 carries the same mapped declarations through persisted workqueue payl
 
 ## Check, Scaffold, Format, Test
 
-Always run `check` before scaffolding, explain consumer bindings when mappings exist, target the core package's `src` directory, format the result, and run the generated domain harness. Here `SERVICE_INPUT` is the repository-relative `domain/<service>.keiro` or `domain/<service>.keiro-workspace` path. Danwa realizes the workflow by running the CLI from a keiro checkout because the executable is not installed globally:
+Always run `check` before scaffolding, explain consumer bindings when mappings exist, target the core package's `src` directory, format the result, and run the generated domain harness. Here `SERVICE_INPUT` is normally the repository-relative `domain/<service>.keiro-workspace` path; only the trivial single-aggregate exception uses `domain/<service>.keiro`. Danwa realizes the workflow by running the CLI from a keiro checkout because the executable is not installed globally:
 
 ```bash
 # Run from the keiro checkout. Use absolute paths to the service repository.
@@ -96,7 +97,7 @@ Generated files carry the exact `-- @generated by keiro-dsl; do not edit. Regene
 
 Do not use `--force-generated-overwrite` in an ordinary workflow. It bypasses the missing-banner protection for generated paths and is appropriate only after a human has proved the existing file is disposable.
 
-Each successful single-file run writes informational sidecars named for the role they play:
+Each successful scaffold writes informational sidecars named for the role they play:
 
 | Sidecar | Single file | Workspace |
 |---|---|---|
@@ -115,7 +116,7 @@ Keiro 0.11 renamed every sidecar from the `keiro-dsl-manifest.*` / `keiro-dsl-sc
 Read the listed moves, then apply them:
 
 ```bash
-keiro-dsl scaffold domain/service.keiro --apply-name-migrations
+keiro-dsl scaffold SERVICE_INPUT --apply-name-migrations
 ```
 
 The apply path is backup-backed and digest-journaled, with crash recovery, and it rewrites Haskell module references token-aware rather than by text substitution. Duplicate old files that cannot be renamed losslessly are preserved under `.keiro-dsl-name-migrations/sidecar-v1/`. Legacy conformance records are converted only by this explicit path; nothing is upgraded implicitly.

@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T15:35:02Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T15:35:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -57,6 +57,10 @@ need the surrounding rules.
   [aggregate scalar expressions and transition ownership](keiro/aggregate-expressions.md)
   to decide what the spec generates and what stays hand-owned.
 - **Writing or upgrading a `.keiro` source:** start with
+  [workspace-first service contracts](keiro/service-workspaces.md): use one
+  versioned workspace by default, keep each aggregate in a readable single-owner
+  member, and reserve a bare source for a trivial domain with exactly one
+  aggregate. Then read
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
   the language contract. On stable Language 5, follow
   [semantic-local regeneration](keiro/dsl-semantic-locality.md) and inventory
@@ -111,11 +115,10 @@ need the surrounding rules.
   [migration authoring](migrations/authoring.md), then use the
   [migration operations runbook](migrations/operations.md) for verification and
   repair.
-- **Structuring packages and modules:** use the
+- **Structuring packages and modules:** start with the
+  [workspace-first service-contract standard](keiro/service-workspaces.md), then use the
   [service-package standard](architecture/service-packages.md) and
-  [vertical-slice module standard](architecture/vertical-slice-modules.md); when
-  several spec members compose one service, apply the
-  [composable service-workspace standard](keiro/service-workspaces.md). Satisfy
+  [vertical-slice module standard](architecture/vertical-slice-modules.md). Satisfy
   [the generated compilation contract](architecture/generated-compilation-contract.md)
   when wiring the generated layer into Cabal, naming the runtime package, or
   building the generated conformance package.

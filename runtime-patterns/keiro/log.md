@@ -1,5 +1,9 @@
 # keiro Update Log
 
+## 2026-09-01
+* **Update**: Route DSL adoption through the workspace-first source-layout default
+* **Update**: Make a versioned workspace the default Keiro DSL source layout, with a bare file only for a trivial single-aggregate domain
+
 ## 2026-08-14
 * **Update**: Route shard ownership inspection and relinquish from the shard error seam
 * **Update**: Route the hook-mounted replay-audit console command and its bounding options

@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-01T15:35:02Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-01T15:35:02Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -27,13 +27,15 @@ reviews:
 
 **Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain types.**
 
-This guide decides when a service should own a checked `.keiro` contract — one file or a composed `.keiro-workspace` — and where generated structure stops and hand-written domain logic begins.
+This guide decides when a service should own a checked Keiro DSL contract and where generated structure stops and hand-written domain logic begins. The default source shape is one composed `.keiro-workspace`; a bare `.keiro` input is reserved for a trivial domain with exactly one aggregate.
 
 ## Apply the adoption rule
 
 Adopt keiro-dsl when a service has more than one node family, any integration surface such as intake, emit, or queues, expected schema/workflow evolution, existing private-event history, or a consumer-owned value whose wire shape and decision fields must be checked. The checker, generated conformance harness, and evolution gate are the payoff, and their value grows with every durable contract edge.
 
 A trivial single-aggregate service may hand-write against the public API only when it has no queues, integration contracts, mapped persisted values, existing history, or expected evolution. Revisit that choice as soon as any of those appear. Structural mappings make retrofit adoption possible without replacing the service's Haskell domain types with generated equivalents.
+
+When a service does adopt the DSL, create its versioned workspace immediately. Keep each aggregate whole in a readable, single-owner member and give shared declarations an explicit owner. Do not defer the workspace merely because the first delivery has one aggregate: a non-trivial single-aggregate contract still benefits from stable workspace identity and can accept another aggregate without reorganizing the original source. See [composable service workspaces](service-workspaces.md).
 
 Keiro-dsl is a build-time parser, checker, scaffolder, harness emitter, and evolution differ—not a runtime interpreter. The `keiro-dsl` library has no dependency on `keiro`; generated and conformance code use the same public runtime APIs as hand-written services.
 
@@ -127,7 +129,7 @@ keiro-dsl diff INPUT --since GIT-REF \
 ```
 
 - `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
-- `INPUT` is either one `.keiro` file or a `.keiro-workspace` manifest. Use the manifest whenever complete aggregates live in separate members; all file-taking commands operate on the composed service.
+- `INPUT` is normally a `.keiro-workspace` manifest, and all file-taking commands operate on that composed service. Use one bare `.keiro` file only for the trivial single-aggregate exception.
 - `parse` parses and pretty-prints the normalized service specification; `pretty` is the explicit alias for that canonical render. Neither one rewrites a source's language declaration.
 - `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
 - `behavior-obligations` inventories every live transition, reachable rejection cell, and replay-only transition of the composed service, for a file or a workspace. See [behavior conformance and obligations](behavior-conformance.md).
@@ -140,7 +142,7 @@ keiro-dsl diff INPUT --since GIT-REF \
 A `keiro-dsl` warning is a real finding, and until 0.11 nothing stopped a repository from accumulating them. Gate them explicitly; severities themselves do not change.
 
 ```sh
-keiro-dsl check domain/service.keiro \
+keiro-dsl check domain/service.keiro-workspace \
   --min-language 5 \
   --deny-warnings \
   --report-out build/keiro-check.json

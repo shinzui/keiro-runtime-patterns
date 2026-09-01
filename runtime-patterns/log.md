@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-09-01
+* **Update**: Route DSL authoring and service structure through the workspace-first standard
+
 ## 2026-08-14
 * **Update**: Route the read-side lifecycle choice, targeted stream repair, and replay-history retention
 

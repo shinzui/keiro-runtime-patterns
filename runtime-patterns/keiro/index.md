@@ -31,7 +31,7 @@
 - [Typed projection catalogs and rebuild groups](projection-catalogs.md) - One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds
 - [Read models and projections](read-models-and-projections.md) - Truthful read-model freshness, guarded external SQL contracts, catalog-backed projection application, targeted repair, and snapshot limits
 - [Runtime assembly](runtime-assembly.md) - Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order
-- [Composable service workspaces](service-workspaces.md) - Splitting one Keiro service into single-owner members while preserving checked source provenance, semantic-local scaffolding, history, and evolution reports
+- [Composable service workspaces](service-workspaces.md) - Defaulting Keiro DSL services to a versioned workspace so aggregates and shared declarations remain readable and single-owner
 - [Targeted stream-scoped projection repair](stream-scoped-repair.md) - Declaring a StreamScopedReplay policy and repairing one stream's projection rows under admission limits without a group rebuild
 - [Telemetry](telemetry.md) - Keiro tracing, command-decision and position-distance metrics, W3C propagation, Kiroku bridging, and logging seams
 - [TypeID prefix naming](typeid-prefix-naming.md) - Choose durable TypeID prefixes from the domain's ubiquitous language instead of an arbitrary abbreviation budget
