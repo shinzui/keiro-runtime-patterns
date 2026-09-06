@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed projection catalogs and rebuild groups"
 description: "One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-projection-catalogs
 tags: [keiro, projection-catalogs]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Build one closed-world `ProjectionCatalog`, validate it once, and derive every live writer and rebuild action from that same value.**
 
-This is the read-side baseline for a new service on Keiro 0.12.0.0. Its design is fixed by `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and the checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
+This is the read-side baseline for a new service on Keiro 0.15.0.0. Its design is fixed by `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and the checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
 
 ## Keep every identity explicit
 

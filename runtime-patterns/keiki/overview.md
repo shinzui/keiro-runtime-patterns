@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiki Patterns for Keiro Runtime Projects"
 description: "Index of Keiki transducer patterns for Keiro services; start here"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-overview
 tags: [keiki, overview]
 status: current
@@ -36,7 +36,7 @@ reviews:
 
 # Keiki Patterns for Keiro Runtime Projects
 
-**Start here for prescriptive Keiki 0.9 transducer, replay, validation, composition, and private-event guidance.**
+**Start here for prescriptive Keiki 0.9.1 transducer, replay, validation, composition, and private-event guidance.**
 
 This corpus is the terse, agent-facing standard for keiki-backed state machines inside keiro services. It covers pure aggregates and orchestrator transducers; the hosted process-manager runtime, durable timers, and cross-service messaging belong to keiro and the messaging standards tracked separately by this initiative.
 
@@ -60,7 +60,9 @@ This corpus is the terse, agent-facing standard for keiki-backed state machines 
 - **[Resolving Operator Conflicts](./operator-conflicts.md)** gives three import patterns for keiki's predicate operators alongside `lens` and `generic-lens`.
 - **[Keiki Diagram Documentation](./diagram-docs.md)** generates and validates Mermaid atlases and edge inspectors from executable transducers.
 
-## What Changed Through Keiki 0.9.0.0 (2026-08)
+## What Changed Through Keiki 0.9.1.0 (2026-08)
+
+- Keiki 0.9.1 extends the default inversion proof to standard `Bool` register comparisons by exhausting its producer-owned `[False, True]` domain with the captured comparison closures. Arbitrary finite consumer types, negation, and opaque guards remain conservative; the public validation API, runtime replay, and co-released JSON codec are unchanged. Audit disappearing warnings against [Build-Time Validation](./build-time-validation.md).
 
 - Keiki 0.9 **seals `WireCtor` and `InCtor` construction**. Both are read-only patterns, so record literals and record updates no longer compile; trusted structural evidence comes only from the `mkInCtorVia` / `mkInCtorRecordVia` / `mkWireCtorVia` / `mkWireCtor0Via` / `mkWireCtorRecordVia` producers and Template Haskell derivation. `mkWireCtor`, `mkWireCtor0`, `mkInCtor`, and `mkInCtor0` are deprecated; `unavailableWireCtor` / `unavailableInCtor` are the explicit manual-behavior constructors and `renameWireCtor` / `renameInCtor` relabel without discarding evidence. See [Trusted Constructor Evidence](./constructor-evidence.md).
 - Keiki 0.9 makes that evidence load-bearing in three places: sequential composition substitutes only through typed input-to-wire alignment and reports `StructurallyDifferentInputWire` or `UnwitnessedInputWireAlignment` instead of trusting equal names; the replay-inversion check proves heads distinct from structural constructor paths; and symbolic `PInCtor` translation keeps same-named trusted constructors distinct while collapsing unwitnessed equal names onto one conservative atom. Schema alignment no longer contains an `unsafeCoerce`. See [Checked Composition](./checked-composition.md).

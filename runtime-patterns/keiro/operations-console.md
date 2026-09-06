@@ -2,10 +2,10 @@
 type: Runbook
 title: "Keiro operations console"
 description: "Mounting and operating keiro-ops with schema checks, preview-before-force mutations, per-group operating rules, application hooks, and stable JSON"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-operations-console
 tags: [keiro, operations-console]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Operate Keiro through `keiro-ops` and mounted supported APIs; never build an administrative side door into framework-owned tables.**
 
-`keiro-ops` is published as part of the Keiro 0.12.0.0 package set and moves with it. Run the console binary built from the same set as the runtime it operates; a console from another cohort is drift, not convenience.
+`keiro-ops` is published as part of the Keiro 0.15.0.0 package set and moves with it. Run the console binary built from the same set as the runtime it operates; a console from another cohort is drift, not convenience.
 
 ## Fail closed before mutation
 
@@ -66,6 +66,8 @@ The console is a safe entry point to a subsystem, never a second authority over 
 **`timer`** — classify before mutating. `timer stuck list --min-age --min-attempts` first, then per timer: `requeue` a transient failure, `cancel` obsolete work, or `dead-letter --reason` genuine poison. A reason is required because the transition is terminal and the runtime records failures, not intentions. Never dead-letter a batch to clear a backlog. `drain-once --limit` (default 100) appears only with the `timerFire` hook and is a bounded operator pass, not a replacement for the timer worker. See [process managers and durable timers](../messaging/process-managers.md).
 
 **`outbox`** — `backlog`, `list`, `show`, and `dead-letters list` are read-only. `requeue-stuck --older-than` (default 5m) `--max-attempts` (default 10) reclaims rows stranded in `publishing` by a crashed publisher; rows past the ceiling become dead. It is not a remedy for a failing destination — repair the destination first, or the same rows republish into the same failure. `gc-sent --older-than` (default 30d) deletes publication evidence, so set the age from the audit requirement, not from table size. See [transactional outbox](../messaging/outbox.md).
+
+Use `outbox list --source SOURCE --status rejected` to inspect permanent publication refusals. Human and JSON output carry `rejected_at`, `rejection_code`, and bounded `rejection_detail`; the terminal rejection is not a retry failure. `gc-sent` leaves rejected rows intact.
 
 **`inbox`** — `backlog`, `list`, and `show` are read-only; `gc --older-than` (default 30d) deletes retained completed rows. `mark-failed` is a decision never to process a message: record who decided and why, and do not use it as a retry control. See [idempotent inbox](../messaging/inbox.md).
 

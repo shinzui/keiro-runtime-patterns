@@ -5,7 +5,7 @@
 
 # Overview
 
-- [Kiroku Event-Store Standards](overview.md) - Index of Kiroku Store 0.7 event-store standards for Keiro services, including checkpoint inventory and replay-history retention
+- [Kiroku Event-Store Standards](overview.md) - Index of Kiroku Store 0.8 standards, including retryable transaction failures, checkpoint inventory, and replay-history retention
 
 # Runbook
 

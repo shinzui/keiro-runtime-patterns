@@ -2,10 +2,10 @@
 type: Guide
 title: "Migration Testing"
 description: "Integrity gates in the default suite, ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-timestamp: 2026-07-30T01:11:55Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-07-30T01:11:55Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-testing
 tags: [migrations, testing]
 status: current
@@ -100,6 +100,12 @@ Each service wraps its complete plan once at the suite boundary. The fleet conve
 Assert fresh apply, idempotent rerun with `AlreadyApplied`, strict verification, and behavior that depends on every component. For data changes, also apply the old released plan, insert representative data, upgrade with the new plan, and assert the transformed state.
 
 Cover the negative paths too. A gate that has never been observed failing is not known to work: assert that a tampered payload, an unlisted sibling file, and a drifted live object each produce their named failure.
+
+## Test upgrades in a fresh session on each supported major
+
+A fresh install can hide dependencies on `search_path` set by an earlier migration. Apply an older plan prefix, close its session, then apply the pending tail through a new connection whose path excludes component schemas. Ensure the test role's `"$user"` path entry does not accidentally expose a schema matching its role name.
+
+Exercise PostgreSQL 17 and 18 for Kiroku's UUIDv7 route: 17 uses the schema-local fallback, while 18 supplies the builtin behind `kiroku.uuidv7()`. Assert the qualified function and resolved lease default, not only that DDL parses. For the withdrawn `0010`, cover both never-applied and already-applied histories, the guarded checksum fixup, and forward `0011`; compare each converged schema with a fresh corrected install. See [migration operations](operations.md).
 
 ## Related Patterns
 

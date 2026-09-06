@@ -1,5 +1,12 @@
 # messaging Update Log
 
+## 2026-09-06
+* **Update**: Classify Store 0.8 transaction aborts as AckRetry in process-manager and router workers.
+* **Update**: Route publication rejection and atomic finalization through the outbox standard.
+* **Update**: Handle terminal rejection, atomic conditional finalization, schema rollout, and retained audit evidence.
+* **Update**: Adopt adapter 0.5.1.1 and preserve application dead-letter codes in structured JSON.
+* **Update**: Distinguish terminal publication rejection from retryable destination failure.
+
 ## 2026-09-01
 * **Update**: Require custom service-owned dedupe identities to remain nominal and TypeID-backed until the inbox boundary
 * **Update**: Keep outbox identities nominal and distinguish prescribed UUIDv5 derivation from allocated TypeID-v7 identity

@@ -7,11 +7,12 @@
 - [Brownfield Keiro Adoption](brownfield-adoption.md) - Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates
 - [Keiro-dsl adoption](dsl-adoption.md) - When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates
 - [Durable workflows](durable-workflows.md) - Durable workflow journals, at-least-once step effects, opaque awakeable publication, bounded progress workers, custom wakes, and evolution
+- [Generated Haskell edition migration](generated-haskell-editions.md) - Adopting idiomatic-v2 record APIs through an explicit scaffold gate, durable backups, complete compilation, and recoverable rollback
 - [The two-schema arrangement](two-schema-arrangement.md) - Separation of Kiroku store, Keiro framework, and application-owned PostgreSQL schemas
 
 # Overview
 
-- [Keiro runtime patterns](overview.md) - Index of the released Keiro 0.12.0.0 standards: projection catalogs, guarded external reads, stable DSL Language 5, durable workflows, and the operations console
+- [Keiro runtime patterns](overview.md) - Index of the released Keiro 0.15.0.0 standards: generated Haskell editions, terminal outbox rejection, projection catalogs, and durable workflows
 
 # Runbook
 

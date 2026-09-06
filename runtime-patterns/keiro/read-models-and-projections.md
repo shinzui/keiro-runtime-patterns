@@ -2,10 +2,10 @@
 type: Standard
 title: "Read models and projections"
 description: "Truthful read-model freshness, guarded external SQL contracts, catalog-backed projection application, targeted repair, and snapshot limits"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -57,7 +57,7 @@ Both waiting modes require `DurableQueryCursor`. A cursorless model fails fast w
 
 Waiting targets the newest visible event, not Kiroku's authoritative append counter, so a caught-up query no longer times out after workflow garbage collection hard-deletes the newest journal events. Projection position distance uses the same reachable head and returns zero when no visible work remains. See [Kiroku append and read](../kiroku/append-and-read.md).
 
-`ConsistencyMode` (`Strong`, `Eventual`, `PositionWait`), the direct waiting fields, and `runQueryWith` are deprecated 0.12 compatibility and are **removed in 0.13**. Migrate now; `runQuery` continues to apply the model's declared default freshness. Under Language 5 the specification carries the same separation: a projection owner declares `delivery`, a read model declares `freshness`, and generated code constructs only through the truthful builders, deriving cursor authority from the validated projection owner. Validation rejects a waiting query with zero or several compatible durable cursors before generation.
+`ConsistencyMode` (`Strong`, `Eventual`, `PositionWait`), the direct waiting fields, and `runQueryWith` remain exported but deprecated in 0.15.0.0. Do not rely on the stale 0.13 removal date in their deprecation text; migrate to the truthful freshness builders and `runQueryWithFreshness`. `runQuery` continues to apply the model's declared default freshness. Under Language 5 the specification carries the same separation: a projection owner declares `delivery`, a read model declares `freshness`, and generated code constructs only through the truthful builders, deriving cursor authority from the validated projection owner. Validation rejects a waiting query with zero or several compatible durable cursors before generation.
 
 ## Choose inline or asynchronous application
 

@@ -426,6 +426,14 @@ in  Schema.Project::{
         , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/dsl-adoption.md"
         }
       , Schema.DocRef::{
+        , key = "keiro-generated-haskell-editions"
+        , kind = Schema.DocKind.Guide
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Explicit idiomatic-v2 adoption, record consumer migration, durable backups, and rollback"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/keiro/generated-haskell-editions.md"
+        }
+      , Schema.DocRef::{
         , key = "keiro-dsl-semantic-locality"
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module

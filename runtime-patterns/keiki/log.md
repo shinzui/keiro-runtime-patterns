@@ -1,5 +1,9 @@
 # keiki Update Log
 
+## 2026-09-06
+* **Update**: Reconcile the Keiki 0.9.1 release and unchanged runtime/codec contract.
+* **Update**: Extend default inversion proof guidance to exact standard Bool exhaustion and retain conservative boundaries.
+
 ## 2026-08-06
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 * **Update**: Overview targets Keiki 0.9 and digests the sealed-evidence and replay-inversion cycle

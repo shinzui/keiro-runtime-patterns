@@ -2,10 +2,10 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
@@ -59,6 +59,8 @@ Use `commandErrorClass :: CommandError -> Text` as the stable, low-cardinality t
 - `ConflictFixpoint` usually exposes a soft-deleted stream that still conflicts while reads show no progress. Stop and repair the stream lifecycle rather than loop.
 
 `HydrationReplayFailed` further classifies replay as `HydrationNoInvertingEdge`, `HydrationAmbiguousInversion`, `HydrationQueueMismatch`, or `HydrationTruncatedChain`; each is a stored-history or definition incompatibility, not a transient command rejection.
+
+Handle `StoreFailed (TransientTransactionFailure sqlstate message)` as a retryable transaction rollback at the caller boundary. Kiroku 0.8 classifies exactly `40001` and `40P01` this way; do not match them under `UnexpectedServerError`. `runCommand` still retries only optimistic-concurrency conflicts, so it does not consume this failure in its own retry loop. A request or durable caller must apply bounded retry with jitter to the complete safe operation; never replay external effects blindly. Process-manager and router workers already classify this constructor as transient and return `AckRetry`.
 
 ## Give a silent decision a type instead of an empty batch
 

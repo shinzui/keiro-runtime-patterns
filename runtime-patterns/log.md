@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-09-06
+* **Update**: Route generated Haskell and package record API upgrades separately from source-language adoption.
+
 ## 2026-09-01
 * **Update**: Start new-service guidance with domain newtypes and TypeIDs
 * **Update**: Route DSL authoring and service structure through the workspace-first standard

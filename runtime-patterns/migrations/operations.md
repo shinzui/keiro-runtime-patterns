@@ -2,10 +2,10 @@
 type: Runbook
 title: "Migration Operations"
 description: "Operating verify, verify-schema, status, and repair; the codd preflight; Running after a crash needs audited repair"
-timestamp: 2026-07-30T01:11:55Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-07-30T01:11:55Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-operations
 tags: [migrations, operations]
 status: current
@@ -86,6 +86,18 @@ Applying migrations from a deployment job does not stop an application replica f
 A crash during nontransactional work can leave its database effect absent, partial, or complete while the ledger says `Running`. Do not blindly rerun it and do not edit the ledger.
 
 Back up, quiesce competing writers, inspect PostgreSQL catalogs and application state, and retain the evidence. Then choose exactly one confirmed repair with a non-empty reason: mark applied only if the intended effect is complete, or retry only when the current state makes retry safe. Repair appends an audit row recording the operation, old and new status, reason, role, runner version, and time.
+
+## Recover the withdrawn Kiroku `0010` payload precisely
+
+`kiroku-store-migrations` 0.4.0.0 corrects an unqualified `uuidv7()` default in `0010`. The withdrawn 0.3.2.0/0.3.2.1 payload fails in an ordinary PostgreSQL 17 upgrade session; on PostgreSQL 18 or a fresh PostgreSQL 17 bootstrap it may already have applied. Choose the recovery from durable history, not the server major alone.
+
+- If `kiroku/0010` is absent, leave the ledger alone and apply the corrected pending plan.
+- If it was applied with the withdrawn checksum, back up the database and record the current ledger and schema evidence. Obtain the release-owned script from `mori://shinzui/kiroku`, project-relative path `kiroku-store-migrations/ledger-fixups/2026-08-16-rebaseline-0010-checksum.sql` (artifact-level URI pending). Review and run it once before the next `up`; configure its ledger-schema lookup if the application does not use `pgmigrate`.
+- If the checksum is already corrected, no rebaseline is needed. Any other checksum is an unexplained divergence; investigate rather than widening the script's match.
+
+The script transaction updates only the `kiroku/0010` row carrying the exact withdrawn SHA-256. It is idempotent and changes no schema. This producer-supplied recovery is a narrow exception for a payload that prevents its own forward fix from running; it is not a general `repair` operation or permission to rewrite migration history.
+
+After rebaselining, run the complete service plan through ordinary `up`, including Kiroku `0011`. That forward migration publishes `kiroku.uuidv7()` where needed and rebinds the lease default; changing the checksum alone does neither. Require strict `verify`, inspect the qualified function and stored lease default, and run the service's live-schema checks. Retain the before/after evidence with the deployment record.
 
 ## Respect the non-goals
 

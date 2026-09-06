@@ -2,10 +2,10 @@
 type: Standard
 title: "Telemetry"
 description: "Keiro tracing, command-decision and position-distance metrics, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -52,6 +52,8 @@ Because the bridge is installed on `ConnectionSettings`, `newKeiroMetrics` must 
 ## Propagate the remote parent
 
 The rule is one sentence: inject `traceparent` and `tracestate` before persistence and restore them when consuming.
+
+Thread the publisher metrics handle through `publishClaimedOutbox`. `keiro.outbox.rejected` counts only rejection transitions committed by batch finalization; callback refusals whose transaction failed do not increment it. Use `newKeiroMetrics` or initialize the new `outboxRejected` field in a custom record. Never attach rejection detail or message payloads as metric labels.
 
 Use `traceContextFromCurrentSpan`, `injectTraceContext`, and `traceContextFromHeaders` rather than parsing headers ad hoc. Keiro persists W3C context in outbox and inbox columns so producer and consumer spans can remain one trace across asynchronous publication and delivery.
 

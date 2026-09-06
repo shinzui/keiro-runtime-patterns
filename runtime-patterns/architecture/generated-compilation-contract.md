@@ -2,10 +2,10 @@
 type: Standard
 title: "The generated compilation contract"
 description: "The GHC2024 baseline, closed module extension set, generated service-wide evidence modules, and conformance/runtime-package authority"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-generated-compilation-contract
 tags: [architecture, generated-compilation-contract]
 status: current
@@ -22,7 +22,7 @@ Before Keiro 0.10 a service repository inferred what the generated layer needed 
 The scaffolder writes a complete Cabal fragment sidecar — `keiro-dsl-cabal-fragment.context.<context>.txt`, or the `.workspace.<service>.txt` form. It owns:
 
 - `default-language: GHC2024`;
-- `default-extensions:` carrying the shared baseline, currently `OverloadedStrings`;
+- `default-extensions:` carrying the shared baseline, `DuplicateRecordFields`, `NoFieldSelectors`, `OverloadedRecordDot`, and `OverloadedStrings`;
 - `other-modules`, dependencies, and consumer package/module requirements;
 - an `exposed-modules` block for the conformance facade.
 
@@ -30,13 +30,17 @@ For a mapped service on the semantic-local source contract, the fragment also ca
 
 Repaste the fragment whole on every regeneration. Hand-merging it is how a build acquires an extension the generator no longer emits, or loses one it started needing. See [specification and scaffolding](spec-and-scaffolding.md) for the other sidecars written beside it.
 
+## Adopt the generated edition with the build
+
+The current generated Haskell edition is `idiomatic-v2`. Read generated product records through concise record-dot labels; constructor names, arity, and field order remain stable. Existing ledgers require the explicit [generated-edition migration](../keiro/generated-haskell-editions.md), including the hand-owned consumer audit and a whole-component compile. Updating Cabal defaults alone does not migrate selectors or the ledger.
+
 ## Expect module-local pragmas, and only from the closed set
 
 An overwriteable generated module declares any syntax beyond the baseline itself, as a module-local `{-# LANGUAGE #-}` pragma, and only when it actually needs it. The requestable set is closed and checked:
 
 `BlockArguments`, `DeriveAnyClass`, `DuplicateRecordFields`, `OverloadedLabels`, `OverloadedRecordDot`, `QualifiedDo`, `TemplateHaskell`, `TypeFamilies`.
 
-Two consequences for the service package. Do not add these to your package's `default-extensions` on the generated layer's behalf — the module already asks for what it needs, and a package-wide enable hides which modules depend on it. And do not treat a pragma appearing or disappearing between regenerations as noise: it tracks a real change in what the module contains.
+The emitter filters baseline extensions out of module-local pragmas. `DuplicateRecordFields` and `OverloadedRecordDot` therefore belong in the regenerated fragment even though they remain members of the requestable set. Keep extensions outside the baseline module-local; do not add them to package defaults to hide a missing pragma. Never enable `FieldSelectors` to restore removed product selectors. The internal `Keiro.Dsl.GeneratedHaskellLanguage` module is not a consumer API.
 
 ## Name the runtime package explicitly
 
@@ -46,7 +50,7 @@ The Cabal package that compiles the generated service runtime is build metadata,
 runtime-package ticket-service
 ```
 
-or override it for one run with `keiro-dsl scaffold ... --runtime-package ticket-service`. The name is validated against Cabal's package-name grammar, so a typo fails at planning time rather than at build time. `WorkspaceManifest` carries it as `wmfRuntimePackage` with its source location; the CLI override wins over the manifest when both are present.
+or override it for one run with `keiro-dsl scaffold ... --runtime-package ticket-service`. The name is validated against Cabal's package-name grammar, so a typo fails at planning time rather than at build time. `WorkspaceManifest` carries it as `manifest.runtimePackage` with its source location; the CLI override wins over the manifest when both are present.
 
 ## Let the service scaffold one conformance package
 
@@ -59,7 +63,7 @@ Two refusals guard the arrangement:
 - `DuplicateConformanceFactKeys` — two conformance facts claim one key, which would make the report ambiguous. Fix the spec; do not rename a key to dodge the collision.
 - `ConformancePackageRefusal` — the package plan itself is not constructible, most often because the runtime package is missing or ill-formed.
 
-`ScaffoldReport` carries `reportConformancePackage`. Read it rather than inspecting the filesystem to decide whether a package was written.
+`ScaffoldReport` carries `report.conformancePackage`. Read it rather than inspecting the filesystem to decide whether a package was written.
 
 ## Leave generated imports alone
 

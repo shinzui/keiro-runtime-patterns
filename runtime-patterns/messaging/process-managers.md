@@ -2,10 +2,10 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: UTF-8-stable deterministic ids, worker policies, batched durable timers, and the orchestration decision ladder"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -38,7 +38,7 @@ reviews:
 
 **Use an event-sourced saga for stateful orchestration, deterministic dispatch for crash recovery, and durable timers for deadlines.**
 
-Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.12.0.0, unchanged from 0.4 in this surface), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
+Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.15.0.0, including typed transient store errors), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
 
 ## The Rule
 
@@ -127,6 +127,8 @@ The decision rules are:
 - an all-rejection group follows `RejectedCommandPolicy`.
 
 `CommandAmbiguous` remains an aggregate-definition defect under the [command error standard](../keiro/command-cycle-and-errors.md). The fleet default is to halt and fix the transducer; never configure or generate an ambiguity outcome as successful firing.
+
+With Keiro 0.13 and Kiroku Store 0.8 or later, `TransientTransactionFailure` (`40001` or `40P01`) follows the transient `AckRetry` path for process managers and routers, including a wrapped `StoreFailed`. Extend custom classifiers and exhaustive store-error matches. The store can surface contention after its bounded retry; never treat that as proof of poisoned input or an impossible deadlock.
 
 At-least-once delivery is still bounded by the source adapter. With a Kiroku adapter, repeated `AckRetry` eventually records the source event in `kiroku.dead_letters` after the subscription retry ceiling. Install `kirokuEventBridge` to count that terminal transition, and query the durable table for current depth.
 

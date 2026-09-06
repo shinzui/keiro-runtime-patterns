@@ -1,5 +1,11 @@
 # migrations Update Log
 
+## 2026-09-06
+* **Update**: Exercise fresh-session upgrades and both qualified UUIDv7 routes on PostgreSQL 17 and 18.
+* **Update**: Route Kiroku 0010 release-specific recovery through migration operations.
+* **Update**: Document guarded withdrawn-checksum rebaselining followed by forward 0011 and verification.
+* **Update**: Point the withdrawn Kiroku 0010 exception to its narrow producer recovery protocol.
+
 ## 2026-08-06
 * **Migration**: Move the bundle to OKF v0.2: every concept gains a generated provenance mapping and restates its timestamp in UTC
 

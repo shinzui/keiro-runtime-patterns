@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Messaging Gotchas"
 description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.5, Kafka, Kiroku, and Keiro"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -72,6 +72,8 @@ Treat these as design-review checks, not trivia.
 20. **A visibility-timeout update can lose a race.** `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Nothing` when the row was already deleted, archived, or popped. Settle that as a lost race rather than retrying it as infrastructure failure. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
 21. **PGMQ notifications are hints.** They are fire-and-forget and throttled, and the missing throttle means 250 ms. Use `notifyChannelName`, keep a poll fallback, and install the 0.5 native migration component for crash-safe notification recovery and serialized enablement. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+
+**Terminal publication rejection releases ordering.** `PublishRejected` is durable audit truth, does not retry, and does not stop `StopTheLine`. Keep temporary broker failures on `PublishFailed`, retain rejected rows, and install migration `0031` before deploying the new readers. See [transactional outbox](outbox.md).
 
 ## Related Patterns
 

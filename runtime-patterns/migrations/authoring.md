@@ -2,10 +2,10 @@
 type: Standard
 title: "Migration Authoring"
 description: "Authoring rules: append-only migrations, the three-file review diff, the no-transaction directive, and manifest v1 strictness"
-timestamp: 2026-07-23T23:55:16Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-07-23T23:55:16Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-authoring
 tags: [migrations, authoring]
 status: current
@@ -28,6 +28,8 @@ reviews:
 **Append a new immutable migration for every change; never rewrite history that any environment may have applied.**
 
 Use this guide when creating or reviewing a pg-migrate SQL file and its manifest entry. It defines the append-only rule, transaction directive, manifest-v1 format, and safe authoring workflow.
+
+Use the [release-specific recovery runbook](operations.md) when upgrading a database that applied Kiroku’s withdrawn `0010`. Its guarded producer fixup is an exceptional recovery protocol; do not reproduce it for ordinary application migrations.
 
 ## Keep applied history immutable
 

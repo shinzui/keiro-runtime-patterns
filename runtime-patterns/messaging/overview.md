@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Messaging Patterns"
 description: "Index of messaging standards for Keiro services, including pgmq-hs 0.5 queue lifecycle and reconciliation"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -40,7 +40,7 @@ Use this area for process managers, public integration contracts, transactional 
 ## Talking To Other Services
 
 - [Integration events](integration-events.md) — the public envelope, identity, versioning, ordering, and trace propagation contract.
-- [Transactional outbox](outbox.md) — safely record and publish outbound integration events.
+- [Transactional outbox](outbox.md) — safely enqueue outbound integration events, classify terminal rejection, and finalize publication outcomes atomically.
 - [Idempotent inbox](inbox.md) — deduplicate inbound integration events with their local effects.
 
 ## The Processing Substrate

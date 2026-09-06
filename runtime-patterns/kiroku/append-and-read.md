@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Append and Read Patterns"
 description: "ExpectedVersion semantics, idempotent retries via supplied event ids, and streaming reads"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-append-and-read
 tags: [kiroku, append-and-read]
 status: current
@@ -53,6 +53,8 @@ event = EventData { eventId = Nothing, eventType, payload, metadata, causationId
 -- CORRECT: generate once and retain it across every attempt.
 event = EventData { eventId = Just commandEventId, eventType, payload, metadata, causationId, correlationId }
 ```
+
+If the bounded internal retry is exhausted by another `40001` or `40P01`, Store 0.8 surfaces `TransientTransactionFailure code message`. Classify it as retryable, preserve the same event IDs, and back off at the application boundary. Multi-stream pre-locking does not exclude fresh-stream deadlocks; see [transactions and projections](transactions-and-projections.md).
 
 ## Re-read after a version conflict
 

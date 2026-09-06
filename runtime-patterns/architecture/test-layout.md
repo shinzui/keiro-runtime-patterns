@@ -2,10 +2,10 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -80,6 +80,10 @@ Use the service name as the cabal prefix, for example `<service>-dsl-test` and `
 A brownfield migration adds a temporary or retained `<service>-codec-migration` test or executable owned by core. Generate its comparison module explicitly with `--codec-comparison TYPE --comparison-out FILE`, compile it beside an explicit historical codec, and feed it sanitized production goldens. Require canonical JSON parity, matching decode outcomes, and complete historical/typed branch coverage; otherwise add a schema version and upcaster.
 
 The comparison module is excluded from ordinary production manifests and scaffold records. It proves only the sampled historical corpus and must not become a runtime codec selector or fallback. Keep the captured goldens and report provenance as long-lived compatibility evidence even if the executable is later retired.
+
+## Reuse the published PostgreSQL fixture
+
+`keiro-test-support` is published in the lockstep Keiro cohort from 0.14. Use `Keiro.Test.Postgres.withMigratedSuiteWith` behind the service migration test-support wrapper: it migrates one suite template with Kiroku, Keiro, and the supplied application/transport components, then `withFreshDatabase` or `withFreshStore` clones an isolated database for each example. Supply the complete extra component list before cloning; applying a partial plan against a ledger that already records omitted components fails strict verification. Keep `Fixture` abstract and acquire it through the suite function. Use `withFreshStoreWith` when tests need application schema search-path settings. This fixture reuses migration work without sharing mutable test databases.
 
 ## Database Isolation Rule
 

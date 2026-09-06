@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -71,6 +71,10 @@ Aggregate harnesses carry only declarations in their checked semantic closure. `
 
 Scaffolding reports stale paths but never deletes them; review stale generated and hand-owned files separately. It also reports newly required structural binding fields, constructors, fixtures, and initials without parsing or rewriting filled Haskell bodies.
 
+## Adopt record APIs and generated editions explicitly
+
+Keiro-dsl 0.15 uses concise product labels and record-dot reads in both the package API and `idiomatic-v2` generated Haskell. Migrate hand-owned consumers, apply the edition gate, repaste the complete Cabal fragment, and compile the service plus its conformance package. Follow [generated Haskell editions](generated-haskell-editions.md); `--force-generated-overwrite` does not authorize an edition change. Source Language 5 and persisted wire meaning remain unchanged.
+
 ## Recognize Runtime Holes And Mapping Obligations
 
 The established runtime surface has eight hole kinds:
@@ -121,6 +125,7 @@ keiro-dsl check INPUT [--emit] [--explain-bindings] \
 keiro-dsl scaffold INPUT --out DIR \
   [--module-root PREFIX] [--collocate] [--force-generated-overwrite] \
   [--goldens DIR] [--runtime-package PACKAGE] [--apply-name-migrations] \
+  [--apply-generated-haskell-edition] \
   [--codec-comparison TYPE --comparison-out FILE]
 keiro-dsl diff INPUT --since GIT-REF \
   [--emit-goldens DIR] [--replay-impact-out FILE] [--explain] \

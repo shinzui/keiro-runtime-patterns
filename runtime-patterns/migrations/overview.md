@@ -2,10 +2,10 @@
 type: Overview
 title: "Migration Standards"
 description: "Index of pg-migrate migration standards for keiro services; start here"
-timestamp: 2026-07-23T23:55:16Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-07-23T23:55:16Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-overview
 tags: [migrations, overview]
 status: current
@@ -27,7 +27,7 @@ reviews:
 
 **Start with the pg-migrate model, then give every service one component, one complete plan, and one migration executable.**
 
-This area is the fleet’s prescriptive guide to database evolution for Keiro services. It covers compile-time plans, immutable SQL authoring, service packaging, deployment, testing, and the completed Codd transition.
+This area is the fleet’s prescriptive guide to database evolution for Keiro services. It covers compile-time plans, immutable SQL authoring, service packaging, deployment, testing, the completed Codd transition, and the release-specific Kiroku `0010` checksum recovery in [migration operations](operations.md).
 
 Integrity is layered on purpose: compile-time embedding, a review-time lockfile and body lint, a boot-time startup handshake, and two deploy-time gates — `verify` for the ledger and `verify-schema` for live objects. No layer substitutes for another.
 

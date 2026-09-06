@@ -1,5 +1,17 @@
 # keiro Update Log
 
+## 2026-09-06
+* **Update**: Count committed outbox rejection transitions and initialize the rejection counter.
+* **Update**: Correct the stale removal claim: deprecated read-model compatibility APIs remain exported in 0.15.
+* **Update**: Advance the service baseline to the verified 0.15 cohort without changing catalog semantics.
+* **Update**: Adopt the seven-package 0.15 cohort, Store 0.8/migrations 0.4, and route generated-edition adoption.
+* **Update**: Track the 0.15 cohort and expose terminal outbox rejection inspection and retention.
+* **Update**: Correct concise product labels and preserve abstract checked/source-index construction boundaries.
+* **Update**: Document pre-v2 ledger gates and command callers owning transient transaction retry.
+* **Added**: Define explicit idiomatic-v2 adoption, hand-owned record remediation, backup scope, build gates, and rollback.
+* **Update**: Add the explicit generated-edition flag and record consumer migration obligations.
+* **Update**: Classify surfaced transient transaction failures at command callers and worker retry boundaries.
+
 ## 2026-09-01
 * **Update**: Keep runtime-owned workflow identifiers nominal and apply the TypeID default to service-owned IDs carried by workflows
 * **Update**: Route the Keiro index to domain newtypes and TypeIDs

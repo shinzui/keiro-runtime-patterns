@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Transactions and Projections"
 description: "Atomic append plus projection with runTransactionAppendingResource, and why the other combinators are traps"
-timestamp: 2026-07-22T16:52:58Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T16:52:58Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-transactions-and-projections
 tags: [kiroku, transactions-and-projections]
 status: current
@@ -60,6 +60,16 @@ Use the continuation only for the bounded SQL needed to keep a projection, outbo
 ## Choose retry behavior deliberately
 
 The retrying `runTransaction*` variants may execute the entire body again after a serialization conflict. That is appropriate only when the body’s effects are wholly inside the database transaction. Use a `NoRetry` variant when the body has any externally observable behavior, or move that behavior behind a durable outbox so the transaction remains replay-safe.
+
+## Classify transaction rollback explicitly
+
+Kiroku Store 0.8 maps exactly SQLSTATE `40001` and `40P01` to `TransientTransactionFailure code message` across append and general transaction error paths. Extend exhaustive `StoreError` matches and replace former matches on `UnexpectedServerError` for those codes. Keep other server errors classified separately; a `40` prefix alone is not the supported retry whitelist.
+
+Direct appends retry these aborts once before surfacing the typed error. Repeated contention can still reach the caller: use bounded backoff and retain the same prepared event IDs across application retries. A PostgreSQL transaction abort rolls back its database effects, not arbitrary IO the application performed outside it. Preserve the `NoRetry` boundary for those effects.
+
+## Do not assume multi-stream pre-locking excludes every deadlock
+
+The ordered pre-lock covers existing source rows only. For an append over existing A and fresh B, the multi-stream transaction can acquire A, then `$all`, then B, while a concurrent single-stream append acquires B then waits for `$all`. The cycle remains possible in Store 0.8; PostgreSQL aborts one transaction and the bounded retry contract applies. Do not advertise deadlock freedom or suppress `TransientTransactionFailure` as impossible. The proposed source-before-`$all` redesign is not implemented in this baseline.
 
 ## Related Patterns
 

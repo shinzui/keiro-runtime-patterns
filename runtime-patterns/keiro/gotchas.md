@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Keiro gotchas"
 description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, and bring-your-own Kafka traps"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -82,6 +82,14 @@ Conflating the two either creates dual event interpretations or overstates what 
 Keiro deliberately has no `hw-kafka-client` dependency. `outboxRowToKafkaRecord` and `integrationEventToKafkaRecord` in `Keiro.Outbox.Kafka` produce a transport-neutral `KafkaProducerRecord`; the application owns the actual producer, consumer, and broker/group configuration.
 
 Keep transport configuration in keiro-dsl hole kind 8. The [messaging standards](../messaging/overview.md) define the publication and consumption topology.
+
+## A generated edition is an explicit migration
+
+Every pre-v2 ledger, including one with no edition row, refuses ordinary scaffolding. Use the [edition migration guide](generated-haskell-editions.md), combine both apply flags when legacy names remain, and preserve the complete backup set. A clean lexical remediation report does not prove that all hand-owned code compiles.
+
+## A transaction rollback still reaches command callers
+
+`TransientTransactionFailure` is retried by process-manager and router acknowledgement policy, but `runCommand` surfaces it inside `StoreFailed`. Classify it at the caller boundary; see [command errors](command-cycle-and-errors.md).
 
 ## Related Patterns
 

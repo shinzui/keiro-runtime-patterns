@@ -2,10 +2,10 @@
 type: Guide
 title: "Build-Time Validation of Keiki Transducers"
 description: "Asserting transducers and typed field projections are well-formed in CI with validateTransducer"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiki-build-time-validation
 tags: [keiki, build-time-validation]
 status: current
@@ -77,7 +77,7 @@ Never disable `checkStateChangingEpsilon` for a persisted transducer. An output-
 
 - `HiddenInput { tvwEdge, tvwInCtor, tvwMissingSlots, tvwDetail }` means an edge consumes command information that its output does not emit. Add the missing fields to the private event or stop reading them.
 - `HeadUnrecoverable { tvwEdge, tvwInCtor, tvwTailOnlySlots, tvwDetail }` means a later event in a multi-event edge carries a consumed field that the first event lacks. Streaming replay inverts only the head event, so move every replay-critical field onto that event.
-- `InversionAmbiguity { tvwSource, tvwEdgeA, tvwEdgeB, tvwWireCtor, tvwDetail }` means two same-mode outgoing edges may emit the same head event and their replay candidates were not proved disjoint. Give the edges distinct head events, or make their guards disjoint through exact integral register comparisons. `tvwDetail` names the first construct that blocked the cheap proof.
+- `InversionAmbiguity { tvwSource, tvwEdgeA, tvwEdgeB, tvwWireCtor, tvwDetail }` means two same-mode outgoing edges may emit the same head event and their replay candidates were not proved disjoint. Give the edges distinct head events, or make their guards disjoint through supported exact integral or standard `Bool` register comparisons. `tvwDetail` names the first construct that blocked the cheap proof.
 - `UnguardedInputRead { tvwEdge, tvwInCtor, tvwDetail }` means an edge reads fields from an input constructor without first establishing the matching top-level constructor guard. Add the correct constructor guard so a different command cannot make evaluation throw.
 - `StateChangingEpsilon { tvwEdge, tvwChangesVertex, tvwWritesRegisters, tvwDetail }` means an output-free edge changes durable state. Emit an event or make the edge inert.
 - `NondeterministicPair { tvwSource, tvwEdgeA, tvwEdgeB, tvwInCtor, tvwDetail }` means two outgoing guards can hold for one command. Make them mutually exclusive; the runtime witness of this defect is `AmbiguousEdges`.
@@ -99,11 +99,13 @@ This direction has no false positives: every `NondeterministicPair` it reports i
 
 First it decides whether two head events may alias. When both wire constructors carry trusted structural schemas, structurally different constructor paths prove the heads distinct and the pair is dropped. When either schema is unavailable, it falls back to comparing `wcName` — so an aggregate built from deprecated or manual constructors gets the older, weaker answer. See [trusted constructor evidence](./constructor-evidence.md).
 
-Second, for a pair that may alias, it recursively extracts exact integral `register relation literal` conjuncts through `PAnd` and suppresses the warning only when the combined conditions are definitely unsatisfiable. Register variables are keyed by zero-based position and runtime type; labels are diagnostic only. Unsupported sibling conjuncts are dropped as weakening, so they can never manufacture disjointness. The proof deliberately does not enter `POr` or `PNot`, does not model output fields, and does not infer disjointness from different reconstructed command constructors. It ignores tail events, because replay equality-checks rather than inverts them.
+Second, for a pair that may alias, it recursively extracts supported exact `register relation literal` conjuncts through `PAnd` and suppresses the warning only when the combined conditions are definitely unsatisfiable. Register variables are keyed by zero-based position and runtime type; labels are diagnostic only. Unsupported sibling conjuncts are dropped as weakening, so they can never manufacture disjointness. The proof deliberately does not enter `POr` or `PNot`, does not model output fields, and does not infer disjointness from different reconstructed command constructors. It ignores tail events, because replay equality-checks rather than inverts them.
 
 Cross-mode pairs are never reported: replay's two-phase attribution resolves them, with live candidates winning outright.
 
-Upgrading to Keiki 0.9 can therefore shrink the warning set for an unchanged model. That is the check getting more precise, not a regression — but confirm each disappearance is a pair you can now see is disjoint, rather than assuming it.
+Keiki 0.9.1 adds a producer-owned exact finite domain for standard `Bool`: it exhausts `[False, True]` using the captured concrete equality or ordering closures. Complementary Bool register guards can therefore prove a same-mode pair disjoint without a solver. Integral interval reasoning is unchanged. Arbitrary `Bounded`/`Enum` enumerations, equality anchors on unregistered carriers, `PNot`, and opaque guards supply no new proof; unsupported siblings are only dropped as weakening. This does not change the separate forward determinism pass or runtime replay.
+
+Upgrading through Keiki 0.9.1 can therefore shrink the warning set for an unchanged model. That is the check getting more precise, not a regression — but confirm each disappearance is a pair you can now see is disjoint, rather than assuming it.
 
 ## Escalate The Inversion Check Only When It Blocks You
 

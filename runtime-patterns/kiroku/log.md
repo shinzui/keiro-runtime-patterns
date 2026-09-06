@@ -1,5 +1,12 @@
 # kiroku Update Log
 
+## 2026-09-06
+* **Update**: Classify 40001/40P01 explicitly and describe the actual multi-stream locking limit.
+* **Update**: Adopt Store 0.8 and migrations 0.4 with typed retry and guarded checksum recovery.
+* **Update**: Document surfaced retryable rollback and the surviving fresh-stream deadlock cycle.
+* **Update**: Require qualified UUIDv7 migrations and route withdrawn 0010 recovery.
+* **Update**: Retain event identity and back off when bounded append retry surfaces a typed transaction rollback.
+
 ## 2026-08-14
 * **Update**: Require snapshot truncation preflight before moving a marker and route lifecycle mutations through the console
 * **Update**: Route the frozen checkpoint relation and replay-history retention

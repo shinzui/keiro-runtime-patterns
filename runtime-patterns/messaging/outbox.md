@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Transactional Outbox"
-description: "Publishing through the transactional outbox: IntegrationProducer, publisher worker, maintenance pass, deterministic ids"
-timestamp: 2026-09-01T16:07:10Z
+description: "Transactional enqueue, publication failure and terminal rejection, atomic finalization, maintenance, and deterministic identity"
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-outbox
 tags: [messaging, outbox]
 status: current
@@ -50,17 +50,29 @@ Both per-key and per-source order use `created_at`, which PostgreSQL sets at tra
 
 ## Publish Outside The Business Transaction
 
-Run `publishClaimedOutbox` repeatedly. One pass claims rows with `FOR UPDATE SKIP LOCKED`, calls the supplied batch publisher, then maps `PublishSucceeded` and `PublishFailed` into sent, retryable, or dead row states according to `OutboxPublishOptions`. Under ordered policies, a failed head blocks or skips its later group members without blocking unrelated keys.
+Run `publishClaimedOutbox` repeatedly. One pass claims rows with `FOR UPDATE SKIP LOCKED`, calls the supplied batch publisher, then maps `PublishSucceeded`, `PublishFailed`, and `PublishRejected` into sent, retryable/dead, or terminal rejected row states according to `OutboxPublishOptions`. Under ordered policies, a failed head blocks or skips its later group members without blocking unrelated keys.
 
 The worker is transport-neutral. Keiro intentionally does not own an `hw-kafka-client` producer; `Keiro.Outbox.Kafka.outboxRowToKafkaRecord` and `integrationEventToKafkaRecord` only convert the contract. The application owns producer configuration and acknowledgment. Danwa demonstrates a one-second `pollingStream` tick that returns failed publishes to the outbox rather than dropping them.
 
 Validate production options with `mkOutboxPublishOptions`. Defaults are a 32-row batch, ten attempts, two-second constant backoff, per-key head-of-line ordering, and a five-minute publishing timeout.
 
+## Record permanent refusal as terminal audit evidence
+
+Return `PublishRejected` only when publication is intentionally and permanently refused. Construct its abstract `PublishRejection` through `mkPublishRejection`: the code must match `^[a-z][a-z0-9._-]{0,63}$`, and optional detail must contain 1–1024 UTF-8 bytes. Validation does not normalize the input. Use stable codes; keep payloads and unbounded exception text out of the audit detail and telemetry labels.
+
+A committed rejection becomes `OutboxRejected`, with `rejectedAt` and `rejection` on `OutboxRow`. It schedules no retry, releases successors under per-key and per-source ordering, and does not halt `StopTheLine`. A `PublishFailed` still blocks its later ordered group members; do not label a temporary outage as rejection to drain a queue. Extend exhaustive outcome/status matches and direct row, summary, and metrics construction.
+
+The publisher finalizes sent, rejected, failed, and skipped rows in one transaction. Each update must still match `publishing`; stale claims cannot overwrite terminal truth. the `published`, `rejected`, `retried`, and `dead` fields of `OutboxPublishSummary`, and the corresponding metrics, count committed transitions rather than callback intentions. If finalization fails before commit, recovery may invoke the callback again: preserve the at-least-once publication contract and stable transport deduplication.
+
+Low-level callers must also adopt the conditional results: `markOutboxFailedTx` returns `Maybe OutboxStatus`, `markOutboxSkippedTx` and `markOutboxRejectedTx` return `Bool`, and `markOutboxSentBatchTx` returns the changed count. A no-change result is not a newly committed outcome.
+
+Apply Keiro migration `0031` before the upgraded runtime or console reads outbox rows. Upgrade every reader and publisher before enabling `PublishRejected`; older status decoders cannot interpret `rejected`. The migration constrains rejection audit columns and removes rejected rows from head-of-line indexes. `garbageCollectSent`, maintenance, backlog counts, and stuck-row recovery do not remove or retry rejected rows; retain their audit evidence under an explicit application policy.
+
 ## Run Maintenance Separately
 
 Schedule `outboxMaintenancePass` less frequently than publishing. It reclaims stale `publishing` rows through `requeueStuckOutbox`, dead-letters rows that exhausted the attempt ceiling, and samples `countOutboxBacklog`.
 
-Retention is a separate job: call `garbageCollectSent` on an explicit schedule and keep dead rows for operator review. `outboxMaintenancePass` does not garbage-collect sent rows.
+Retention is a separate job: call `garbageCollectSent` on an explicit schedule and keep dead and rejected rows for operator review. `outboxMaintenancePass` does not garbage-collect sent rows.
 
 For interactive repair, drive the same APIs through the [Keiro operations console](../keiro/operations-console.md): `outbox backlog|list|show` and `dead-letters list` to inspect, `requeue-stuck` for rows a crashed publisher stranded, `gc-sent` for retention, and `maintenance-pass` for one bounded default pass. Reclaiming stuck rows is not a remedy for a failing destination.
 

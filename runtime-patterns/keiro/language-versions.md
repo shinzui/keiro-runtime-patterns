@@ -2,10 +2,10 @@
 type: Standard
 title: "Keiro DSL language versions"
 description: "Declaring a Keiro DSL language contract, adopting published stable version 5, and auditing compatibility-only sources"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -63,7 +63,7 @@ Together they let a source declare physical projection targets, atomic rebuild g
 
 Two of those features change the meaning of clauses a version-4 source already wrote:
 
-- A projection owner declares `delivery = inline | subscription`, and a catalog-bound read model declares `freshness = immediate | wait-for-head …`, deriving any durable cursor from its validated owner. Languages 1–4 keep byte-compatible `feed`/`consistency`/`scope` behavior; the public AST replaces `rmConsistency`/`rmScope`/`rmFeed`/`rmSubscription` with `rmFreshness`/`rmSupply` and `poFeed` with `poDelivery`, so exhaustive consumers and direct record construction must migrate. See [read models and projections](read-models-and-projections.md).
+- A projection owner declares `delivery = inline | subscription`, and a catalog-bound read model declares `freshness = immediate | wait-for-head …`, deriving any durable cursor from its validated owner. Languages 1–4 keep byte-compatible `feed`/`consistency`/`scope` behavior; the public AST replaces `rmConsistency`/`rmScope`/`rmFeed`/`rmSubscription` with freshness/supply and `poFeed` with delivery; in the 0.15 product API read these as `readModel.freshness`, `readModel.supply`, and `projectionOwner.delivery`, so exhaustive consumers and direct record construction must migrate. See [read models and projections](read-models-and-projections.md).
 - Catalog-bound read models reject read-model-local `table`/`schema` coordinates, treat observed `targets` as an unordered set, and require `backing = <target>` when that set has more than one member.
 
 `outcome` remains an ordinary identifier in every language, including 5; the outcome clause words are contextual rather than globally reserved.
@@ -102,7 +102,7 @@ From Keiro 0.8 every registry entry selects an immutable `SyntaxProfile` and a r
 
 Never write `4` or `5` into tooling. The registry holds exactly one stable version and at most one candidate; select the one the operation actually means.
 
-`LanguageDefinition` is exported with all its fields, which makes positional construction and non-wildcard record patterns fail to compile — match with a wildcard. `definitionBodyParser` survives only as a compatibility projection and no longer drives parser dispatch; never branch on it.
+`LanguageDefinition` is a public product record. Read it through concise record-dot labels and match only the fields the caller needs. `definition.bodyParser` survives only as a compatibility projection and no longer drives parser dispatch; never branch on it.
 
 ## Carry the checked contract, not a bare `Spec`
 
@@ -118,13 +118,19 @@ replayImpactServices :: CheckedService -> CheckedService -> Either FoldSurfaceEr
 
 `legacyCheckedService` still exists for a genuinely version-1 source, but constructing one is now an explicit assertion that the version-1 contract applies. Do not reach for it to satisfy a type.
 
-Keiro 0.12 closes the same hole in planning. Behavior provenance is part of planning, so the semantic-only entry points `planServiceScaffold`, `planServiceScaffoldWithGoldens`, `planServiceScaffoldWithRuntimePackage`, `planServiceScaffoldWithRuntimePackageAndGoldens`, `planScaffold`, `planScaffoldWithGoldens`, and `checkServiceDiagnostics` are removed — they could only derive a `CompatibilityLineOnly` source index, whose behavior-source join refused every transition-bearing service they had planned cleanly under 0.11. Parse with `parseSourceDocument` and pass the document's `documentSourceIndex` to `planIndexedServiceScaffold`, its goldens and runtime-package variants, or `checkIndexedServiceDiagnostics`. A programmatically constructed `Spec` can still be planned by building a complete exact index with `Keiro.Dsl.SourceIndex.exactSemanticSourceIndex` over `semanticSourceSubjects`, which is an explicit assertion about the spans it claims. The zero-caller `pureRefusals` and `constraintPlan` shims are gone; use `pureRefusalsForService` and `constraintPlanForService`. Every execution entry point and the `Spec`-only module-set builders are unchanged.
+Keiro 0.12 closes the same hole in planning. Behavior provenance is part of planning, so the semantic-only entry points `planServiceScaffold`, `planServiceScaffoldWithGoldens`, `planServiceScaffoldWithRuntimePackage`, `planServiceScaffoldWithRuntimePackageAndGoldens`, `planScaffold`, `planScaffoldWithGoldens`, and `checkServiceDiagnostics` are removed — they could only derive a `CompatibilityLineOnly` source index, whose behavior-source join refused every transition-bearing service they had planned cleanly under 0.11. Parse with `parseSourceDocument` and pass `document.sourceIndex` to `planIndexedServiceScaffold`, its goldens and runtime-package variants, or `checkIndexedServiceDiagnostics`. A programmatically constructed `Spec` can still be planned by building a complete exact index with `Keiro.Dsl.SourceIndex.exactSemanticSourceIndex` over `semanticSourceSubjects`, which is an explicit assertion about the spans it claims. The zero-caller `pureRefusals` and `constraintPlan` shims are gone; use `pureRefusalsForService` and `constraintPlanForService`. Every execution entry point and the `Spec`-only module-set builders are unchanged.
 
 These APIs return `Either FoldSurfaceError` rather than throwing or silently producing a wrong fingerprint. `FoldSurfaceError` names which part of the surface failed to resolve — type graph, nominal, register type, register initial, guard, or event output — and `renderFoldSurfaceError` gives the message. Scaffold planning refuses the same error before generating any module, so a resolution failure can no longer reach generated code.
 
 Grammar-only differences between versions 1 and 2 preserve generated and fold bytes because both select `runtime-semantics/1`; a contract that changes runtime behavior contributes its own fingerprint discriminator through `runtimeSemanticsFingerprintSegment`.
 
 Fold fingerprints themselves widened in 0.9 from 16-hex-digit FNV-1a-64 to 32-hex-digit FNV-1a-128, deliberately invalidating every snapshot discriminated by the earlier value. Read [evolution gates and rollout ordering](evolution-and-rollout.md) before upgrading a service with live snapshots.
+
+## Preserve checked construction boundaries during the record migration
+
+Keiro-dsl 0.15 removes package product selector functions and owner-prefixed labels. Use record dot for public products and the supported projection functions for abstract values. `CheckedService` and `SemanticSourceIndex` remain abstract: retain `checkedSpec`, `checkedLanguageContract`, `checkedTypeGraph`, and `checkedProjectionSupplies`, and construct source indexes through their validating functions. Replace a checked graph through `checkedServiceWithSpec` so its cached analyses are recomputed; do not forge a record update. Prepared sidecar and generated-edition migrations likewise come from preflight, not consumer construction.
+
+Keep the package API migration separate from the `.keiro` language selection. Adopting [generated Haskell `idiomatic-v2`](generated-haskell-editions.md) changes Haskell labels and build defaults without changing the declared language, JSON report keys, diagnostics, canonical output, fingerprints, or runtime semantics.
 
 ## Reach for the located frontend only for source tooling
 

@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -113,15 +113,18 @@ The conformance ledger uses the versioned `keiro-dsl conformance ledger v1` form
 
 Keiro 0.11 renamed every sidecar from the `keiro-dsl-manifest.*` / `keiro-dsl-scaffold-record.*` spellings. **A tree still holding the old names refuses to scaffold and writes nothing** — this is a hard stop, not a warning, reported as `SidecarMigrationRequired` or `SidecarMigrationRefusal`.
 
-Read the listed moves, then apply them:
+Read the listed moves. On the current generator a pre-v2 ledger also requires edition adoption; keep the normal output and build arguments and apply both operations together:
 
 ```bash
-keiro-dsl scaffold SERVICE_INPUT --apply-name-migrations
+keiro-dsl scaffold SERVICE_INPUT --out GENERATED_ROOT \
+  --apply-name-migrations --apply-generated-haskell-edition
 ```
 
 The apply path is backup-backed and digest-journaled, with crash recovery, and it rewrites Haskell module references token-aware rather than by text substitution. Duplicate old files that cannot be renamed losslessly are preserved under `.keiro-dsl-name-migrations/sidecar-v1/`. Legacy conformance records are converted only by this explicit path; nothing is upgraded implicitly.
 
 The same run migrates generated Haskell names. Keiro 0.11 moved generated modules onto one checked UpperCamelCase/lowerCamelCase naming edition, so compound paths change (`Service_oncall` becomes `ServiceOncall`). These are generated-only renames: they are consumer-build advisories, and external and replay identities do not move. `ScaffoldReport` and `WorkspaceScaffoldReport` carry the applied moves, so review them before committing.
+
+A ledger without a `naming-edition` row means `legacy-v1`; an existing ledger that cannot be parsed is a refusal, never an absent history. Both `legacy-v1` and `idiomatic-v1` require explicit migration to `idiomatic-v2`, including sidecar-only legacy trees. Follow [generated Haskell editions](../keiro/generated-haskell-editions.md) for backup scope, hand-owned selector remediation, and complete rollback.
 
 The first structural scaffold emits private `Structural.Shape.*` modules and one `StructuralProjections` facade and creates the declared binding module. Fill total conversion functions, deterministic fixtures, and required initials, then run the generated harness. Exact nominal types may opt into `genericStructuralBinding`; any constructor, selector, order, arity, or field-type mismatch must use the explicit skeleton. A nominal binding additionally emits create-once binding skeletons, a context-level `NominalProjections` facade, and any private enum-representation leaf modules, and records them in additive `nominal-mapping` rows.
 

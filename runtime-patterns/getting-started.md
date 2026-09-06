@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -72,6 +72,11 @@ need the surrounding rules.
   prefix-bearing ID onto version 3. Choose every new prefix with the
   [TypeID prefix naming standard](keiro/typeid-prefix-naming.md); do not impose
   an arbitrary abbreviation budget.
+- **Upgrading generated Haskell or the keiro-dsl package API:** follow
+  [generated Haskell editions](keiro/generated-haskell-editions.md) for the
+  explicit migration, hand-owned record audit, Cabal reconciliation, and rollback.
+  Keep this separate from the source-language declaration.
+
 - **Proving an aggregate behaves as declared:** use
   [behavior conformance and obligations](keiro/behavior-conformance.md) to
   inventory every transition, rejection, and replay-only edge and gate CI on the

@@ -1,5 +1,11 @@
 # architecture Update Log
 
+## 2026-09-06
+* **Update**: Reuse the published cohort test fixture through complete service migration wrappers.
+* **Update**: Require combined legacy name/edition migration and refuse corrupt or pre-v2 ledgers.
+* **Update**: Route generated Haskell adoption and rollback through the edition guide.
+* **Update**: Adopt idiomatic-v2 shared extensions, concise record projections, and the explicit edition gate.
+
 ## 2026-09-01
 * **Update**: Place domain newtypes and TypeIDs in the core package
 * **Update**: Keep generated domain wrappers intact across the hand-owned module boundary

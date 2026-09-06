@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Replay-History Retention"
 description: "Holding a renewable retention lease so a long replay sees stable history, and how that lease refuses destructive work"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-history-retention
 tags: [kiroku, history-retention]
 status: current
@@ -16,6 +16,8 @@ status: current
 **Any process that replays history for longer than one transaction must hold a retention lease for the whole replay, and must abandon rather than reacquire when the lease lapses.**
 
 Kiroku Store 0.7 makes "the retained event set will not move under me" a durable database fact instead of an assumption. `Kiroku.Store.HistoryRetention` exposes the lease lifecycle both as transaction combinators and through the mockable `Store` effect; migration `0010` installs the lease tables, the schema-local coordinator, and the statement-level guards.
+
+Install `kiroku-store-migrations` 0.4.0.0: the lease default uses the schema-qualified `kiroku.uuidv7()` generator on both PostgreSQL 17 and 18. A database that applied `0010` from withdrawn 0.3.2.0/0.3.2.1 needs the guarded ledger fixup and forward `0011`; a database where `0010` never applied uses the corrected pending payload without that fixup. Follow [migration operations](../migrations/operations.md), and never work around the defect with a session `search_path` change.
 
 ## Acquire before the first page, not after a failure
 

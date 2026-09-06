@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Subscriptions Through Shibuya"
 description: "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-kiroku-subscriptions
 tags: [messaging, kiroku-subscriptions]
 status: current
@@ -35,6 +35,8 @@ reviews:
 - `AckRetry delay` becomes `Retry`: redeliver the same event before advancing. `RetryPolicy` bounds total deliveries; the default is five, then `DeadLetterMaxAttempts` is written.
 - `AckDeadLetter reason` writes `kiroku.dead_letters` and atomically advances past the event.
 - `AckHalt` cancels the subscription without advancing, so the event returns after restart.
+
+Use `shibuya-kiroku-adapter` 0.5.1.1 with Store 0.8 and Shibuya 0.9. `ApplicationFailure code detail` maps to `DeadLetterOther`, preserving the canonical `code: detail` summary and structured JSON `{"kind":"other","summary":…, "detail":{"code":…,"detail":…}}`. Query the application code through `reason->'detail'->>'code'`; never parse the summary. The built-in poison, invalid-payload, and max-attempt encodings remain unchanged.
 
 `Envelope.attempt` is the zero-based redelivery count. The adapter's bridge queue may be larger, but ack coupling keeps effective in-flight delivery at one event per member.
 

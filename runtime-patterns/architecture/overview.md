@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Service Architecture"
 description: "Index of the keiro service architecture standard: domain types, packages, vertical slices, tests, and scaffolding; start here"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-06T21:22:15Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:codex
+  at: "2026-09-06T21:22:15Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-overview
 tags: [architecture, overview]
 status: current
@@ -36,6 +36,7 @@ This area is the fleet structure standard for deployed keiro services. It reconc
 - [Vertical-slice modules](vertical-slice-modules.md) defines the per-concept generated and hand-owned module ring.
 - [Specification and scaffolding](spec-and-scaffolding.md) places the single-file or workspace service contract and gives the repeatable whole-service regeneration workflow.
 - [The generated compilation contract](generated-compilation-contract.md) states how generated Haskell must be compiled: the GHC2024 baseline, the closed module-local extension set, the runtime-package authority, and the one conformance package a configured service scaffolds.
+- [Generated Haskell editions](../keiro/generated-haskell-editions.md) governs explicit v2 adoption, record consumers, backup scope, and rollback.
 - [Cross-cutting modules](cross-cutting-modules.md) is the closed allowlist for technical module names.
 - [Extended node verticals](extended-node-verticals.md) places read models, process managers, workflows, routers, queues, and integration contracts.
 - [Test layout](test-layout.md) assigns test suites to packages and mirrors source verticals in test modules.
