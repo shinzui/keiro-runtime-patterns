@@ -2,10 +2,10 @@
 type: Standard
 title: "Mapped consumer surfaces"
 description: "Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-mapped-consumer-surfaces
 tags: [keiro, mapped-consumer-surfaces]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Treat every mapped occurrence as a typed consumer with its own persisted or operational rollout consequence.**
 
-The complete surface is stable [Language 5](language-versions.md), released in Keiro 0.12.0.0 and fixed by `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption` and `mori://shinzui/keiro/masterplans/35-make-mapped-types-first-class-across-queues-read-models-and-projections-before-fleet-adoption`. A service still on Language 4 keeps its released meaning, but the surface below is not available to it; move the service rather than emulating the surface locally.
+The base surface was introduced in [Language 5](language-versions.md), released in Keiro 0.12.0.0 and fixed by `mori://shinzui/keiro/masterplans/34-make-keiro-dsl-regeneration-semantically-local-and-source-stable-before-wide-adoption` and `mori://shinzui/keiro/masterplans/35-make-mapped-types-first-class-across-queues-read-models-and-projections-before-fleet-adoption`. A service still on Language 4 keeps its released meaning, but the surface below is not available to it; move the service rather than emulating the surface locally.
 
 ## Declare the complete private consumer graph
 
@@ -37,9 +37,9 @@ Use `mapped structural` only when the DSL owns the exact private JSON shape and 
 
 Queue payloads keep the schema-version-1 envelope contract while their typed fields use the generated mapped codec plan. Query contracts are Haskell aliases only. Projection consumers derive from the authoritative aggregate event source; category and all-history sources remain heterogeneous decoder boundaries and are not inferred.
 
-## Keep nominal leaves nominal under candidate version 6
+## Keep nominal leaves nominal under version 6
 
-Candidate [Language 6](language-versions.md) adds `StructuralNominalLeaves`: a declared `id`, `enum`, or `mapped nominal` scalar may appear inside structural records, unions, `Optional`/`List`/`Map` containers, typed workqueue fields, and read-model query input/results. Released services stay on Language 5 until the candidate is published; the rules below govern the candidate branch.
+[Language 6](language-versions.md) adds `StructuralNominalLeaves`: a declared `id`, `enum`, or `mapped nominal` scalar may appear inside structural records, unions, `Optional`/`List`/`Map` containers, typed workqueue fields, and read-model query input/results. Use Language 6 from Keiro 0.17.0.0 onward; the rules below govern that baseline.
 
 - **Name the declaration, not an opaque twin.** The generated private shape carries the nominal domain type, not its `KindID` or primitive. One context-owned `Structural.NominalLeaves` module applies the declared binding and Keiro-owned ID or scalar admission wherever a generated codec meets the leaf. Replace the pre-6 workaround — a `mapped opaque` twin of a consumer-bound ID, or an opaque `Maybe` wrapper — rather than keeping both.
 - **Treat that replacement as a mapped type change.** `diff` reports opaque-or-`Text`-to-nominal replacement conservatively as `MappedFieldTypeChanged` at every affected root. Generate the historical codec comparison, run the old codec against committed missing/null/present samples, and require byte parity plus rejection of malformed IDs. That evidence does not waive event versioning, queue drain, or snapshot rules.

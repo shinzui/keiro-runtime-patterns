@@ -2,10 +2,10 @@
 type: Standard
 title: "Domain Design And Runtime Choices"
 description: "Design bounded contexts, invariants, aggregates, domain events, and workflows before service layout and runtime mechanisms"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-domain-design
 tags: [architecture, ddd, aggregates, invariants, domain-events, workflows]
 status: current
@@ -130,7 +130,7 @@ redelivery does not repeat a protected business effect.
 
 Then apply [DSL adoption](../keiro/dsl-adoption.md), declare nominal
 [domain values](domain-newtypes-and-typeids.md), and record the model in a
-[service workspace](../keiro/service-workspaces.md). On stable Language 5,
+[service workspace](../keiro/service-workspaces.md). On Language 6,
 generate expressible aggregate decisions and keep explicit holes for the
 behavior the language cannot express. Choose [vertical modules](vertical-slice-modules.md),
 [application packages](service-packages.md), and

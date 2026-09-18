@@ -2,10 +2,10 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -111,7 +111,7 @@ The rule is one sentence: inventory every durable value whose decoder or decisio
 - **Aggregate codec bumps admit no mixed versions.** One `schemaVersion` serves both writing and decoding, so an old replica hydrating a stream that contains a new-version event returns `VersionAhead`. Use stop-the-world or blue/green with one version exclusively owning a stream category. After the first new-version append the deploy is roll-forward-only; rollback means restore from backup.
 - **Versioned job queues deploy workers before producers.** A future `{v,t,data}` envelope returns `JobPayloadFromFuture` and burns the delivery budget; size `maxRetries × defaultRetryDelay` to cover the window. Generated workqueues start at schema version 1 with `keiroJobCodec`. Never switch a non-empty queue between bare and enveloped payloads without a drain or a transitional dual decoder.
 - **Router and process-manager decide changes need a drained redelivery window.** Deterministic target-command ids confirm overlaps as benign duplicates, so an undrained change merges old and new fan-out silently with no error. Hole-only decide changes are invisible to the differ; the drain rule applies anyway.
-- **Moving a process body between the legacy form and reactions is an identity migration.** Candidate Language 6 reactions key dispatch ids by physical target stream plus same-target occurrence, not the legacy positional emit index, so old and new ids never match and an undrained cutover duplicates target appends. `ProcessDispatchIdentityModelChanged` is breaking: drain source redelivery, partial fan-out, and pending timers first. A `reactions version` bump records intent only and is never the migration mechanism.
+- **Moving a process body between the legacy form and reactions is an identity migration.** Language 6 reactions key dispatch ids by physical target stream plus same-target occurrence, not the legacy positional emit index, so old and new ids never match and an undrained cutover duplicates target appends. `ProcessDispatchIdentityModelChanged` is breaking: drain source redelivery, partial fan-out, and pending timers first. A `reactions version` bump records intent only and is never the migration mechanism.
 - **Reaction changes carry `drain-required`.** Guard, arm-order, fan-out, reaction-removal, and versioned-fingerprint advisories name the drained redelivery window. Increase `reactions version` with every semantic fingerprint change: an unchanged version is the breaking `ProcessReactionFingerprintChangedWithoutVersionBump`, a decrease is the breaking `ProcessReactionVersionDecreased`, and a bumped change is still the drain-required `ProcessReactionFingerprintChangedWithVersionBump` because the version never enters the dispatch id seed.
 - **Scheduled timer rows outlive their declaration.** `ProcessTimerRemoved` and `ProcessTimerIdentityChanged` (timer or fired-event prefix) are breaking because already-scheduled rows keep the old deterministic id and may still be claimed. Deleting a declaration does not cancel a row and an absent `cancel` leaves no tombstone: keep the old firing decoder and route deployed until those rows have fired, been cancelled, or been migrated and verified. A `max-attempts` change keeps each row's accumulated attempt count. Timer ceiling and dead-letter text are excluded from the fingerprint and report only `ProcessTimerCeilingChanged`.
 - **Switching intake idempotence is breaking.** `IntakeIdempotenceModeChanged` separates `keiro_inbox` history from downstream receipts; drain in-flight delivery and define a replay boundary at cutover.

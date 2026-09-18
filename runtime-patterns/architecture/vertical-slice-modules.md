@@ -2,10 +2,10 @@
 type: Standard
 title: "Vertical-Slice Modules"
 description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -49,7 +49,7 @@ An aggregate is one event-sourced consistency boundary. Its standard module ring
 | `<Concept>.Handler` | server | hand | command and query route handlers |
 | `<Concept>.Worker` | workers | hand | a Shibuya processor that decodes events and applies the projection |
 
-The generated ring describes checked structure. Its generated IDs and declared nominal scalar wrappers satisfy [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) and are used directly; hand-owned modules must not erase them back to primitives or add redundant wrappers. On stable Language 5, the specification owns expressible guards, register writes, and transitions; generated code implements them. Use `implementation hole` only for the transition behavior that requires application code. The older whole-transducer-in-`Holes` arrangement is a compatibility layout, not the default. `ReadModel` owns query shapes and SQL. Follow [aggregate transition ownership](../keiro/aggregate-expressions.md) and the emitted manifest for the exact generated module set; this table describes roles, not a fixed file count.
+The generated ring describes checked structure. Its generated IDs and declared nominal scalar wrappers satisfy [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) and are used directly; hand-owned modules must not erase them back to primitives or add redundant wrappers. On Language 6, the specification owns expressible guards, register writes, and transitions; generated code implements them. Use `implementation hole` only for the transition behavior that requires application code. The older whole-transducer-in-`Holes` arrangement is a compatibility layout, not the default. `ReadModel` owns query shapes and SQL. Follow [aggregate transition ownership](../keiro/aggregate-expressions.md) and the emitted manifest for the exact generated module set; this table describes roles, not a fixed file count.
 
 ## Shared Structural Mapping Modules
 

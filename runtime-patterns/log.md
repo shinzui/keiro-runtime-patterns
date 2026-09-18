@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-09-18
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Prioritize DDD domain design before service structure and route business request retry contracts.
 * **Update**: Route the Keiro 0032 stopped-writer migration obligation.
 * **Update**: Route candidate Language 6 gating, FIFO-heads jobs, dead timer resume, and diff --deny.

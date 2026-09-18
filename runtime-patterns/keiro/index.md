@@ -1,6 +1,6 @@
 # Gotcha
 
-- [Keiro gotchas](gotchas.md) - Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and candidate-language traps
+- [Keiro gotchas](gotchas.md) - Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps
 
 # Guide
 
@@ -12,7 +12,7 @@
 
 # Overview
 
-- [Keiro runtime patterns](overview.md) - Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, candidate Language 6, generated Haskell editions, and durable workflows
+- [Keiro runtime patterns](overview.md) - Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, Language 6, generated Haskell editions, and durable workflows
 
 # Runbook
 
@@ -27,7 +27,7 @@
 - [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md) - Separating checked semantic consumers, generated-artifact churn, and source provenance while keeping service conformance complete
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) - The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering
 - [Enforced identifier domains](identifier-domains.md) - Apply the TypeID default through the frozen v7 admission contract for aggregate IDs and public contract fields, with the rollout each surface requires
-- [Keiro DSL language versions](language-versions.md) - Declaring a Keiro DSL language contract, adopting published stable version 5, keeping candidate version 6 off released services, and auditing compatibility-only sources
+- [Keiro DSL language versions](language-versions.md) - Requiring Language 6 from Keiro 0.17.0.0, handling registry metadata, and deliberately migrating older sources
 - [Mapped consumer surfaces](mapped-consumer-surfaces.md) - Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections
 - [Consumer-owned nominal bindings](nominal-bindings.md) - Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit
 - [Typed projection catalogs and rebuild groups](projection-catalogs.md) - One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds

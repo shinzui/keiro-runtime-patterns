@@ -1,6 +1,9 @@
 # messaging Update Log
 
 ## 2026-09-18
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Define delegated intake, producer identity, process reaction, guarded claim, and grouped-head FIFO terms.
 * **Update**: State the mkDelegatedRetryContext ceiling/attempt order and its runInboxDelegatedWithRetries use.
 * **Update**: Restore FIFO-index reporting to the drift section and correct the effectful-core bound.

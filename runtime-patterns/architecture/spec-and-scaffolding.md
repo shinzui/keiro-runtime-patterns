@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -47,11 +47,11 @@ spec ticket/ticket.keiro
 Every member begins with the language preamble and context:
 
 ```text
-language keiro-dsl 5
+language keiro-dsl 6
 context ticket
 ```
 
-The `language` clause must be the first significant clause and is required of every new source. Version 5 is the sole published stable authoring contract; versions 1 through 4 remain readable as compatibility-only and make the CLI emit a stderr contract notice. Keiro 0.17 registers version 6 as an unpublished candidate that may still change in place; keep production services on version 5 and assert the check report's `language.stable`. `keiro-dsl new` always writes the published stable version, even while a candidate is registered. See [Keiro DSL language versions](../keiro/language-versions.md). The shared context identifies the service's DSL namespace. The manifest's `module` supplies the Haskell module root, while `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
+The `language` clause must be the first significant clause. Use Language 6 in every source from Keiro 0.17.0.0 onward, and migrate all workspace members together. The 0.17.0.0 registry still labels version 5 `stable` and version 6 `candidate`; `keiro-dsl new` therefore emits version 5. Change that skeleton preamble to version 6, require `--min-language 6` in CI, and verify the adopted `effectiveLanguageVersion` instead of asserting `language.stable`. See [Keiro DSL language versions](../keiro/language-versions.md). The shared context identifies the service's DSL namespace. The manifest's `module` supplies the Haskell module root, while `layout collocated` places generated modules at `<Service>.<Node>.Generated.*` and holes beside them at `<Service>.<Node>.*`.
 
 Keiro-dsl also supports a `module <Dotted.Prefix>` clause and the equivalent `--module-root` and `--collocate` command-line overrides. They exist for unusual namespaces and older specs. A standard fleet service records placement in its contract and needs no placement flags, preventing two scaffold invocations from silently choosing different trees.
 

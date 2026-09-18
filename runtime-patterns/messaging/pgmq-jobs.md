@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq 0.17: required job ordering, FIFO-heads, retry and VT rules, guarded DLQ retention, and partitioned provisioning"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -63,7 +63,7 @@ Build non-default tuning with `mkJobTuning`, then apply the job's own ordering w
 
 Roll `FifoHeads` out consumers first: migrate the schema to PGMQ 1.12 or later, deploy every consumer built with the required `jobOrdering` and `FifoHeads` support, and only then change the generated queue policy or producer assumptions. Never leave an older consumer reading an ordered queue as unordered or through a legacy batch-filling read.
 
-Messages without an `x-pgmq-group` header share one implicit group. Grouped reads are visibility leases, not exactly-once delivery; handlers stay idempotent. A `.keiro` `ordering fifo-heads` declaration scaffolds `FifoHeads` and FIFO-index provisioning under candidate Language 6; see [language versions](../keiro/language-versions.md).
+Messages without an `x-pgmq-group` header share one implicit group. Grouped reads are visibility leases, not exactly-once delivery; handlers stay idempotent. A `.keiro` `ordering fifo-heads` declaration scaffolds `FifoHeads` and FIFO-index provisioning under Language 6; see [language versions](../keiro/language-versions.md).
 
 ## Produce And Consume
 

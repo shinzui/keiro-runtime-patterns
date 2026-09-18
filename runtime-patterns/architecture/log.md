@@ -1,6 +1,11 @@
 # architecture Update Log
 
 ## 2026-09-18
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
+* **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Correct symbolic firewall exceptions and generated module inventory against the current scaffolder.
 * **Update**: Remove the unconditional single-Holes rule in favor of declared generated and hand-owned responsibilities.
 * **Update**: Derive tests from domain invariants, workflow outcomes, concurrent commands, and request retry semantics.

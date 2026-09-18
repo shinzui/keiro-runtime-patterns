@@ -2,10 +2,10 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: UTF-8-stable deterministic ids, the typed reaction runner, worker policies, batched durable timers, and the orchestration decision ladder"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -179,7 +179,7 @@ Use `drainDueTimersWith` for a bounded backlog pass. It runs the requeue and gau
 
 Keiro-dsl has first-class `process` and nested `timer` nodes. A process declares rejected and poison policies, and every timer fire declares `on-ok`, `on-reject`, `on-ambiguous`, `on-error`, and `not-mine` outcomes. In published Languages 1 through 5, keep reaction logic in the hand-owned hole (reported as `custom-unverified`) and regenerate structural wiring from the specification; see [Keiro-dsl adoption](../keiro/dsl-adoption.md).
 
-Candidate Language 6 declares process reactions directly and generates them onto the reaction runner. Guards are pure, ordered, and read only the decoded input, never saga state. An `accepted` block is legal only when its saga command is verified to emit an event on acceptance, and it must carry an explicit `silent no-action` alternative; effects outside it become unconditional `followUps`, effects inside it `onAccepted`. The only create-once process hole is the versioned typed decoder `RecordedEvent -> Maybe <Process>Input`; it may decode but must not select or override behavior. Each reaction body declares a positive coordination version: a semantic change without a version increase is breaking, and any accepted change still requires the applicable drain. Versions and fingerprints never enter dispatch or timer identity. Module placement belongs to the separate vertical-structure standard, not this behavior guide.
+Language 6 declares process reactions directly and generates them onto the reaction runner. Guards are pure, ordered, and read only the decoded input, never saga state. An `accepted` block is legal only when its saga command is verified to emit an event on acceptance, and it must carry an explicit `silent no-action` alternative; effects outside it become unconditional `followUps`, effects inside it `onAccepted`. The only create-once process hole is the versioned typed decoder `RecordedEvent -> Maybe <Process>Input`; it may decode but must not select or override behavior. Each reaction body declares a positive coordination version: a semantic change without a version increase is breaking, and any accepted change still requires the applicable drain. Versions and fingerprints never enter dispatch or timer identity. Module placement belongs to the separate vertical-structure standard, not this behavior guide.
 
 ## The Decision Ladder
 

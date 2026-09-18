@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and candidate-language traps"
-timestamp: 2026-09-18T04:30:00Z
+description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -99,9 +99,9 @@ Migration `0032` adds guarded-resume token columns, but old binaries do not enfo
 
 Since 0.16 every timer worker pass returns expired foreground resume claims to `Dead`. A host that resumes timers in the foreground without running a worker must call `recoverExpiredTimerResumes` itself. See [dead timer resume](dead-timer-resume.md).
 
-## A candidate language is silent
+## The registry stable flag does not enforce the fleet baseline
 
-A `language keiro-dsl 6` source produces no stderr notice, and `--min-language` accepts it, yet its generated identities can change before publication. Assert `language.stable == true` in the `check --report-out` JSON for every released service. See [language versions](language-versions.md).
+Language 6 is required from Keiro 0.17.0.0 onward, but that release still reports it as `candidate` with `language.stable = false`, and `new` emits version 5. Set the preamble to `language keiro-dsl 6`, require `--min-language 6`, and check each source reports the adopted `effectiveLanguageVersion`. A `stable == true` gate would reject the required contract. See [language versions](language-versions.md).
 
 ## Legacy process to reactions is an identity migration
 

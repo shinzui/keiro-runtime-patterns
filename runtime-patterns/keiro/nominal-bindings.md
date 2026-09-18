@@ -2,10 +2,10 @@
 type: Standard
 title: "Consumer-owned nominal bindings"
 description: "Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-nominal-bindings
 tags: [keiro, nominal-bindings]
 status: current
@@ -101,7 +101,7 @@ Moving the same ID onto the version-3 identifier domain is a *different*, heavie
 
 ## Reuse the same binding inside structural shapes
 
-Under candidate [Language 6](language-versions.md), a bound `id`, `enum`, or `mapped nominal` scalar may also appear as a leaf inside structural mappings, typed workqueue fields, and query contracts. The generated leaf codec applies this binding plus Keiro-owned admission; do not add a `mapped opaque` twin to carry the consumer type there. A bound ID used as a `Map[DeclaredId]` key additionally obliges a checked law that its `Ord` agrees with canonical TypeID text ordering. See [mapped consumer surfaces](mapped-consumer-surfaces.md).
+Under [Language 6](language-versions.md), a bound `id`, `enum`, or `mapped nominal` scalar may also appear as a leaf inside structural mappings, typed workqueue fields, and query contracts. The generated leaf codec applies this binding plus Keiro-owned admission; do not add a `mapped opaque` twin to carry the consumer type there. A bound ID used as a `Map[DeclaredId]` key additionally obliges a checked law that its `Ord` agrees with canonical TypeID text ordering. See [mapped consumer surfaces](mapped-consumer-surfaces.md).
 
 The other nominal diff codes carry the weight their surface implies: `NominalRepresentationChanged` is wire-breaking; `NominalBindingChanged` points at the binding laws, fixtures, and replay evidence because the change is not inspectable from spec text; `NominalInitialChanged` and `NominalCanonicalTypeChanged` reach the snapshot and consumer-build surfaces; `NominalFixturesChanged` records the evidence change. Branch on the code, never the sentence.
 

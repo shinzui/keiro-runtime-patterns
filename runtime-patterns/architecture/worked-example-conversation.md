@@ -2,10 +2,10 @@
 type: Pattern
 title: "Worked Conversation Vertical"
 description: "Conversation vertical illustrating domain-first design and current generated/hand-owned ownership"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-worked-example-conversation
 tags: [architecture, worked-example-conversation]
 status: current
@@ -56,7 +56,7 @@ owners before adopting them.
 ## Declare The Model And Its Ownership
 
 Use `domain/<service>.keiro-workspace` with a complete Conversation member
-under `domain/<service>/`. Declare stable Language 5 in each member, collocated
+under `domain/<service>/`. Declare Language 6 in each member, collocated
 placement in the manifest, and `runtime-package <service>-core`.
 
 Declare the expressible guards, updates, emitted events, rejection reasons,

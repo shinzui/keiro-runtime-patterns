@@ -2,10 +2,10 @@
 type: Standard
 title: "Enforced identifier domains"
 description: "Apply the TypeID default through the frozen v7 admission contract for aggregate IDs and public contract fields, with the rollout each surface requires"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-identifier-domains
 tags: [keiro, identifier-domains]
 status: current
@@ -66,9 +66,9 @@ parseKindIdV7Value :: ValidPrefix prefix => Value -> Parser (KindID prefix)
 
 Generated decoders use `parseKindIdV7Value` with `explicitParseField`, so Aeson attaches the owning JSON field key to the same stable `IdDomainFailure` set. A rejection therefore names both the field path and which admission rule failed. Do not hand-write a `FromJSON` that bypasses these; a plain `KindID` parse skips the canonical-form and UUIDv7 checks.
 
-## Name a declared ID on a contract field under candidate version 6
+## Name a declared ID on a contract field under version 6
 
-Candidate [Language 6](language-versions.md) lets a contract event field name a top-level `id` declaration — `templateId: TemplateId` — instead of repeating `typeid "template"`. The generated or consumer-bound domain type keeps that declaration's TypeID-v7 admission and compatibility identity, so the public field cannot drift from the prefix the aggregate owns. Only `id` declarations are accepted; enums, nominal scalars, and mapped declarations are rejected. Keep released services on the version-4 `typeid` spelling until version 6 is published.
+[Language 6](language-versions.md) lets a contract event field name a top-level `id` declaration — `templateId: TemplateId` — instead of repeating `typeid "template"`. The generated or consumer-bound domain type keeps that declaration's TypeID-v7 admission and compatibility identity, so the public field cannot drift from the prefix the aggregate owns. Only `id` declarations are accepted; enums, nominal scalars, and mapped declarations are rejected. Use Language 6 from Keiro 0.17.0.0 onward; the older `typeid` spelling remains valid.
 
 Moving between `typeid "template"` and `TemplateId` with the same prefix preserves JSON bytes but changes the Haskell type, so consumers must rebuild. A prefix change remains a breaking public-contract change.
 

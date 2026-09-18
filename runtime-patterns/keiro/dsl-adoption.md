@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -26,6 +26,8 @@ reviews:
 # Keiro-dsl adoption
 
 **Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain newtypes.**
+
+From Keiro 0.17.0.0 onward, use [Language 6](language-versions.md) in every source and workspace member. Upgrade older contracts through the language-adoption checks.
 
 This guide decides when a service should own a checked Keiro DSL contract and where generated structure stops and hand-written domain logic begins. The default source shape is one composed `.keiro-workspace`; a bare `.keiro` input is reserved for a trivial domain with exactly one aggregate.
 
@@ -77,7 +79,7 @@ Scaffolding reports stale paths but never deletes them; review stale generated a
 
 Keiro-dsl 0.15 uses concise product labels and record-dot reads in both the package API and `idiomatic-v2` generated Haskell. Migrate hand-owned consumers, apply the edition gate, repaste the complete Cabal fragment, and compile the service plus its conformance package. Follow [generated Haskell editions](generated-haskell-editions.md); `--force-generated-overwrite` does not authorize an edition change. Source Language 5 and persisted wire meaning remain unchanged.
 
-Keiro-dsl 0.17 grows the public AST for candidate Language 6 without removing or renaming a top-level export: `ProcessNode` replaces `input`, `handle`, and `timer` with `body :: ProcessBody`; `IntakeNode` gains `idempotence`; `WqOrdering` gains `WqFifoHeads`; `ContractType` gains `CDeclaredId`; `TypeExpr` gains `TKeyedMap`; `DiagnosticCode`, `LanguageFeature`, and `RuntimeCapability` gain constructors; and `checkReport`/`workspaceCheckReport` take a `CheckedService`. Tooling that matches exhaustively or constructs these records positionally must be extended even when every service stays on Language 5.
+Keiro-dsl 0.17 grows the public AST for Language 6 without removing or renaming a top-level export: `ProcessNode` replaces `input`, `handle`, and `timer` with `body :: ProcessBody`; `IntakeNode` gains `idempotence`; `WqOrdering` gains `WqFifoHeads`; `ContractType` gains `CDeclaredId`; `TypeExpr` gains `TKeyedMap`; `DiagnosticCode`, `LanguageFeature`, and `RuntimeCapability` gain constructors; and `checkReport`/`workspaceCheckReport` take a `CheckedService`. Tooling that matches exhaustively or constructs these records positionally must be extended even before a service migrates from Language 5.
 
 ## Recognize Runtime Holes And Mapping Obligations
 
@@ -138,7 +140,7 @@ keiro-dsl diff INPUT --since GIT-REF \
   [--deny CODE[,CODE...]]
 ```
 
-- `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation. It declares the published stable language even while a candidate is registered.
+- `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation. In 0.17.0.0 it declares version 5; explicitly change the preamble to the required Language 6.
 - `INPUT` is normally a `.keiro-workspace` manifest, and all file-taking commands operate on that composed service. Use one bare `.keiro` file only for the trivial single-aggregate exception.
 - `parse` parses and pretty-prints the normalized service specification; `pretty` is the explicit alias for that canonical render. Neither one rewrites a source's language declaration.
 - `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
@@ -153,7 +155,7 @@ A `keiro-dsl` warning is a real finding, and until 0.11 nothing stopped a reposi
 
 ```sh
 keiro-dsl check domain/service.keiro-workspace \
-  --min-language 5 \
+  --min-language 6 \
   --deny-warnings \
   --report-out build/keiro-check.json
 ```
@@ -161,7 +163,7 @@ keiro-dsl check domain/service.keiro-workspace \
 - `--deny-warnings` exits non-zero when any warning-severity diagnostic fires. Prefer it.
 - `--deny CODE[,CODE...]` is the selective fallback when one idiomatic spelling warns by design — router and process benign-inversion spellings are the usual reason. It is repeatable and comma-separated. Deny the codes you accept, never the reverse.
 - `--min-language N` enforces the effective-version floor. See [Keiro DSL language versions](language-versions.md).
-- `--report-out FILE` writes the append-only `keiro-dsl/check-report/1` JSON — source or workspace — through `Keiro.Dsl.CheckReport`. Each entry carries its severity, code, location, and whether a `--deny` selection matched it, so CI can report the finding without re-parsing rendered text. The report's `language` object carries `languageSupport` and `stable`; assert `stable` is `true` for released services so a candidate preamble cannot ship. From 0.17 the report also appends `processReactions`, one entry per process with its verification mode, reaction version, fingerprint, and hole obligations.
+- `--report-out FILE` writes the append-only `keiro-dsl/check-report/1` JSON — source or workspace — through `Keiro.Dsl.CheckReport`. Each entry carries its severity, code, location, and whether a `--deny` selection matched it, so CI can report the finding without re-parsing rendered text. The report's `language` object carries `languageSupport` and `stable`; 0.17.0.0 reports Language 6 as `candidate` with `stable = false`, so gate on the adopted `effectiveLanguageVersion` instead of requiring `stable == true`. From 0.17 the report also appends `processReactions`, one entry per process with its verification mode, reaction version, fingerprint, and hole obligations.
 
 A denial that could never match is refused rather than silently ignored. `check --deny` rejects any code emitted only by `diff` or by the codec-comparison path, and rejects `CoverageOpaqueGateExceeded` outright because that code is the error `--fail-on-opaque` itself raises. If a `--deny` invocation is accepted, the code it names is genuinely reachable from that command.
 

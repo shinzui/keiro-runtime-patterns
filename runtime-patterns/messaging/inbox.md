@@ -2,10 +2,10 @@
 type: Standard
 title: "Idempotent Inbox"
 description: "Consuming integration events idempotently: runInboxTransaction variants, delegated downstream receipts, and disposition completeness"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-inbox
 tags: [messaging, inbox]
 status: current
@@ -66,7 +66,7 @@ The caller owns durable attempt accounting: build `mkDelegatedRetryContext ceili
 
 Keep table intake for silent commands, zero-event successes, separately committed side effects, general workflow bodies, and multi-command reactions. Delegated consumers have no inbox backlog, failed-row, retention, or `keiro-ops inbox` surface. Renaming the marker event, target, consumer, source, or operation makes a replay look fresh.
 
-Switching a consumer between table and delegated intake changes its persisted identity: inbox rows do not prove downstream receipts exist, and receipts do not populate inbox history. Drain in-flight delivery and fix an explicit cutover and replay boundary before switching in either direction. Candidate Language 6 expresses delegated intake as `idempotence delegated` (omission means `table`); it cannot be combined with `persist = dedupe-only`, and changing the mode is a breaking `IntakeIdempotenceModeChanged` diff. Measure before switching for speed: delegation makes confirmed duplicates much cheaper, but a fresh table batch can win through its shared commit.
+Switching a consumer between table and delegated intake changes its persisted identity: inbox rows do not prove downstream receipts exist, and receipts do not populate inbox history. Drain in-flight delivery and fix an explicit cutover and replay boundary before switching in either direction. Language 6 expresses delegated intake as `idempotence delegated` (omission means `table`); it cannot be combined with `persist = dedupe-only`, and changing the mode is a breaking `IntakeIdempotenceModeChanged` diff. Measure before switching for speed: delegation makes confirmed duplicates much cheaper, but a fresh table batch can win through its shared commit.
 
 ## Define Every Disposition
 

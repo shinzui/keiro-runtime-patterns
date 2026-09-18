@@ -489,7 +489,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Declaring the language keiro-dsl preamble, adopting stable version 5, and carrying the checked contract through tooling"
+            "Requiring Language 6 from Keiro 0.17.0.0, declaring the preamble, and carrying the checked contract through tooling"
         , location = Schema.DocLocation.LocalFile
             "runtime-patterns/keiro/language-versions.md"
         }

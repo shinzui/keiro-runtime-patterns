@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro runtime patterns"
-description: "Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, candidate Language 6, generated Haskell editions, and durable workflows"
-timestamp: 2026-09-18T04:48:47Z
+description: "Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, Language 6, generated Haskell editions, and durable workflows"
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -59,7 +59,7 @@ The 0.4 line changed three runtime surfaces incompatibly and those rules still a
 
 Migrations `0019` and `0020` accompany the last two of those, and snapshot-enabled code requires Keiki 0.4 or later.
 
-The 0.13 release adopts [typed transient transaction failures](command-cycle-and-errors.md) and schema-qualified Kiroku UUIDv7 migrations. The 0.14 release adds [terminal outbox rejection](../messaging/outbox.md), atomic batch finalization, migration `0031`, and the published [test fixture package](../architecture/test-layout.md). The 0.15 release changes package record APIs and requires explicit [generated-edition adoption](generated-haskell-editions.md); it preserves Language 5, wire formats, and runtime meaning. The 0.16 release makes `Dead` timers resumable through a guarded claim and adds migration `0032` with an ordered writer rollout ([dead timer resume](dead-timer-resume.md)). The 0.17 release derives [producer outbox identities](../messaging/outbox.md) deterministically from the recorded source event — `enqueueProducerEventTx` takes the event and an emission index, message IDs become opaque `<namespace>_v1_<sha256-hex>` text, and historical random IDs need a drained cutover, with no schema migration — requires `jobOrdering` on every [PGMQ job](../messaging/pgmq-jobs.md) and adds `FifoHeads`, guards DLQ purge, and adds the [process-manager reaction runner](../messaging/process-managers.md) and [delegated inbox intake](../messaging/inbox.md). keiro-dsl 0.17 registers Language 6 as an unpublished candidate that may still change in place; keep released services on stable Language 5. See [language versions](language-versions.md).
+The 0.13 release adopts [typed transient transaction failures](command-cycle-and-errors.md) and schema-qualified Kiroku UUIDv7 migrations. The 0.14 release adds [terminal outbox rejection](../messaging/outbox.md), atomic batch finalization, migration `0031`, and the published [test fixture package](../architecture/test-layout.md). The 0.15 release changes package record APIs and requires explicit [generated-edition adoption](generated-haskell-editions.md); it preserves Language 5, wire formats, and runtime meaning. The 0.16 release makes `Dead` timers resumable through a guarded claim and adds migration `0032` with an ordered writer rollout ([dead timer resume](dead-timer-resume.md)). The 0.17 release derives [producer outbox identities](../messaging/outbox.md) deterministically from the recorded source event — `enqueueProducerEventTx` takes the event and an emission index, message IDs become opaque `<namespace>_v1_<sha256-hex>` text, and historical random IDs need a drained cutover, with no schema migration — requires `jobOrdering` on every [PGMQ job](../messaging/pgmq-jobs.md) and adds `FifoHeads`, guards DLQ purge, and adds the [process-manager reaction runner](../messaging/process-managers.md) and [delegated inbox intake](../messaging/inbox.md). From Keiro 0.17.0.0 onward, use Language 6 for every new or upgraded service. The released toolchain still labels it `candidate` and emits version 5 skeletons; set the preamble explicitly and enforce the adopted version in CI. See [language versions](language-versions.md).
 
 ## Start here
 
@@ -71,7 +71,7 @@ Start with [domain design and runtime choices](../architecture/domain-design.md)
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.
 - [Keiro-dsl adoption](dsl-adoption.md) — decide when checked specifications and the evolution gate pay off.
 - [Generated Haskell editions](generated-haskell-editions.md) — migrate pre-v2 ledgers and hand-owned record consumers, reconcile the build, and recover interrupted adoption.
-- [Keiro DSL language versions](language-versions.md) — declare the source language, stay on the stable version 5 contract while Language 6 is a candidate, and carry the checked contract through tooling.
+- [Keiro DSL language versions](language-versions.md) — declare the source language, use Language 6 from Keiro 0.17.0.0 onward, and carry the checked contract through tooling.
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) — declare guards and writes that generate the transducer, and mark what stays hand-owned.
 - [Consumer-owned nominal bindings](nominal-bindings.md) — keep existing ID, enum, and scalar-wrapper types in checked aggregate fields.
 - [Enforced identifier domains](identifier-domains.md) — put prefix-bearing aggregate IDs and public contract fields on the frozen TypeID-v7 contract, and roll each adoption out in its own direction.
@@ -92,7 +92,7 @@ Start with [domain design and runtime choices](../architecture/domain-design.md)
 - [Dead timer resume](dead-timer-resume.md) — inspect parked timers, resume one under an expiring guarded claim, and roll migration `0032` out behind stopped writers.
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) — pass every gate before deploying a change to a service that holds data.
 - [Telemetry](telemetry.md) — connect tracing, metrics, propagation, and application logging hooks.
-- [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, silent-failure, Kafka integration, timer-rollout, and candidate-language traps.
+- [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, silent-failure, Kafka integration, timer-rollout, and language-registry metadata traps.
 
 ## Related Patterns
 

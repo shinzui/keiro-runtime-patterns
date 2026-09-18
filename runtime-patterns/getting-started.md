@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -78,9 +78,8 @@ need the surrounding rules.
   member, and reserve a bare source for a trivial domain with exactly one
   aggregate. Then read
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
-  the language contract; keep released services on stable Language 5 while
-  Language 6 is a candidate, and gate CI on the check report's `stable` flag.
-  On stable Language 5, follow
+  Language 6 from Keiro 0.17.0.0 onward; require `--min-language 6` in CI
+  and verify each source reports the adopted version. Follow
   [semantic-local regeneration](keiro/dsl-semantic-locality.md) and inventory
   every [mapped consumer surface](keiro/mapped-consumer-surfaces.md); use
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,

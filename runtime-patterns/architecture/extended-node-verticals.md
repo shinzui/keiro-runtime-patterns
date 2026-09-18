@@ -2,10 +2,10 @@
 type: Pattern
 title: "Extended Keiro-DSL Node Verticals"
 description: "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:01:11Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:01:11Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-extended-node-verticals
 tags: [architecture, extended-node-verticals]
 status: current
@@ -52,7 +52,7 @@ A `process` node is an event-sourced process manager: it reacts to facts and dis
 <Service>/<Name>/ProcessHoles.hs
 ```
 
-A process written with candidate Language 6 `reactions` also generates `Generated/Input.hs` for its typed input ADT, and its `ProcessHoles.hs` shrinks to the single create-once `decode<Process>Input :: RecordedEvent -> Maybe <Process>Input`; the pure reaction, timers, and firing dispatcher are generated. Keep released services on the legacy body until Language 6 is published; see [language versions](../keiro/language-versions.md).
+A process written with Language 6 `reactions` also generates `Generated/Input.hs` for its typed input ADT, and its `ProcessHoles.hs` shrinks to the single create-once `decode<Process>Input :: RecordedEvent -> Maybe <Process>Input`; the pure reaction, timers, and firing dispatcher are generated. Use Language 6 from Keiro 0.17.0.0 onward; migrate legacy process bodies through the identity and drain checks in [evolution and rollout](../keiro/evolution-and-rollout.md).
 
 `HospitalCapacity.HospitalSurge` is the reference realization. Process-state, timer, and dispatch semantics come from [process managers and durable timers](../messaging/process-managers.md).
 
@@ -82,7 +82,7 @@ Integration is a first-class concept under `<Service>.Integration.*`, never a te
 
 Danwa realizes this division with `danwa-core/src/Danwa/Integration/AddressedMessage.hs` and `danwa-workers/src/Danwa/Integration/{AddressedMessageWorker,OutboxPublisherWorker}.hs`. The richer example realizes hand-written `HospitalCapacity.Integration.{Contracts,Inbox,Outbox,KafkaConsumer,KafkaPublisher,ReservationWorkDispatch}` modules around generated nodes.
 
-Do not mistake keiro-runtime-jitsurei's neighboring per-aggregate `Transducer`, `Projection`, `EventStream`, and `CommandProcessor` modules for part of this convention. They are a teaching-only legacy surface; the production aggregate convention is the generated ring plus only its declared create-once hooks, bindings, and witnesses. Stable Language 5 generates expressible decisions; see [vertical-slice modules](vertical-slice-modules.md).
+Do not mistake keiro-runtime-jitsurei's neighboring per-aggregate `Transducer`, `Projection`, `EventStream`, and `CommandProcessor` modules for part of this convention. They are a teaching-only legacy surface; the production aggregate convention is the generated ring plus only its declared create-once hooks, bindings, and witnesses. Language 6 generates expressible decisions; see [vertical-slice modules](vertical-slice-modules.md).
 
 ## Related Patterns
 
