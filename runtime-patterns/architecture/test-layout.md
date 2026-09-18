@@ -2,10 +2,10 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -28,6 +28,21 @@ reviews:
 **Tests mirror vertical source modules, and every package owns the suites that prove its responsibility.**
 
 The baseline comes from danwa's six-package structure; services using keiro-dsl's extended node vocabulary add the focused suites demonstrated by keiro-runtime-jitsurei. Database tests always provision isolated PostgreSQL through the migrations package's public `test-support` sublibrary and never use a developer database.
+
+## Start With Domain Scenarios
+
+Derive tests from [invariants and workflow outcomes](domain-design.md) before
+assigning them to package suites. Cover accepted commands, business rejections,
+no-ops, competing commands, and replay of the resulting domain events. For
+cross-context processes, cover duplicate delivery, timeout, compensation, and
+recovery after interruption. Generated conformance complements these business
+scenarios; it does not choose or prove the completeness of the domain model.
+
+Server suites must exercise the
+[business request retry contract](../keiro/command-cycle-and-errors.md#make-business-request-retries-explicit),
+including a committed operation whose response is lost, concurrent duplicates,
+and the declared treatment of silent outcomes. Assert query freshness separately
+from command acceptance.
 
 ## Core Owns Four Baseline Suites
 

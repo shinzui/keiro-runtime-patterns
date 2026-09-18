@@ -2,10 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -87,10 +87,15 @@ Three diagnostics guard the feature: `FieldWireKeyCollision` when two fields res
 
 ## Let generation own the transition by default
 
-For each such aggregate the scaffolder emits two generated modules:
+The current scaffolder places aggregate behavior in these generated modules (shown in the default layout; platform workspaces use the collocated equivalent):
 
-- `Generated.<Context>.<Aggregate>.Expressions` — one typed Keiki predicate per declared guard and one typed Keiki term per register write;
-- `Generated.<Context>.<Aggregate>.Transducer` — the assembled transducer, the aggregate fold fingerprint, `BehaviorOwnership (GeneratedOwned | HoleOwned)`, and an aggregate-specific `<aggregate>PredicateVerifications` action.
+- `Generated.<Context>.<Aggregate>.Transducer` — typed guard/write terms, the assembled transducer, the aggregate fold fingerprint, `BehaviorOwnership (GeneratedOwned | HoleOwned)`, and an aggregate-specific `<aggregate>PredicateVerifications` action;
+- `Generated.<Context>.<Aggregate>.BehaviorContract` — the declared behavior obligations.
+
+There is no separate generated `Expressions` module. Outcome-enabled
+`EventStream` modules also evaluate checked rejection/no-op reasons after exact
+edge selection. Both that outcome surface and the authoritative `Transducer`
+are intentional firewall exceptions; ordinary event-stream modules remain scanned.
 
 Generated ownership is the default and it is exclusive: no hand-owned module may replace a generated guard or write.
 

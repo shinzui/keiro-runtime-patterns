@@ -2,10 +2,10 @@
 type: Standard
 title: "Six Packages Per Deployed Service"
 description: "The six-package split standard for deployed keiro services and its dependency rules"
-timestamp: 2026-09-01T16:07:10Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-service-packages
 tags: [architecture, service-packages]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Six Packages Per Deployed Service
 
-**A deployed keiro service is exactly six cabal packages with explicit dependency budgets.**
+**A deployed platform service has six application Cabal packages with explicit dependency budgets; generated conformance tooling is additional.**
 
 The package split keeps domain decisions, HTTP types, HTTP execution, background processing, schema installation, and client consumption independently buildable. Use the service's lowercase name in place of `<service>` and keep all six packages in one repository.
 
@@ -80,9 +80,22 @@ Dependency arrows must not point back toward server or workers. In particular, m
 
 ## Production Ruling
 
-The six-package split is both the floor and the ceiling for a deployed fleet service. Do not create a seventh package merely to collect PostgreSQL, Kafka, or other technical code; danwa removed its former `danwa-postgres` package and kept the shared database wiring in core.
+The six-package split is both the floor and the ceiling for application packages in a deployed fleet service. Do not create a seventh package merely to collect PostgreSQL, Kafka, or other technical code; danwa removed its former `danwa-postgres` package and kept the shared database wiring in core.
 
 Keiro-runtime-jitsurei's one-cabal-package-per-service shape is acceptable only for teaching and example repositories, where keeping a library, CLIs, and several test suites together makes a walkthrough easier to follow. A repository using that exception must say so in its README. It is not a production deployment template.
+
+## Generated Conformance Is Tooling
+
+A configured DSL service also generates a local `keiro-<service>-conformance`
+package. This build/test package is outside the six application-package budget;
+it is not another deployable service or a place for application behavior. Include
+it in the Cabal workspace and CI. The generated facade remains compiled in
+`<service>-core`, and the conformance runner depends on that package.
+
+Declare `runtime-package <service>-core` in the service workspace because core
+compiles the generated runtime and facade. For a ticket service, use
+`runtime-package ticket-core`. Follow the
+[generated compilation contract](generated-compilation-contract.md).
 
 ## Related Patterns
 

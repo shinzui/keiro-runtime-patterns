@@ -2,10 +2,10 @@
 type: Standard
 title: "The generated compilation contract"
 description: "The GHC2024 baseline, closed module extension set, generated service-wide evidence modules, and conformance/runtime-package authority"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-generated-compilation-contract
 tags: [architecture, generated-compilation-contract]
 status: current
@@ -47,10 +47,10 @@ The emitter filters baseline extensions out of module-local pragmas. `DuplicateR
 The Cabal package that compiles the generated service runtime is build metadata, and it is **never inferred**. Declare it in the workspace manifest:
 
 ```text
-runtime-package ticket-service
+runtime-package ticket-core
 ```
 
-or override it for one run with `keiro-dsl scaffold ... --runtime-package ticket-service`. The name is validated against Cabal's package-name grammar, so a typo fails at planning time rather than at build time. `WorkspaceManifest` carries it as `manifest.runtimePackage` with its source location; the CLI override wins over the manifest when both are present.
+or override it for one run with `keiro-dsl scaffold ... --runtime-package ticket-core`. The name is validated against Cabal's package-name grammar, so a typo fails at planning time rather than at build time. `WorkspaceManifest` carries it as `manifest.runtimePackage` with its source location; the CLI override wins over the manifest when both are present.
 
 ## Let the service scaffold one conformance package
 

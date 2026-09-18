@@ -1,11 +1,11 @@
 ---
 type: Pattern
 title: "Worked Conversation Vertical"
-description: "Complete file listing of danwa's Conversation slice across all six packages"
-timestamp: 2026-07-22T18:54:19Z
+description: "Conversation vertical illustrating domain-first design and current generated/hand-owned ownership"
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T18:54:19Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-worked-example-conversation
 tags: [architecture, worked-example-conversation]
 status: current
@@ -25,76 +25,102 @@ reviews:
 
 # Worked Conversation Vertical
 
-**Danwa's Conversation slice shows one aggregate from specification through API, command execution, projection, and worker tests.**
+**Design the Conversation aggregate's invariants and events first, then map its responsibilities into the current workspace and vertical layout.**
 
-This example is a complete real vertical from the danwa structural reference. Every path below exists in the danwa checkout. Copy the shape for a new concept, then replace Conversation-specific commands, events, data, and handlers with the new domain behavior.
+The original example described the legacy Conversation slice in
+`mori://shinzui/danwa`, with a bare service source and a whole transducer in
+`Holes`. That historical layout explains existing code; it is not the
+replication template for a new Language 5 service. The design below is an
+illustrative current-language adaptation, not a claim about that repository's
+present files or business rules.
 
-## Complete File Listing
+## State The Business Rules
 
-```text
-domain/danwa.keiro
-  declares the aggregate, projection, and operations
+Suppose a Conversation may be started, receive messages while open, and close.
+State the rules before writing a specification:
 
-danwa-core/src/Danwa/Conversation/Generated/Domain.hs
-  generated: identifiers, commands, events, registers, and predicates
-danwa-core/src/Danwa/Conversation/Generated/Codec.hs
-  generated: persisted event codec
-danwa-core/src/Danwa/Conversation/Generated/EventStream.hs
-  generated: validated stream definition
-danwa-core/src/Danwa/Conversation/Generated/Projection.hs
-  generated: inline projection wiring
-danwa-core/src/Danwa/Conversation/Generated/Harness.hs
-  generated: validation and round-trip assertions
-danwa-core/src/Danwa/Conversation/Holes.hs
-  hand: keiki transducer and applyConversations event fold
-danwa-core/src/Danwa/Conversation/ReadModel.hs
-  hand: rows, hasql codecs, and statements
+- one Conversation identity owns its lifecycle and message-acceptance decisions;
+- appending a message to a closed Conversation is rejected;
+- closing an open Conversation emits a domain event; closing an already closed
+  Conversation is an explicitly modeled no-op;
+- summary generation may finish later and does not determine whether a message
+  was accepted.
 
-danwa-api/src/Danwa/Conversation/Api.hs
-  hand: NamedRoutes and wire DTOs
-danwa-server/src/Danwa/Conversation/Handler.hs
-  hand: route handlers
+Name commands in the context's language: `StartConversation`, `AppendMessage`,
+and `CloseConversation`. Name private domain facts in the past tense:
+`ConversationStarted`, `MessageAppended`, and `ConversationClosed`.
+Record the data needed to reproduce each accepted decision during replay.
+These are example modeling choices; establish the real domain's rules with its
+owners before adopting them.
 
-danwa-workers/src/Danwa/Conversation/Worker.hs
-  hand: projection worker
-danwa-workers/src/Danwa/Conversation/AgentSummaryWorker.hs
-  hand: Conversation-side PGMQ-backed process
-danwa-workers/test/Danwa/Conversation/WorkerSpec.hs
-  hand: projection worker tests
-danwa-workers/test/Danwa/Conversation/AgentSummaryWorkerSpec.hs
-  hand: process tests
-```
+## Declare The Model And Its Ownership
 
-## What The Scaffolder Owns
+Use `domain/<service>.keiro-workspace` with a complete Conversation member
+under `domain/<service>/`. Declare stable Language 5 in each member, collocated
+placement in the manifest, and `runtime-package <service>-core`.
 
-Keiro-dsl regenerates the five `Generated.*` core modules on every scaffold run. Their header banner makes that ownership explicit. It creates `Holes.hs` only when absent, then skips the file forever; developers fill it with the aggregate transducer and projection apply function. `ReadModel.hs`, API, handler, workers, and worker specs are also hand-owned.
+Declare the expressible guards, updates, emitted events, rejection reasons,
+and no-op reasons in the aggregate member. Let the generated transducer own
+them. Use `implementation hole` for a specific behavior the language cannot
+express, then provide its implementation and conformance witnesses. Never
+copy an entire legacy hand-written transducer over generated ownership.
 
-The two core modules edited during ordinary domain work are `Holes` and `ReadModel`. Change structural declarations in `domain/danwa.keiro`, not in the generated ring. Change domain decisions and event folding in `Holes`. Change query rows, codecs, and SQL in `ReadModel`.
+Keep command/event types, codecs, transducer assembly, and behavior contracts
+in the generated ring. Fill only the create-once hooks, bindings, and witnesses
+reported by scaffolding. Query SQL, API DTOs, request orchestration, and worker
+implementations remain application-owned. The emitted manifest and
+[vertical-slice standard](vertical-slice-modules.md) determine the actual files.
 
-## Command Flow
+## Execute Commands And Serve Their Results
 
-A request enters `Danwa.Conversation.Api` as a typed servant route and DTO. `Danwa.Conversation.Handler` converts it to a domain command and runs the validated stream from `Generated.EventStream`. The stream hydrates prior events and applies the keiki transducer defined in `Holes`; accepted events are appended to kiroku. Generated `Domain` and `Codec` modules supply the checked domain and persistence shapes throughout the flow.
-
-```text
-Api → Handler → Generated.EventStream → Holes transducer → kiroku append
-```
-
-## Event-To-Query Flow
-
-A Shibuya Kiroku subscription delivers a recorded event to `Danwa.Conversation.Worker`. The worker invokes `applyConversations` from `Holes` inside the projection transaction. That fold executes statements declared by `ReadModel`, updating the application-owned query table. The worker spec proves this boundary using an ephemeral migrated database.
+The API handler translates a request into a domain command, establishes its
+[retry contract](../keiro/command-cycle-and-errors.md#make-business-request-retries-explicit),
+and invokes the generated domain handler through a validated stream. Handle
+accepted, rejected, and no-op outcomes separately.
 
 ```text
-kiroku subscription → Worker → Holes.applyConversations → ReadModel table
+Request → application handler → validated aggregate → decision → atomic event append
 ```
 
-## Replicate The Slice
+Choose inline catalog projections when the query state must commit with the
+accepted events. Otherwise use a subscription projection with an explicit
+freshness policy. When the caller must observe its accepted write through an
+asynchronous model, return its committed position and use a supported position
+wait. A timeout after commit does not undo acceptance or justify issuing a new
+business command.
 
-To add concept `<New>`, declare it in `domain/<service>.keiro`, run the checked re-scaffold workflow, and then create or fill exactly the hand-owned surfaces the concept needs: `Holes`, `ReadModel`, `Api`, `Handler`, `Worker`, and `WorkerSpec`. A concept with several distinct processes may add more concept-named workers and matching specs; it does not move them into a technical worker namespace.
+## Coordinate Work Outside The Aggregate
+
+Project a queryable Conversation view from private domain events. Projection
+handlers must reproduce the same rows on replay and tolerate redelivery.
+
+Treat summary generation as a job if it is independent operational work. If
+the business process instead has deadlines, durable decisions, and compensation,
+model that process explicitly with a process manager or durable workflow.
+Keep the Conversation aggregate authoritative for its own invariants.
+
+If another bounded context needs a Conversation fact, map it to an explicitly
+owned integration contract and publish through the outbox. Do not share private
+event types or read the Conversation tables from that context.
+
+## Prove The Vertical
+
+Test acceptance, rejection after closure, repeated close, and replay. Race
+message acceptance with closure and assert that the final history obeys the
+chosen invariant. Test a retry after a lost response, projection redelivery,
+and the declared query freshness behavior. For summary work, test duplicate
+delivery and failure recovery.
+
+Run the generated conformance package against `<service>-core`; keep these
+application-level scenarios in the owning core, server, and worker suites.
+The six application packages remain the deployment structure, with generated
+conformance tooling additional.
 
 ## Related Patterns
 
-- [Vertical-slice modules](vertical-slice-modules.md)
+- [Domain design and runtime choices](domain-design.md)
 - [Specification and scaffolding](spec-and-scaffolding.md)
+- [Aggregate transition ownership](../keiro/aggregate-expressions.md)
 - [Test layout](test-layout.md)
-- [Command cycle and errors](../keiro/command-cycle-and-errors.md)
-- [Kiroku subscriptions](../messaging/kiroku-subscriptions.md)
+- [Read models and projections](../keiro/read-models-and-projections.md)
+- [Process managers](../messaging/process-managers.md)

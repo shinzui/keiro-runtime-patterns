@@ -6,7 +6,12 @@ product-oriented explanations belong in `keiro-runtime-docs`, and generally
 applicable Haskell guidance belongs in `haskell-jitsurei`, as recorded in
 [ADR 0006](docs/adr/0006-separate-pattern-product-and-general-haskell-docs.md).
 
-Start with [Getting started](runtime-patterns/getting-started.md) for
+These standards serve one microservice platform with isolated DDD bounded
+contexts. Start with [domain design](runtime-patterns/architecture/domain-design.md):
+business invariants, aggregates, commands, domain events, and workflows come
+before package layout, generation, and transport choices.
+
+Use [Getting started](runtime-patterns/getting-started.md) for
 task-oriented routes. Use the [generated catalog index](runtime-patterns/index.md)
 when you need the complete subject and concept listing.
 

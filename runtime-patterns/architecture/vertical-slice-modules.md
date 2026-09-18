@@ -2,10 +2,10 @@
 type: Standard
 title: "Vertical-Slice Modules"
 description: "The authoritative generated aggregate ring, structural mapping modules, and hand-owned holes/bindings convention"
-timestamp: 2026-09-01T16:07:10Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-vertical-slice-modules
 tags: [architecture, vertical-slice-modules]
 status: current
@@ -40,13 +40,16 @@ An aggregate is one event-sourced consistency boundary. Its standard module ring
 | `<Concept>.Generated.EventStream` | core | generated | the stream definition and its validated construction |
 | `<Concept>.Generated.Projection` | core | generated | status mapping and inline projection wiring to the hand-owned apply function |
 | `<Concept>.Generated.Harness` | core | generated | transducer validation, codec round trips, and accepted-transition assertions |
-| `<Concept>.Holes` | core | hand | the keiki transducer and the read-model event fold |
+| `<Concept>.Generated.Transducer` | core | generated | assembled transitions and fold identity under the current language contract |
+| `<Concept>.Generated.BehaviorContract` | core | generated | declared behavior obligations |
+| `<Concept>.Holes` (when required) | core | hand, create-once | declared transition/output hooks and projection application hooks |
+| generated-declared behavior witness modules | core | hand, create-once | concrete evidence for hand-owned behavior |
 | `<Concept>.ReadModel` | core | hand | row types, hasql codecs, and SQL statements |
 | `<Concept>.Api` | api | hand | servant `NamedRoutes` and wire DTOs |
 | `<Concept>.Handler` | server | hand | command and query route handlers |
 | `<Concept>.Worker` | workers | hand | a Shibuya processor that decodes events and applies the projection |
 
-The generated ring describes checked structure. Its generated IDs and declared nominal scalar wrappers satisfy [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) and are used directly; hand-owned modules must not erase them back to primitives or add redundant wrappers. `Holes` contains decisions: for danwa's Conversation aggregate, that is the keiki transducer plus `applyConversations`, the transaction that folds recorded events into query tables. `ReadModel` owns persistence shapes and statements without hiding domain decisions in generated code.
+The generated ring describes checked structure. Its generated IDs and declared nominal scalar wrappers satisfy [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) and are used directly; hand-owned modules must not erase them back to primitives or add redundant wrappers. On stable Language 5, the specification owns expressible guards, register writes, and transitions; generated code implements them. Use `implementation hole` only for the transition behavior that requires application code. The older whole-transducer-in-`Holes` arrangement is a compatibility layout, not the default. `ReadModel` owns query shapes and SQL. Follow [aggregate transition ownership](../keiro/aggregate-expressions.md) and the emitted manifest for the exact generated module set; this table describes roles, not a fixed file count.
 
 ## Shared Structural Mapping Modules
 
@@ -72,10 +75,10 @@ module Danwa.Conversation.Generated.Domain where
 
 The scaffolder uses the banner as an overwrite guard. Never remove it from a generated module, never add it to a hand-owned module, and never edit the generated module directly. Change the owning `.keiro` member and scaffold the service file or workspace manifest again.
 
-There is exactly one create-once, hand-owned `Holes` module per aggregate. The scaffolder creates it only when absent and does not replace it on later runs. Structural binding modules are also create-once, but they are declared type owners rather than extra aggregate holes. Other hand-owned modules sit directly below `<Service>.<Concept>` without another layer.
+The scaffolder emits an aggregate `Holes` module only when that language and definition require its hooks. It creates hand-owned modules only when absent and preserves them on later runs. Behavior witness and structural binding modules are separate declared responsibilities; do not force them into one aggregate hole. Other hand-owned modules sit directly below `<Service>.<Concept>` without another layer.
 
 ```haskell
--- CORRECT: domain decisions live in the one hand-owned hole.
+-- CORRECT: implement only the declared hand-owned hooks here.
 module Danwa.Conversation.Holes where
 
 -- WRONG: this file is generated and will be replaced.
@@ -94,7 +97,7 @@ WRONG:   Danwa.Transducers.Conversation
 
 ## Authoritative Convention
 
-The authoritative convention is `Generated.*` plus one hand-owned `Holes` module. The flat `<Service>.<Concept>.{Domain,Codec,EventStream,Harness}` layout described by older danwa prose is rejected: it was an abandoned intermediate design, and danwa's shipped code contains the collocated generated ring instead.
+The authoritative convention is `Generated.*` plus the declared create-once hooks, bindings, and witnesses. The flat `<Service>.<Concept>.{Domain,Codec,EventStream,Harness}` layout described by older danwa prose is rejected: it was an abandoned intermediate design, and danwa's shipped code contains the collocated generated ring instead.
 
 The parallel hand modules retained by keiro-runtime-jitsurei—such as `Transducer.hs`, `Projection.hs`, `EventStream.hs`, and `CommandProcessor.hs` beside an aggregate's generated ring—are also rejected for deployed services. They are a deliberate teaching surface in a mid-refactor example repository, not an alternative production layout. Duplicating the generated ring dissolves the firewall because ownership is no longer obvious and regeneration can no longer be treated as routine.
 

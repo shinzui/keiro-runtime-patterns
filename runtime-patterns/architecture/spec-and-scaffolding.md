@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -29,6 +29,8 @@ reviews:
 
 Keiro-dsl is a build-time toolchain, not a runtime interpreter. It checks a typed service specification and emits structural Haskell modules while preserving create-once hand-owned holes. The standard workflow makes the spec's placement choices explicit so every developer and CI run produces the same tree.
 
+First settle the [domain design](domain-design.md): aggregate invariants, command outcomes, private events, and coordination responsibilities. The workspace records those decisions; file and package boundaries do not choose the domain model.
+
 ## Place The Service Contract At The Repository Root
 
 In the standard one-service-per-repository shape, version `domain/<service>.keiro-workspace` and keep its members under `domain/<service>/`. The manifest owns service-wide placement and lists each complete aggregate member plus any explicitly owned shared member:
@@ -37,7 +39,7 @@ In the standard one-service-per-repository shape, version `domain/<service>.keir
 service ticket
 module Ticket
 layout collocated
-runtime-package ticket-service
+runtime-package ticket-core
 spec ticket/shared.keiro
 spec ticket/ticket.keiro
 ```
@@ -130,7 +132,7 @@ The first structural scaffold emits private `Structural.Shape.*` modules and one
 
 The semantic-local scaffold additionally emits one context `StructuralConformance` and one context `BehaviorSourceMap`. The former owns declaration-wide laws once for the service; aggregate harnesses retain only use-specific evidence in their checked closures. The latter maps stable behavior keys to current source positions so source movement does not churn semantic contracts. Repaste both from the Cabal fragment and run the generated service conformance target after adoption. See [semantic-local regeneration](../keiro/dsl-semantic-locality.md).
 
-From language version 2 each aggregate also gets generated `Expressions` and `Transducer` modules. They are the one exemption to the symbolic-operator firewall, because they are the generated authority that builds Keiki terms from declared guards and writes. Every such transition is generated-owned or explicitly `implementation hole`; see [aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md).
+From language version 2, the generated `Transducer` owns the Keiki terms for declared guards and writes; the current generator also emits `BehaviorContract`. Do not require a separate `Expressions` module. The symbolic-operator firewall exempts the authoritative `Transducer` and outcome-enabled `EventStream` modules, where checked rejection/no-op reasons are evaluated after edge selection; ordinary event-stream modules remain scanned. Every transition is generated-owned or explicitly `implementation hole`; see [aggregate scalar expressions and transition ownership](../keiro/aggregate-expressions.md).
 
 A configured service additionally scaffolds at most one local conformance package behind a single generated `<Generated prefix>.Conformance` facade. See [the generated compilation contract](generated-compilation-contract.md) for the package, its runtime-package authority, and the language pragmas generated modules may declare.
 

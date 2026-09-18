@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Service Architecture"
 description: "Index of the keiro service architecture standard: domain types, packages, vertical slices, tests, and scaffolding; start here"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-overview
 tags: [architecture, overview]
 status: current
@@ -25,11 +25,13 @@ reviews:
 
 # Keiro Service Architecture
 
-**One nominal type per key domain value, one vertical slice per domain concept, six packages per service, and an explicit generated/hand-owned boundary for aggregate rings and structural mappings.**
+**Design bounded contexts, invariants, aggregates, domain events, and workflows first; express that model through the platform's service contracts and vertical slices.**
 
 This area is the fleet structure standard for deployed keiro services. It reconciles danwa's shipped six-package, collocated module structure with the richer keiro-dsl node vocabulary in keiro-runtime-jitsurei. Danwa's code is authoritative where its older prose disagrees with it; keiro-runtime-jitsurei is the node-placement reference, but its teaching-only monolith and legacy duplicate modules are not production conventions.
 
 ## Start Here
+
+- [Domain design and runtime choices](domain-design.md) establishes the business model and consistency boundaries before code layout.
 
 - [Domain newtypes and TypeIDs](domain-newtypes-and-typeids.md) makes TypeID the service-owned identifier default and forbids raw primitives for key domain values.
 - [Service packages](service-packages.md) defines the six cabal packages, their dependency boundaries, and the teaching-repository exception.
@@ -44,7 +46,7 @@ This area is the fleet structure standard for deployed keiro services. It reconc
 
 ## How To Use This Standard
 
-To start a new service, establish its [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md), then read service packages, vertical-slice modules, and specification and scaffolding in that order. To place a keiro-dsl node beyond an aggregate, use extended node verticals. When a proposed module has a technology-shaped name rather than a domain-concept name, check the cross-cutting allowlist; if the name is absent, keep the code in the owning concept vertical.
+To start a service in this platform, follow [domain design and runtime choices](domain-design.md). Capture business scenarios, invariant ownership, aggregate command/event behavior, and cross-context workflows. Then apply [DSL adoption](../keiro/dsl-adoption.md), [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md), specification and scaffolding, service packages, and vertical-slice modules. To place a keiro-dsl node beyond an aggregate, use extended node verticals. When a proposed module has a technology-shaped name rather than a domain-concept name, check the cross-cutting allowlist; if the name is absent, keep the code in the owning concept vertical.
 
 The generated/hand-owned boundary is load-bearing. Keiro-dsl may replace every `Generated.*` module, including structural wire shapes and projection witnesses, while developers own aggregate holes, consumer bindings, fixtures, and application modules. Never copy legacy parallel modules from a teaching repository into a deployed service.
 

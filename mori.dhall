@@ -53,6 +53,14 @@ in  Schema.Project::{
       ]
     , docs =
       [ Schema.DocRef::{
+        , key = "architecture-domain-design"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Design bounded contexts, invariants, aggregates, domain events, and workflows before selecting runtime mechanisms and service layout"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/architecture/domain-design.md"
+        }
+      , Schema.DocRef::{
         , key = "keiki-overview"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module
@@ -727,7 +735,7 @@ in  Schema.Project::{
         , kind = Schema.DocKind.Pattern
         , audience = Schema.DocAudience.Module
         , description = Some
-            "Complete file listing of danwa's Conversation slice across all six packages"
+            "Conversation vertical illustrating domain-first design and current generated/hand-owned ownership"
         , location =
             Schema.DocLocation.LocalFile
               "runtime-patterns/architecture/worked-example-conversation.md"

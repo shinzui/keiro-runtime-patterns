@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro runtime patterns"
 description: "Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, candidate Language 6, generated Haskell editions, and durable workflows"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -63,7 +63,9 @@ The 0.13 release adopts [typed transient transaction failures](command-cycle-and
 
 ## Start here
 
-Read runtime assembly first, the schema arrangement second, and the DSL adoption decision before writing a new service.
+Start with [domain design and runtime choices](../architecture/domain-design.md): bounded contexts, invariants, aggregates, domain events, and workflows. Apply the DSL adoption convention to that model, then read runtime assembly and the schema arrangement. Runtime wiring implements the business boundaries already chosen.
+
+- [Domain design and runtime choices](../architecture/domain-design.md) — model the business before selecting mechanisms.
 
 - [Runtime assembly](runtime-assembly.md) — acquire resources, validate event streams, and configure options.
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.

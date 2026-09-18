@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -36,15 +36,30 @@ reviews:
 
 # Getting started with the runtime patterns
 
+These standards serve one microservice platform with isolated DDD bounded contexts. Begin with domain design; package layout, generation, and transport implement the model.
+
 Choose the task that brought you here. Each route starts with the narrowest
 normative document; follow its related links or the subject overview when you
 need the surrounding rules.
 
-- **Starting a new service:** begin with
-  [domain newtypes and TypeIDs](architecture/domain-newtypes-and-typeids.md), then apply the
-  [six-package service standard](architecture/service-packages.md) and use the
+- **Designing a bounded context or starting a service:** begin with
+  [domain design and runtime choices](architecture/domain-design.md): establish the
+  ubiquitous language, business scenarios, invariants, aggregate boundaries,
+  commands, domain events, and workflow outcomes. Choose consistency and
+  cross-context contracts before arranging packages or selecting transports.
+- **Turning the domain model into a service:** apply
+  [DSL adoption](keiro/dsl-adoption.md), then
+  [domain newtypes and TypeIDs](architecture/domain-newtypes-and-typeids.md),
+  [service workspaces](keiro/service-workspaces.md), and the
+  [six application-package standard](architecture/service-packages.md). Use the
   [architecture overview](architecture/overview.md) for module and test layout.
-- **Defining an aggregate:** begin with
+- **Handling business request retries:** define the
+  [command request contract](keiro/command-cycle-and-errors.md#make-business-request-retries-explicit)
+  before exposing a command endpoint.
+- **Defining an aggregate:** first establish its
+  [invariants, command outcomes, and domain events](architecture/domain-design.md),
+  then use [aggregate transition ownership](keiro/aggregate-expressions.md).
+  For hand-owned behavior, follow
   [Keiki transducer best practices](keiki/transducer-best-practices.md), then
   apply the [build-time validation gate](keiki/build-time-validation.md). Mint every
   hand-written command and event constructor through

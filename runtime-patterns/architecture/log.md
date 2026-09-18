@@ -1,6 +1,16 @@
 # architecture Update Log
 
 ## 2026-09-18
+* **Update**: Correct symbolic firewall exceptions and generated module inventory against the current scaffolder.
+* **Update**: Remove the unconditional single-Holes rule in favor of declared generated and hand-owned responsibilities.
+* **Update**: Derive tests from domain invariants, workflow outcomes, concurrent commands, and request retry semantics.
+* **Update**: Align the runtime-package example with the core package that compiles generated code.
+* **Update**: Require domain modeling before scaffolding and align the runtime-package example with ticket-core.
+* **Update**: Replace legacy replication instructions with an explicitly illustrative domain-first Conversation vertical using current workspace and ownership conventions.
+* **Update**: Align stable-language generated transition ownership with conditional create-once hooks and behavior witnesses.
+* **Update**: Keep six application packages; explicitly exclude generated conformance tooling and name core as the runtime package.
+* **Update**: Start architecture adoption with business scenarios and invariant ownership before DSL and package layout.
+* **Added**: Domain-first platform standard: bounded contexts, invariants, aggregates, commands, domain events, workflows, and consistency before implementation choices.
 * **Update**: Place the candidate reaction process's generated input module and decoder-only hole.
 * **Update**: Add candidate Language 6 guidance, the HoleContractDrift refusal, the process-reaction ledger row, and comment-only QueuePolicy.hs churn.
 * **Update**: Add withFreshResourceStore and withFreshResourceStorePrepared for privileged role or grant preparation.

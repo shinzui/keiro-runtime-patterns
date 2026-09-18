@@ -1,6 +1,11 @@
 # keiro Update Log
 
 ## 2026-09-18
+* **Update**: Correct authoritative transducer and outcome-enabled event-stream firewall exceptions.
+* **Update**: Align generated behavior modules and symbolic firewall exceptions with the current scaffolder; remove obsolete Expressions module claims.
+* **Update**: Route runtime adoption through DDD domain design before resource assembly.
+* **Update**: Position DSL-first as the platform implementation convention applied after domain design.
+* **Update**: Define application-owned request identity, receipt atomicity, silent-outcome policy, retention, and command-versus-query outcomes.
 * **Update**: Require foreground-only timer resume hosts to schedule recoverExpiredTimerResumes.
 * **Update**: Correct the timer-query example to fire\_at and forbid custom SQL mutation of guarded timer rows.
 * **Update**: State that nested nominal leaves in aggregate events and registers enter the aggregate fold fingerprint.

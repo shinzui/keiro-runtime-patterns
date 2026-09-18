@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -28,6 +28,8 @@ reviews:
 **Adopt keiro-dsl for persisted contracts and evolution safety, including services that keep existing consumer-owned domain newtypes.**
 
 This guide decides when a service should own a checked Keiro DSL contract and where generated structure stops and hand-written domain logic begins. The default source shape is one composed `.keiro-workspace`; a bare `.keiro` input is reserved for a trivial domain with exactly one aggregate.
+
+Before choosing generated surfaces, establish the [domain design](../architecture/domain-design.md): bounded-context language, invariant ownership, aggregate behavior, domain events, and workflow outcomes. DSL-first is this platform's implementation convention; it does not determine aggregate or context boundaries.
 
 ## Apply the adoption rule
 
@@ -63,7 +65,7 @@ The rule is absolute: **never edit a generated module**. Change the specificatio
 
 Generated modules carry `-- @generated` and are overwritten on every scaffold. `HoleStub` modules are create-once and skipped thereafter. The `FirewallSurface` checked by `firewallBreaches` prevents generated modules from containing keiki decision operators and builders such as `.==`, `./=`, `.||`, `lit`, or the `B` builder qualifier.
 
-That firewall has exactly one exemption: the version-2 generated `Expressions` and `Transducer` modules, which are the intended generated authority for declared scalar guards and writes. Under language version 2 the spec, not a hand-written module, owns scalar decide logic for a generated transition; behavior the scalar language cannot express is marked `implementation hole` and stays hand-owned. Under version 1 every aggregate decide body remains hand-owned as before. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
+The firewall exempts the authoritative generated `Transducer` and outcome-enabled `EventStream` modules. The former owns transition terms; the latter evaluates a checked rejection/no-op reason only after Keiki selects an exact edge. Ordinary event-stream modules remain scanned, and the current generator does not emit a separate `Expressions` module. From language version 2 onward the spec owns scalar decide logic for a generated transition; behavior the scalar language cannot express is marked `implementation hole` and stays hand-owned. Under version 1 every aggregate decide body remains hand-owned as before. See [aggregate scalar expressions and transition ownership](aggregate-expressions.md).
 
 The default layout is `Generated.<Context>.<Node>` with holes under the domain namespace. `--collocate` instead places generated code at `<Context>.<Node>.Generated` beside the hand-owned layer. Structural mappings additionally emit private `Structural.Shape.*` modules, one `StructuralProjections` facade, one service-wide `StructuralConformance`, and one source-only `BehaviorSourceMap`. Binding, fixture, optional register-initial, and behavior-witness modules are create-once, hand-owned files at the qualified modules named by the declarations.
 

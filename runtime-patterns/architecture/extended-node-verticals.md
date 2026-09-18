@@ -2,10 +2,10 @@
 type: Pattern
 title: "Extended Keiro-DSL Node Verticals"
 description: "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-extended-node-verticals
 tags: [architecture, extended-node-verticals]
 status: current
@@ -82,7 +82,7 @@ Integration is a first-class concept under `<Service>.Integration.*`, never a te
 
 Danwa realizes this division with `danwa-core/src/Danwa/Integration/AddressedMessage.hs` and `danwa-workers/src/Danwa/Integration/{AddressedMessageWorker,OutboxPublisherWorker}.hs`. The richer example realizes hand-written `HospitalCapacity.Integration.{Contracts,Inbox,Outbox,KafkaConsumer,KafkaPublisher,ReservationWorkDispatch}` modules around generated nodes.
 
-Do not mistake keiro-runtime-jitsurei's neighboring per-aggregate `Transducer`, `Projection`, `EventStream`, and `CommandProcessor` modules for part of this convention. They are a teaching-only legacy surface; the production aggregate convention remains one generated ring plus one hand-owned `Holes` module.
+Do not mistake keiro-runtime-jitsurei's neighboring per-aggregate `Transducer`, `Projection`, `EventStream`, and `CommandProcessor` modules for part of this convention. They are a teaching-only legacy surface; the production aggregate convention is the generated ring plus only its declared create-once hooks, bindings, and witnesses. Stable Language 5 generates expressible decisions; see [vertical-slice modules](vertical-slice-modules.md).
 
 ## Related Patterns
 

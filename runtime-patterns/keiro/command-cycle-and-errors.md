@@ -2,10 +2,10 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:48:47Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-09-18T04:48:47Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
@@ -79,6 +79,52 @@ Workers acknowledge a typed rejection or no-op normally and drop the handled pay
 Telemetry uses the bounded `keiro.command.decision` span attribute and the `keiro.command.decisions` counter, whose value set is exactly `accepted`, `rejected`, and `no_op`. Application rejection and no-op payloads must never become telemetry labels or error descriptions.
 
 Declare the outcome types in the specification under [Language 5](language-versions.md): an aggregate may declare rejection and no-op result types and label each live transition accepted, rejected with a checked reason, or no-op with a checked reason. Scaffolding then exports the aggregate's `DomainCommandHandler`, dispatches on Keiki's exact selected edge, and evaluates only the selected reason term. Fold fingerprints, event history, snapshots, and replay are unchanged by the declaration.
+
+## Make business request retries explicit
+
+A request retry is another invocation unless the application proves it is the
+same business operation. Optimistic-concurrency retries protect one stream's
+decision; they do not provide a stored HTTP response or deduplicate separate
+client requests. Caller-supplied event IDs can protect an append, but are not
+a complete request receipt.
+
+Before exposing a retryable command, declare:
+
+- a stable operation key, scoped to the bounded context, command purpose, and
+  target aggregate; retries reuse it, while a new business intent gets a new key;
+- a canonical request fingerprint; the same key with a different request is a
+  conflict, never a duplicate success;
+- the durable result or sufficient evidence to reconstruct the original result,
+  including accepted, rejected, and no-op outcomes where the API promises repeatability;
+- concurrent-duplicate behavior, bounded waiting/retry, and receipt retention
+  covering the supported retry horizon.
+
+For accepted commands, commit the receipt with the protected event append and
+any required SQL/outbox effects. Do not mark success before commit or write an
+uncoordinated receipt afterwards. A lost response after commit must resolve to
+that recorded result, not execute a fresh operation.
+
+A rejected or no-op decision invokes no after-append callback. If the API
+promises to replay that result, provide an application-owned receipt protocol
+that serializes competing requests and durably records it; do not pretend an
+after-append hook handles the silent path. If the API instead reevaluates such
+requests against current state, state that policy explicitly. Do not add fake
+domain events solely to make a receipt callback run.
+
+The runtime supplies append and transaction primitives, not a general request
+receipt service. The [inbox](../messaging/inbox.md) applies to integration-event
+intake; delegated intake specifically refuses success without an event receipt.
+Do not substitute it for a general command endpoint contract.
+
+Return acceptance independently from read-side freshness. Preserve the committed
+position when available and use the [read-model freshness protocol](read-models-and-projections.md)
+for read-your-write. A query timeout after a successful append is not command
+failure. External effects use stable downstream operation keys and the
+[outbox](../messaging/outbox.md) or idempotent workflow steps.
+
+Prove the boundary with concurrent identical requests, conflicting payloads
+under one key, a crash before commit, a lost response after commit, silent
+outcomes, and retry after the declared retention window.
 
 ## Ambiguity is never benign
 
