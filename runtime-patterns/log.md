@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-09-18
+* **Update**: Route the Keiro 0032 stopped-writer migration obligation.
 * **Update**: Route candidate Language 6 gating, FIFO-heads jobs, dead timer resume, and diff --deny.
 
 ## 2026-09-06

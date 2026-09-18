@@ -2,10 +2,10 @@
 type: Standard
 title: "Idempotent Inbox"
 description: "Consuming integration events idempotently: runInboxTransaction variants, delegated downstream receipts, and disposition completeness"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-inbox
 tags: [messaging, inbox]
 status: current
@@ -62,7 +62,7 @@ Table-backed intake is the default. Use delegated intake only when one downstrea
 - `delegatedFromPMCommand` adapts one deterministic process-manager dispatch whose command identity already absorbs the intake identity. It does not prove a multi-command reaction completed.
 - Handle every `DelegatedCommandError`. `DelegatedCommandFailed` and `DelegatedCommandWithoutReceipt` (a successful command that appended no event) are failures; never wrap the whole result as `DelegatedFresh`.
 
-The caller owns durable attempt accounting: supply the one-based attempt and ceiling through `mkDelegatedRetryContext`, and above the ceiling the handler is not invoked (`InboxPreviouslyFailed`). Durably publish or store a dead-letter record before acknowledging a terminal failure; the delegated wrappers write none. `runInboxDelegatedBatch` suppresses repeated identities only within its one sequential call.
+The caller owns durable attempt accounting: build `mkDelegatedRetryContext ceiling attempt` from a positive ceiling and the positive one-based current attempt, pass it to `runInboxDelegatedWithRetries`, and above the ceiling the handler is not invoked (`InboxPreviouslyFailed`). Durably publish or store a dead-letter record before acknowledging a terminal failure; the delegated wrappers write none. `runInboxDelegatedBatch` suppresses repeated identities only within its one sequential call.
 
 Keep table intake for silent commands, zero-event successes, separately committed side effects, general workflow bodies, and multi-command reactions. Delegated consumers have no inbox backlog, failed-row, retention, or `keiro-ops inbox` surface. Renaming the marker event, target, consumer, source, or operation makes a replay look fresh.
 

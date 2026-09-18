@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq 0.17: required job ordering, FIFO-heads, retry and VT rules, guarded DLQ retention, and partitioned provisioning"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -60,6 +60,8 @@ Build non-default tuning with `mkJobTuning`, then apply the job's own ordering w
 - `Unordered`: approximate `msg_id` selection order, no per-key guarantee. The default for independent work.
 - `FifoHeads`: PGMQ grouped-head reads. A read leases at most the absolute oldest message of each `x-pgmq-group`; an invisible, delayed, or failed head blocks only its own group while other groups stay eligible. `batchSize` bounds how many groups one read claims, not how many members it takes from a group. Requires PGMQ 1.12 or later and `shibuya-pgmq-adapter` 0.16 (`HeadPerGroup`). Keiro handlers remain serial.
 - `FifoThroughput` and `FifoRoundRobin`: the legacy fill strategies (`read_grouped`, `read_grouped_rr`). They can lease a successor before its predecessor settles, so Keiro accepts them only with a batch size of one. Do not select them for new jobs.
+
+Roll `FifoHeads` out consumers first: migrate the schema to PGMQ 1.12 or later, deploy every consumer built with the required `jobOrdering` and `FifoHeads` support, and only then change the generated queue policy or producer assumptions. Never leave an older consumer reading an ordered queue as unordered or through a legacy batch-filling read.
 
 Messages without an `x-pgmq-group` header share one implicit group. Grouped reads are visibility leases, not exactly-once delivery; handlers stay idempotent. A `.keiro` `ordering fifo-heads` declaration scaffolds `FifoHeads` and FIFO-index provisioning under candidate Language 6; see [language versions](../keiro/language-versions.md).
 

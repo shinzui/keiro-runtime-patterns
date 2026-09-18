@@ -2,10 +2,10 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order"
-timestamp: 2026-08-10T13:59:20Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-08-10T13:59:20Z"
+  by: process:claude-code
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -117,6 +117,8 @@ guardMigrations provider plan = do
 ```
 
 `missingMigrations` is a read-only status query, so every replica may call it at boot. `StartupHandshake` reports `pendingMigrations` and `ledgerIssues`; `handshakePassed` requires both to be empty. Open Kiroku with schema initialization disabled afterwards.
+
+Every timer worker pass recovers expired guarded timer claims, whatever `requeueStuckAfter` says. A host that resumes `Dead` timers in the foreground without running a timer worker must call `recoverExpiredTimerResumes` before discovery and periodically afterwards; see [dead timer resume](dead-timer-resume.md).
 
 Catalog registration and worker startup should fail the process rather than leave a partially assembled runtime alive. Before starting any worker against a populated event store, resolve its missing-checkpoint policy explicitly; the read-only [durable checkpoint inventory](../kiroku/checkpoint-inventory.md) can prove what exists but cannot choose or mutate that lifecycle.
 

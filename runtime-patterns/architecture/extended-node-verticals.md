@@ -2,10 +2,10 @@
 type: Pattern
 title: "Extended Keiro-DSL Node Verticals"
 description: "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
-timestamp: 2026-07-22T18:42:26Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T18:42:26Z"
+  by: process:claude-code
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-extended-node-verticals
 tags: [architecture, extended-node-verticals]
 status: current
@@ -51,6 +51,8 @@ A `process` node is an event-sourced process manager: it reacts to facts and dis
 <Service>/<Name>/Generated/ProcessHarness.hs
 <Service>/<Name>/ProcessHoles.hs
 ```
+
+A process written with candidate Language 6 `reactions` also generates `Generated/Input.hs` for its typed input ADT, and its `ProcessHoles.hs` shrinks to the single create-once `decode<Process>Input :: RecordedEvent -> Maybe <Process>Input`; the pure reaction, timers, and firing dispatcher are generated. Keep released services on the legacy body until Language 6 is published; see [language versions](../keiro/language-versions.md).
 
 `HospitalCapacity.HospitalSurge` is the reference realization. Process-state, timer, and dispatch semantics come from [process managers and durable timers](../messaging/process-managers.md).
 

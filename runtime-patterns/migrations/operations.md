@@ -2,10 +2,10 @@
 type: Runbook
 title: "Migration Operations"
 description: "Operating verify, verify-schema, status, and repair; the codd preflight; Running after a crash needs audited repair"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-operations
 tags: [migrations, operations]
 status: current
@@ -81,6 +81,10 @@ Import the codd history first with `keiro-migrate import-codd-history`; it verif
 
 Applying migrations from a deployment job does not stop an application replica from starting before that job reaches its database. Every replica should call `missingMigrations` at boot and refuse to serve until `handshakePassed` holds. The check is a read-only status query, safe to run from every process. See [runtime assembly](../keiro/runtime-assembly.md).
 
+## Stop timer writers before Keiro `0032`
+
+Keiro `0032` is the exception to deploying code against an already-migrated schema. Its guarded-resume columns are additive, but old binaries do not enforce their exclusions. Stop or drain every timer writer — workers, process-manager and workflow hosts, consoles, custom SQL — then run `up`, deploy every upgraded writer, and only then enable foreground resume. To roll back writers, disable resume and drain or recover guarded claims first. See [dead timer resume](../keiro/dead-timer-resume.md).
+
 ## Treat `Running` after a crash as ambiguous
 
 A crash during nontransactional work can leave its database effect absent, partial, or complete while the ledger says `Running`. Do not blindly rerun it and do not edit the ledger.
@@ -111,3 +115,4 @@ Live-schema comparison is a Keiro-owned gate layered on top, not a pg-migrate fe
 - [Migration Authoring](./authoring.md)
 - [Migration Testing](./testing.md)
 - [Codd Transition](./codd-transition.md)
+- [Dead timer resume](../keiro/dead-timer-resume.md)

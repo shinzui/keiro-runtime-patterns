@@ -2,10 +2,10 @@
 type: Standard
 title: "Keiro DSL language versions"
 description: "Declaring a Keiro DSL language contract, adopting published stable version 5, keeping candidate version 6 off released services, and auditing compatibility-only sources"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -77,7 +77,7 @@ Adopting version 5 is one gate, not a preamble edit: move every workspace member
 
 **A candidate is accepted for authoring, but it is not a compatibility contract: keep every released service on version 5 until version 6 is published.**
 
-The registry marks version 6 `Candidate` with `CandidateLanguage` maturity. Published entries are append-only and immutable; the active candidate may be corrected in place until its release boundary, including grammar, diagnostics, generated code, fingerprints, and derived runtime identities. Keiro 0.17.0.0 already exercised that right by changing how candidate reaction timer and fired-event UUIDv5 ids are derived. Anything a candidate source persists — reaction timer ids, dispatch ids, delegated receipt ids, nominal-leaf codec bytes — therefore carries no guarantee across a keiro-dsl upgrade.
+The registry marks version 6 `Candidate` with `CandidateLanguage` maturity. Published entries are append-only and immutable; the active candidate may be corrected in place until its release boundary, including grammar, diagnostics, generated code, fingerprints, and derived runtime identities. Version 6 first appears in 0.17.0.0 and has no earlier release, but its derived identities are exactly what an in-place correction may change: reaction timer and fired-event ids are UUIDv5 values over length-prefixed fields under a fingerprint encoder that is frozen only when the language is published. Anything a candidate source persists — reaction timer ids, dispatch ids, delegated receipt ids, nominal-leaf codec bytes — therefore carries no guarantee across a keiro-dsl upgrade.
 
 - Declare `language keiro-dsl 6` only in a spike, fixture, or branch that can absorb an in-place correction, and never where the generated output writes production data.
 - A candidate source stays silent on stderr — the compatibility notice fires only for `compatibility-only` contracts — so do not treat the absence of a notice as publication. Gate on the check report instead: `language.languageSupport` is `candidate` and `language.stable` is `false`. Make `language.stable == true` a CI assertion for every released service.

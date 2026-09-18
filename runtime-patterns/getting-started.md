@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -127,7 +127,7 @@ need the surrounding rules.
 - **Evolving database schemas:** follow
   [migration authoring](migrations/authoring.md), then use the
   [migration operations runbook](migrations/operations.md) for verification and
-  repair.
+  repair. Keiro migration `0032` requires stopped timer writers before `up`.
 - **Structuring packages and modules:** start with the
   [workspace-first service-contract standard](keiro/service-workspaces.md), then use the
   [service-package standard](architecture/service-packages.md) and

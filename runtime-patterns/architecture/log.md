@@ -1,6 +1,7 @@
 # architecture Update Log
 
 ## 2026-09-18
+* **Update**: Place the candidate reaction process's generated input module and decoder-only hole.
 * **Update**: Add candidate Language 6 guidance, the HoleContractDrift refusal, the process-reaction ledger row, and comment-only QueuePolicy.hs churn.
 * **Update**: Add withFreshResourceStore and withFreshResourceStorePrepared for privileged role or grant preparation.
 * **Update**: Exempt Keiro's deterministic producer outbox identity (UUIDv8 OutboxId, opaque message ID) from TypeID wrapping.

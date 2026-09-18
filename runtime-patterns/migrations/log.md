@@ -1,5 +1,8 @@
 # migrations Update Log
 
+## 2026-09-18
+* **Update**: Add the Keiro 0032 stop-the-writers exception to the migrate-then-deploy flow.
+
 ## 2026-09-06
 * **Update**: Exercise fresh-session upgrades and both qualified UUIDv7 routes on PostgreSQL 17 and 18.
 * **Update**: Route Kiroku 0010 release-specific recovery through migration operations.

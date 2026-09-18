@@ -1,6 +1,11 @@
 # messaging Update Log
 
 ## 2026-09-18
+* **Update**: Define delegated intake, producer identity, process reaction, guarded claim, and grouped-head FIFO terms.
+* **Update**: State the mkDelegatedRetryContext ceiling/attempt order and its runInboxDelegatedWithRetries use.
+* **Update**: Restore FIFO-index reporting to the drift section and correct the effectful-core bound.
+* **Update**: Require a consumers-first FifoHeads rollout after the PGMQ 1.12 schema migration.
+* **Update**: Specify conflict condemnation and halting, out-of-SQL recording, isolation retries, retention horizon, replay comparison rules, and the Keiro.Outbox.Identity selector-ambiguity upgrade step.
 * **Update**: Route pgmq-hs 0.6, FIFO-heads jobs, the reaction runner, and delegated inbox intake.
 * **Update**: Add FIFO-heads, DLQ-inspection, partition-retention, frozen producer identity, reaction-runner, and delegated-inbox traps; move PGMQ claims to 0.6 and renumber.
 * **Update**: Add delegated intake (runInboxDelegated\*, Keiro.Inbox.Delegated), its receipt contract, caller-owned retry and DLQ, and the cutover as an identity change.

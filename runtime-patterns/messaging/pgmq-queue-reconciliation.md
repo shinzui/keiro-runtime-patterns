@@ -2,10 +2,10 @@
 type: Standard
 title: "PGMQ queue lifecycle and reconciliation"
 description: "Validated durable queue names, additive startup reconciliation, truthful drift reports, notification recovery, and PGMQ 1.13 schema, partition premake, and retry classification in pgmq-hs 0.6"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-queue-reconciliation
 tags: [messaging, pgmq-queue-reconciliation]
 status: current
@@ -17,7 +17,7 @@ status: current
 
 These rules target the released pgmq-hs 0.6 package family (0.6.1.0). Upgrade `pgmq-core`, `pgmq-hasql`, `pgmq-effectful`, `pgmq-config`, and `pgmq-migration` together with bounds `>=0.6 && <0.7`; Keiro 0.17 and `shibuya-pgmq-adapter` 0.16 require that family.
 
-Crossing from 0.5 breaks two records. `QueueMetrics` gains `defaultPartitionLength :: Maybe Int64`, and `PartitionConfig` gains `premake :: Maybe Int32`; positional constructors and patterns must supply both. The family accepts `effectful-core` `^>=2.6 || ^>=2.7`; on 2.7 use 2.7.1.1 or newer, because 2.7.0.0 slows every dynamically dispatched queue operation. Keiro 0.17 and adapter 0.16 still bound `effectful-core` to 2.6, which decides the version a Keiro service resolves.
+Crossing from 0.5 breaks two records. `QueueMetrics` gains `defaultPartitionLength :: Maybe Int64`, and `PartitionConfig` gains `premake :: Maybe Int32`; positional constructors and patterns must supply both. The family accepts `effectful-core` `^>=2.6 || ^>=2.7`; on 2.7 use 2.7.1.1 or newer, because 2.7.0.0 slows every dynamically dispatched queue operation. Keiro 0.17 and adapter 0.16 still bound `effectful-core` below 2.7, which decides the version a Keiro service resolves.
 
 ## Migrate the schema before creating queues
 
@@ -37,13 +37,13 @@ Declare queue type, notifications, FIFO index, and topic bindings in `QueueConfi
 
 The reconciler is additive. It may create a missing queue, notification row, FIFO index, or topic binding. Its only mutation of existing configuration is applying a changed notification throttle. It must not drop or recreate a queue to change its type: `DetectedQueueTypeDrift` is a startup/operator failure that preserves messages.
 
-`pgmq.list_queues()` exposes only standard, unlogged, or partitioned shape. Partition interval, retention, and premake are not drift-checked. Record and verify those separately when they are operationally load-bearing.
+`pgmq.list_queues()` exposes only standard, unlogged, or partitioned shape. Partition interval, retention, and premake are not drift-checked. Record and verify those separately when they are operationally load-bearing. `SkippedFifoIndex` and `CreatedFifoIndex` now report the observed catalog truth; do not infer action from intent.
 
 `PartitionConfig.premake` applies only at creation. `Nothing` uses the server default of four premade partitions and works on 1.12; `Just n` requires 1.13 and `n >= 1`. Changing it for an existing queue neither reconfigures `pg_partman` nor reports drift.
 
 ## Watch default-partition spill
 
-On 1.13, `defaultPartitionLength` is a planner estimate of rows that spilled into the queue and archive default partitions. Treat a positive value as a maintenance alert. `Nothing` means unavailable (1.12) or inapplicable (ordinary queues); never read it as zero, and expect a zero estimate to lag writes until statistics refresh. Upgrading does not drain defaults: run the upstream recovery sequence (`partition_data_proc` outside a transaction for each affected queue and archive, maintenance, then `ANALYZE`). `SkippedFifoIndex` and `CreatedFifoIndex` now report the observed catalog truth; do not infer action from intent.
+On 1.13, `defaultPartitionLength` is a planner estimate of rows that spilled into the queue and archive default partitions. Treat a positive value as a maintenance alert. `Nothing` means unavailable (1.12) or inapplicable (ordinary queues); never read it as zero, and expect a zero estimate to lag writes until statistics refresh. Upgrading does not drain defaults: run the upstream recovery sequence (`partition_data_proc` outside a transaction for each affected queue and archive, maintenance, then `ANALYZE`).
 
 ## Treat notifications as hints
 

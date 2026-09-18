@@ -1,6 +1,12 @@
 # keiro Update Log
 
 ## 2026-09-18
+* **Update**: Require foreground-only timer resume hosts to schedule recoverExpiredTimerResumes.
+* **Update**: Correct the timer-query example to fire\_at and forbid custom SQL mutation of guarded timer rows.
+* **Update**: State that nested nominal leaves in aggregate events and registers enter the aggregate fold fingerprint.
+* **Update**: Name the reaction version and timer evolution codes and keep old firing decoders deployed until scheduled rows drain.
+* **Update**: Correct the candidate-correction claim: Language 6 first ships in 0.17 and its derived reaction identities are unfrozen until publication.
+* **Update**: Add zero and negative ceiling, exact guard, uniform refusal, and lease-expiry semantics for claim mutations.
 * **Update**: Move the index to Keiro 0.17.0.0, pgmq-hs 0.6, and the effectful 2.6 bound; summarize 0.16 and 0.17 obligations and route dead timer resume.
 * **Update**: Add the 0.16 timer rollout, worker resume recovery, silent candidate language, and legacy-process-to-reactions identity traps.
 * **Update**: Move the baseline release to Keiro 0.17.0.0.

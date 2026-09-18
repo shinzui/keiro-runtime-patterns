@@ -2,10 +2,10 @@
 type: Standard
 title: "Dead timer inspection and guarded resume"
 description: "Reading parked timers with bounded reason-filtered pages, resuming one under an expiring token claim, and the migration 0032 writer rollout and rollback order"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dead-timer-resume
 tags: [keiro, timers, dead-timer-resume]
 status: current
@@ -41,7 +41,7 @@ Neither read authorizes disclosure. The owner label is not an authorization cred
 
 ## Claim with exact guards
 
-Build a `DeadTimerClaimRequest` with the timer id, the mandatory exact `processManagerName`, the non-NULL literal `expectedReason`, an explicit total `maxAttempts` ceiling, and `leaseSeconds` between 1 and 2147483647. Invalid ceilings and leases return `TimerResumeError` without touching the database.
+Build a `DeadTimerClaimRequest` with the timer id, the mandatory exact `processManagerName`, the non-NULL literal `expectedReason`, an explicit total `maxAttempts` ceiling, and `leaseSeconds` between 1 and 2147483647. A negative ceiling or out-of-range lease returns `TimerResumeError` without touching the database; a ceiling of zero refuses every claim. The claim succeeds only when the row is `Dead`, the owner and non-NULL reason match exactly (empty text is a valid reason), and `attempts` is strictly below the ceiling. A missing id and every guard refusal return the same `Right Nothing` and change nothing.
 
 Before calling `claimDeadTimer`, decode the original payload, classify the reason, recheck authorization, and establish session or downstream availability. A refused preflight or a claim that returns `Right Nothing` consumes no attempt. A successful claim increments `attempts` exactly once and moves the row to `firing` under a fresh token.
 
@@ -51,10 +51,12 @@ Treat an ambiguous claim response as no ownership. Inspect and recover rather th
 
 Execute only after receiving a `TimerResumeClaim`, and outside the SQL transaction.
 
-- `renewTimerResume claim seconds` extends the lease from database time and keeps the token. `False` means ownership is lost; an expired claim cannot be revived. `resumeClaimLeaseUntil` is the claim-time snapshot and does not move on renewal, so schedule renewals by the requested interval.
+- `renewTimerResume claim seconds` extends the lease from database time and keeps the token. It returns `Left` for an out-of-range lease and `Right False` when ownership is lost; an expired claim cannot be revived. `resumeClaimLeaseUntil` is the claim-time snapshot and does not move on renewal, so schedule renewals by the requested interval.
 - `completeTimerResume claim eventId` marks the timer `fired`. Never report success when it returns `False`.
 - `parkTimerResume` returns the row to `Dead`, keeping the original reason and the incremented attempts. Use it after post-claim session loss or a transient failure; that attempt is spent.
 - `cancelTimerResume` abandons the work as the current owner.
+
+Every one of these requires the current token and an unexpired lease; after expiry each returns `False`, even before recovery has re-parked the row.
 
 On lost ownership, stop local work where possible and do not report completion. The lease cannot stop an external call that has already started. Give the work a stable identity and deduplicate its result in the consumer: execution is at-least-once.
 

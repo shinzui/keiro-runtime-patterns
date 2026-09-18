@@ -2,10 +2,10 @@
 type: Standard
 title: "Mapped consumer surfaces"
 description: "Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-mapped-consumer-surfaces
 tags: [keiro, mapped-consumer-surfaces]
 status: current
@@ -45,6 +45,7 @@ Candidate [Language 6](language-versions.md) adds `StructuralNominalLeaves`: a d
 - **Treat that replacement as a mapped type change.** `diff` reports opaque-or-`Text`-to-nominal replacement conservatively as `MappedFieldTypeChanged` at every affected root. Generate the historical codec comparison, run the old codec against committed missing/null/present samples, and require byte parity plus rejection of malformed IDs. That evidence does not waive event versioning, queue drain, or snapshot rules.
 - **Enum leaves are exact.** A nominal enum leaf codec accepts and emits only the declaration's declared wire spellings; an optional enum leaf may default to one of its constructors with `on-missing`.
 - **Key maps only by IDs.** `Map[DeclaredId] T` admits JSON object keys through the ID codec and generates `Map DeclaredId T`. The key must be an `id`; enums, nominal scalars, and mapped declarations are rejected. A consumer-bound key type must declare a checked law that its `Ord` agrees with canonical TypeID text ordering; generated conformance checks it over every pair of fixtures, so supply fixtures that exercise ordering.
+- **Nested leaves enter the aggregate fold.** A nominal leaf inside a structural declaration that an aggregate's persisted event payload or snapshot register contains contributes a `nested-nominal-use` segment — path, name, representation (ID prefix, enum constructor-to-wire pairs, or scalar kind), and for a consumer binding its canonical type, binding, and binding version — to that aggregate's fold fingerprint. Introducing such a leaf, or changing its prefix, enum wire spelling, or binding version, moves the fingerprint and follows the [evolution gates](evolution-and-rollout.md). Declaring version 6 alone does not.
 - **Read nominal findings per path.** Nominal prefix, domain, representation, binding, fixture, and canonical-type diffs name every affected structural event, snapshot, workqueue, command, and query path with its own surface context; key position is recorded separately from map values. Coverage report schema 1 appends `nominalBoundaries` and classifies nominal-only queue and query roots as structural rather than opaque.
 
 Aggregate guards and declarative router selection may traverse required structural paths down to these leaves; see [aggregate scalar expressions](aggregate-expressions.md).

@@ -2,10 +2,10 @@
 type: Guide
 title: "The two-schema arrangement"
 description: "Separation of Kiroku store, Keiro framework, and application-owned PostgreSQL schemas"
-timestamp: 2026-07-22T17:46:22Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T17:46:22Z"
+  by: process:claude-code
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-two-schema-arrangement
 tags: [keiro, two-schema-arrangement]
 status: current
@@ -47,12 +47,14 @@ The rule is one sentence: application SQL that names framework or cross-schema t
 -- CORRECT: follows the runtime's schema constant and quotes both identifiers.
 selectDueTimers =
   "SELECT * FROM " <> qualifyTable keiroSchema "keiro_timers" <>
-  " WHERE wake_at <= now()"
+  " WHERE status = 'scheduled' AND fire_at <= now()"
 
 -- WRONG: depends on search_path and may resolve nowhere or to the wrong table.
 selectDueTimers =
-  "SELECT * FROM keiro_timers WHERE wake_at <= now()"
+  "SELECT * FROM keiro_timers WHERE status = 'scheduled' AND fire_at <= now()"
 ```
+
+Read framework tables if you must; never mutate them. Timer rows in particular carry guarded-resume ownership since migration `0032`, and only `Keiro.Timer` enforces its exclusions; a custom `UPDATE` can complete, cancel, or requeue a claimed timer. See [dead timer resume](dead-timer-resume.md).
 
 ## Migrate before startup
 

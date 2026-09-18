@@ -2,10 +2,10 @@
 type: Reference
 title: "Messaging Glossary"
 description: "Shared messaging vocabulary: domain vs integration events, outbox, inbox, ack decisions, at-least-once plus idempotency"
-timestamp: 2026-07-22T18:15:59Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T18:15:59Z"
+  by: process:claude-code
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-glossary
 tags: [messaging, glossary]
 status: current
@@ -45,6 +45,10 @@ Use this reference when reading or writing the messaging standards. These terms 
 
 **Inbox.** The mirror pattern, backed by `keiro.keiro_inbox`, that commits the consumer's local effect and deduplication row in one transaction. The default public-message identity is `(source, messageId)`. See [Transactional Inbox](inbox.md).
 
+**Delegated intake.** Inbox idempotence owned by the downstream state transition instead of a `keiro.keiro_inbox` row: `Keiro.Inbox.Delegated` and the `runInboxDelegated*` wrappers write no inbox row: the receipt is the downstream transition's own durable event, and attempt counting and dead-lettering belong to the consumer. Switching an intake between table and delegated idempotence is an identity change. See [Transactional Inbox](inbox.md).
+
+**Producer identity.** The deterministic outbox identity a canonical `IntegrationProducer` derives from its source, name, source event id, and emission index: a UUIDv8 `OutboxId` and an opaque `<namespace>_v1_<sha256-hex>` `messageId`. A replay yields the same identity; different content under it is an identity conflict. See [Transactional Outbox](outbox.md).
+
 **At-least-once delivery plus idempotency.** Every transport in this stack can redeliver after a crash between the effect and its acknowledgement. Therefore every handler, finalizer, timer fire action, and publication retry path must be idempotent. This is the fleet's most load-bearing messaging invariant.
 
 **Dead letter.** A durable record of a message or event that will not be retried automatically. Concrete homes include PGMQ dead-letter queues or archives, `kiroku.dead_letters` for subscription events, and `keiro.keiro_dead_letters` for Keiro dispatch failures. A dead-letter path is incomplete until an operator can inspect, repair, and deliberately replay or discard its contents.
@@ -53,7 +57,11 @@ Use this reference when reading or writing the messaging standards. These terms 
 
 **Process manager, or saga.** A stateful coordinator implemented by `Keiro.ProcessManager`. It reacts to events, advances its own event-sourced state stream, dispatches deterministic commands, and can schedule durable timers. A router is stateless and resolves targets effectfully from a read model; a reactor is a hand-written stateless Shibuya worker; a durable workflow is an imperative long-running sequence. See [Process Managers And Durable Timers](process-managers.md) and the [Keiro runtime index](../keiro/overview.md).
 
-**Durable timer.** A `keiro.keiro_timers` row scheduled with manager state and claimed later by a timer worker. Timer firing is at-least-once, so the firing action must use a stable idempotency key.
+**Process reaction.** A process manager built on `Keiro.ProcessManager.Reaction`: a pure `react` returns a plan that either leaves the saga untouched (`NoAdvance`) or advances it (`AdvanceReaction`), with follow-up dispatches and timer changes. Its target command ids are keyed by target stream and occurrence, a different identity family from the legacy positional emit index. See [Process Managers And Durable Timers](process-managers.md).
+
+**Durable timer.** A `keiro.keiro_timers` row scheduled with manager state and claimed later by a timer worker. Timer firing is at-least-once, so the firing action must use a stable idempotency key. A `Dead` timer is parked, not destroyed; it can be resumed only through a guarded claim.
+
+**Guarded claim.** The opaque, expiring ownership `claimDeadTimer` grants over one `Dead` timer whose owner and exact reason match. The storage lease fences stale owners but does not authorize the work or stop an external call already running; expired claims return to `Dead`. See [Dead timer resume](../keiro/dead-timer-resume.md).
 
 ## Shibuya Processing
 
@@ -73,6 +81,8 @@ Use this reference when reading or writing the messaging standards. These terms 
 
 **Visibility timeout, or VT.** PGMQ's lease on an in-flight message. The message is invisible until the VT expires and is then eligible for redelivery. VT, not the handler's explicit retry delay, governs crash-redelivery cadence.
 
+**FIFO group and grouped head.** PGMQ orders messages sharing an `x-pgmq-group` header. A grouped-head read (PGMQ 1.12+) leases at most the lowest-id visible message of each group, so an invisible or delayed head blocks only its own group. Keiro exposes it as the `FifoHeads` job ordering; the adapter strategy is `HeadPerGroup`. See [Typed PGMQ Jobs](pgmq-jobs.md).
+
 ## Runtime Terms Live Elsewhere
 
 Validated event streams, the Kiroku/Keiro/application schema ownership arrangement, snapshot semantics, and `CommandAmbiguous` are defined by the [Keiro runtime standards](../keiro/overview.md). Messaging guidance links those definitions and does not redefine them.
@@ -80,6 +90,7 @@ Validated event streams, the Kiroku/Keiro/application schema ownership arrangeme
 ## Related Patterns
 
 - [Process managers and durable timers](process-managers.md)
+- [Dead timer resume](../keiro/dead-timer-resume.md)
 - [Integration events](integration-events.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Transport selection](transport-selection.md)

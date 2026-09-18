@@ -2,10 +2,10 @@
 type: Standard
 title: "Transactional Outbox"
 description: "Transactional enqueue, publication failure and terminal rejection, atomic finalization, maintenance, and deterministic identity"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T05:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-18T05:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-outbox
 tags: [messaging, outbox]
 status: current
@@ -41,13 +41,15 @@ Producer identity is deterministic and versioned (Keiro ADR-42, `mori://shinzui/
 - `ProducerDuplicateIdentical` — a retained row has identical canonical content; nothing is updated, so publication status, attempts, and rejection audit survive the replay;
 - `ProducerIdentityConflict identity fields` — a retained row under either identity differs. `fields` lists `ConflictField` classes only, never payload or metadata values.
 
-Treat a conflict as mapper drift, not a duplicate. Condemn the surrounding checkpoint transaction so the cursor does not advance, and after the transaction runner returns call `recordProducerEnqueueOutcome` once to count it. The application still owns source consumption; `IntegrationProducer` is a producer definition and enqueue primitive, not a checkpoint-owning subscription runner.
+Treat a conflict as mapper drift, not a duplicate. Call `Tx.condemn` in the transaction that also saves the checkpoint, so the cursor does not advance; after the transaction runner returns, call `recordProducerEnqueueOutcome metrics outcome` once to count it, then halt or dead-letter the source event rather than advancing past it. Keep observation outside SQL so serialization retries do not multiply the counter. Under repeatable-read or serializable isolation, retry serialization failures; the replay path takes a locking read through both unique indexes. The application still owns source consumption; `IntegrationProducer` is a producer definition and enqueue primitive, not a checkpoint-owning subscription runner.
 
-Freeze the tuple. Renaming the producer source or name, or reassigning emission indices, is a new delivery identity that republishes under new IDs; changing only the namespace collides with the retained `OutboxId` and reports a conflict. Deduplication lasts only as long as the outbox row: after `garbageCollectSent` removes it, a replay republishes with the same wire `messageId`, and downstream inbox retention decides suppression.
+Freeze the tuple. Renaming the producer source or name, or reassigning emission indices, is a new delivery identity that republishes under new IDs; changing only the namespace collides with the retained `OutboxId` and reports a conflict. Deduplication lasts only as long as the outbox row: after `garbageCollectSent` removes it, a replay republishes with the same wire `messageId`, and downstream inbox retention decides suppression. Size inbox retention to the replay horizon. A retained rejected row is never revived by producer replay. Payload comparison is byte-exact, attributes compare as canonical JSON, and `occurredAt` is truncated to whole microseconds before storage and comparison.
 
 Adopting 0.17 on a producer that minted random IDs is a cutover. Historical TypeID message IDs cannot be derived from the new tuple. Drain in-flight attempts and keep committed checkpoints so pre-cutover events are not replayed, or supply an application-owned old-to-new mapping before any replay. No schema migration is required.
 
 `freshIntegrationEvent` builds an explicitly fresh envelope with a random TypeID message ID and no provenance defaulting; `mintIntegrationEvent` is its deprecated alias. Use it only when the caller persists the envelope before any retry. `enqueueOutboxTx` collapses a repeated `(source, messageId)` with `ON CONFLICT ... DO NOTHING` without comparing content; reuse both the message identity and `OutboxId` for an idempotent retry through that path.
+
+`Keiro.Outbox` re-exports `Keiro.Outbox.Identity`, whose records carry `outboxId`, `messageId`, and `sourceEventId`. Bare selector calls on those names can become ambiguous on upgrade; use record-dot syntax or qualify the import rather than hiding the identity module.
 
 For a saga or process manager already inside a Keiro SQL transaction, use `enqueueIntegrationEventTx`. Supply a stable `OutboxId`; do not call `freshOutboxId` on every redelivery. Keep `OutboxId`, message IDs, and the service-owned IDs used to derive them as nominal types under [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md); render a primitive only at the outbox boundary. Danwa's addressed-message reactor derives a UUIDv5 from stable business facts. This deliberately matches Keiro's `deterministicCommandId` recipe: namespace a deterministic UUID over the triggering fact and emitted purpose. That prescribed deterministic identity retains its UUIDv5 semantics; it is not relabelled as an allocated UUIDv7 entity ID.
 
@@ -73,7 +75,7 @@ Return `PublishRejected` only when publication is intentionally and permanently 
 
 A committed rejection becomes `OutboxRejected`, with `rejectedAt` and `rejection` on `OutboxRow`. It schedules no retry, releases successors under per-key and per-source ordering, and does not halt `StopTheLine`. A `PublishFailed` still blocks its later ordered group members; do not label a temporary outage as rejection to drain a queue. Extend exhaustive outcome/status matches and direct row, summary, and metrics construction.
 
-The publisher finalizes sent, rejected, failed, and skipped rows in one transaction. Each update must still match `publishing`; stale claims cannot overwrite terminal truth. the `published`, `rejected`, `retried`, and `dead` fields of `OutboxPublishSummary`, and the corresponding metrics, count committed transitions rather than callback intentions. If finalization fails before commit, recovery may invoke the callback again: preserve the at-least-once publication contract and stable transport deduplication.
+The publisher finalizes sent, rejected, failed, and skipped rows in one transaction. Each update must still match `publishing`; stale claims cannot overwrite terminal truth. The `published`, `rejected`, `retried`, and `dead` fields of `OutboxPublishSummary`, and the corresponding metrics, count committed transitions rather than callback intentions. If finalization fails before commit, recovery may invoke the callback again: preserve the at-least-once publication contract and stable transport deduplication.
 
 Low-level callers must also adopt the conditional results: `markOutboxFailedTx` returns `Maybe OutboxStatus`, `markOutboxSkippedTx` and `markOutboxRejectedTx` return `Bool`, and `markOutboxSentBatchTx` returns the changed count. A no-change result is not a newly committed outcome.
 
