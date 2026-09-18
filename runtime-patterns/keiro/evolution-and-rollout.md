@@ -2,10 +2,10 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -44,7 +44,7 @@ A decode golden proves decode compatibility only. It is never evidence that an o
 
 ## Read Compatibility By Surface
 
-`keiro-dsl diff` derives each `ADDITIVE`, `WARNING`, or `BREAKING` headline from six surfaces: `private-history-read`, `old-binary-read-new-events`, `snapshot-hydration`, `public-consumer`, `persisted-identity`, and `consumer-build`. Use `--explain` to see containing paths, failing directions, rollout constraints, and remedies; use `--report-out FILE` for automation. Repeat `--gate SURFACE` only when the service intentionally wants a stricter blocking policy than the default.
+`keiro-dsl diff` derives each `ADDITIVE`, `WARNING`, or `BREAKING` headline from six surfaces: `private-history-read`, `old-binary-read-new-events`, `snapshot-hydration`, `public-consumer`, `persisted-identity`, and `consumer-build`. Use `--explain` to see containing paths, failing directions, rollout constraints, and remedies; use `--report-out FILE` for automation. Repeat `--gate SURFACE` only when the service intentionally wants a stricter blocking policy than the default. `diff --deny CODE[,CODE...]` is repeatable and escalates the named *advisory* findings to a failing invocation; it accepts only codes the diff pipeline emits and rejects any other spelling. Deny at least `AggGuardRelationUnknown` and `AggGuardRemedyUnavailable` in CI.
 
 Mapped declaration findings are recursive through every command, event, and register use site. A binding symbol or `binding-version` change is not inspectable from specification text, so the differ points to binding laws, fixtures, historical codec comparison, and replay evidence instead of claiming semantic compatibility.
 
@@ -60,7 +60,7 @@ The reports name structural, opaque, explicit-`Json`, snapshot, and unsupported 
 
 For a workspace, `diff` reconstructs the old manifest and old member set from Git and emits one compatibility stream, coverage report, and replay-impact verdict. Shared changes are classified at every aggregate use site with both declaring and consuming member locations. An unchanged declaration or aggregate moved between members emits `OwnershipMoved` and requires a whole-workspace rescaffold; a service, context, module, or layout authority change emits `WorkspaceAuthorityChanged` beside any actual persisted-identity break.
 
-Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, `WorkspaceAuthorityChanged` — not on the human-readable explanation.
+Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggGuardRelationUnknown`, `AggGuardRemedyUnavailable`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, `WorkspaceAuthorityChanged` — not on the human-readable explanation.
 
 `IdDomainContractChanged` arrived with language version 3 and is the sharpest of the mapped-declaration codes: it is compatible on `private-history-read`, `old-binary-read-new-events`, and `persisted-identity`; advisory on `snapshot-hydration` and `consumer-build`; **breaking** on `public-consumer`; and it carries a producer-last rollout constraint. Old history stays readable through an internal legacy decoder while current command and public decoding reject the same text, so the rollout order is the whole safety argument. See [enforced identifier domains](identifier-domains.md).
 
@@ -97,6 +97,13 @@ Keep the replay-only edge until every affected stream is terminal, truncated, or
 
 When a live guard tightens and no twin exists, `keiro-dsl diff` computes and prints a paste-ready replay-only twin with the `AggGuardTightened` advisory. It is printed, never applied — whether history stays replayable or gets truncated instead is a business decision.
 
+The differ partitions transitions by mode, source, and command, cancels byte-identical canonical transitions as a multiset, and compares the complete live guard union per replay body, so reordered, split, merged, or duplicated sibling branches and no-emit branches no longer raise false guard advisories. Two advisories replace the guess it used to make; both mean **do not deploy**:
+
+- `AggGuardRelationUnknown` — an emitting sibling remainder, or an explicit Hole-owned change, whose relation to the old guard cannot be decided. No replay-only edge is proposed; decide the history consequence by hand.
+- `AggGuardRemedyUnavailable` — the proposed twin failed the differ's proof (inserted into a copy, rendered, re-parsed, validated, and checked for replay identity under the effective language). No paste-ready transition is printed.
+
+An existing replay-only sibling clears the hazard only when it covers the same replay body and its guard is canonically equal to the removed region or provably implied within the differ's deliberately small implication fragment; a stale or partial twin does not hide a later hazard.
+
 ## Order the rollout by durable value
 
 The rule is one sentence: inventory every durable value whose decoder or decision logic changes, then confirm each binary alive during the window can read everything the others may write.
@@ -104,6 +111,10 @@ The rule is one sentence: inventory every durable value whose decoder or decisio
 - **Aggregate codec bumps admit no mixed versions.** One `schemaVersion` serves both writing and decoding, so an old replica hydrating a stream that contains a new-version event returns `VersionAhead`. Use stop-the-world or blue/green with one version exclusively owning a stream category. After the first new-version append the deploy is roll-forward-only; rollback means restore from backup.
 - **Versioned job queues deploy workers before producers.** A future `{v,t,data}` envelope returns `JobPayloadFromFuture` and burns the delivery budget; size `maxRetries × defaultRetryDelay` to cover the window. Generated workqueues start at schema version 1 with `keiroJobCodec`. Never switch a non-empty queue between bare and enveloped payloads without a drain or a transitional dual decoder.
 - **Router and process-manager decide changes need a drained redelivery window.** Deterministic target-command ids confirm overlaps as benign duplicates, so an undrained change merges old and new fan-out silently with no error. Hole-only decide changes are invisible to the differ; the drain rule applies anyway.
+- **Moving a process body between the legacy form and reactions is an identity migration.** Candidate Language 6 reactions key dispatch ids by physical target stream plus same-target occurrence, not the legacy positional emit index, so old and new ids never match and an undrained cutover duplicates target appends. `ProcessDispatchIdentityModelChanged` is breaking: drain source redelivery, partial fan-out, and pending timers first. A `reactions version` bump records intent only and is never the migration mechanism.
+- **Reaction changes carry `drain-required`.** Guard, arm-order, fan-out, reaction-removal, and versioned-fingerprint advisories name the drained redelivery window. Removing a declared timer or changing its identity is breaking while old rows may still fire; so is a semantic change without a `reactions version` increase, or a version decrease. Timer ceiling and dead-letter text are excluded from the fingerprint and report only `ProcessTimerCeilingChanged`.
+- **Switching intake idempotence is breaking.** `IntakeIdempotenceModeChanged` separates `keiro_inbox` history from downstream receipts; drain in-flight delivery and define a replay boundary at cutover.
+- **Changing workqueue `ordering`, including to or from `fifo-heads`, is breaking** (`WqOrderingChanged`). Drain the queue before consumers change delivery-order assumptions.
 - **Timer payloads, integration contracts, and workflow step results have no automatic migration.** Firers and consumers learn new shapes before producers write them, old decoders stay until backlogs drain, and a changed workflow step result gets a **new step name** rather than a changed type.
 - **Every aggregate append goes through the codec boundary.** A direct Kiroku write without `encodeForAppend` is stamped version 1 forever, and the first codec bump then runs a current-shape payload through the version-1 upcaster chain.
 - **Structural mapping changes preserve one wire authority.** The `.keiro` declaration and generated codec own current private-event JSON. A historical codec is test or upcaster machinery only; never route current decode failures through it. Snapshot JSON remains a separate cache boundary and must not be described as generated structural event encoding.

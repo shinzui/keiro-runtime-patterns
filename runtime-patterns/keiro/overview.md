@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro runtime patterns"
-description: "Index of the released Keiro 0.15.0.0 standards: generated Haskell editions, terminal outbox rejection, projection catalogs, and durable workflows"
-timestamp: 2026-09-06T21:22:15Z
+description: "Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, candidate Language 6, generated Haskell editions, and durable workflows"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -36,11 +36,11 @@ reviews:
 
 # Keiro runtime patterns
 
-**Prescriptive defaults for assembling reliable services on the released Keiro 0.15.0.0 set, Keiki 0.9.1, Kiroku Store 0.8, and Shibuya 0.9.**
+**Prescriptive defaults for assembling reliable services on the released Keiro 0.17.0.0 set, Keiki 0.9.1, Kiroku Store 0.8, Shibuya 0.9, and pgmq-hs 0.6.**
 
 Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 through 0.4 behavior remains foundational, while 0.5 through 0.11 add composable multi-file service workspaces, an explicit DSL language-version contract, consumer-owned nominal bindings, authoritative typed scalar aggregate expressions, an enforced identifier domain, complete aggregate behavior conformance, and an explicit compilation contract for the generated layer.
 
-Adopt the published Keiro 0.15.0.0 package set. Seven packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, `keiro-migrations`, `keiro-ops`, and `keiro-test-support` — move together; keep every one the service consumes on that cohort. `keiro-test-support` has been published since 0.14 and supplies reusable isolated PostgreSQL fixtures; `jitsurei` remains internal. The runtime admits `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; the migration package requires `kiroku-store-migrations ^>=0.4.0.0`. Verify Hackage and upstream tags before changing bounds.
+Adopt the published Keiro 0.17.0.0 package set. Seven packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, `keiro-migrations`, `keiro-ops`, and `keiro-test-support` — move together; keep every one the service consumes on that cohort. `keiro-test-support` has been published since 0.14 and supplies reusable isolated PostgreSQL fixtures; `jitsurei` remains internal. The runtime admits `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; the migration package requires `kiroku-store-migrations ^>=0.4.0.0`. `keiro` and `keiro-pgmq` still bound `effectful`/`effectful-core` to `>=2.6 && <2.7`, so a Keiro service stays on effectful 2.6 even though Shibuya 0.9.0.1 and pgmq-hs 0.6.1.0 admit 2.7. Verify Hackage and upstream tags before changing bounds.
 
 Apply the obligations introduced by each release when upgrading across it:
 
@@ -53,13 +53,13 @@ Apply the obligations introduced by each release when upgrading across it:
 - **0.11.0.0** renames every scaffold sidecar to a role-bearing name and **refuses to scaffold a tree still holding the old names** until `scaffold --apply-name-migrations` runs; moves generated Haskell onto one checked UpperCamelCase naming edition; adds [field aliases](aggregate-expressions.md) on direct fields; makes `check` a real CI gate with `--min-language`, `--deny-warnings`, `--deny CODE`, and the `keiro-dsl/check-report/1` report; and starts warning on accepted-but-inert declarations.
 - **0.12.0.0** publishes [Language 5](language-versions.md) as the sole stable authoring contract and demotes Language 4 to an immutable compatibility contract. It adds [typed projection catalogs](projection-catalogs.md) with delivery-bound revisions, schema-versioned rebuilds, [guarded external read contracts](read-models-and-projections.md), [targeted stream repair](stream-scoped-repair.md), truthful [read-model freshness](read-models-and-projections.md), [typed domain command outcomes](command-cycle-and-errors.md), opaque [awakeable allocation](durable-workflows.md), [semantic-local regeneration](dsl-semantic-locality.md), [mapped consumer surfaces](mapped-consumer-surfaces.md), and the new mountable [keiro-ops console](operations-console.md). `Keiro.version` is now derived from Cabal package metadata rather than a hand-maintained literal, so diagnostics and telemetry follow each release automatically.
 
-The runtime requires `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; `keiro` also requires `keiki-codec-json >=0.9 && <0.10`, migration consumers require `kiroku-store-migrations ^>=0.4.0.0`, and `keiro-pgmq` requires the `pgmq-*` 0.5 family with `shibuya-pgmq-adapter ^>=0.14.0.0`. Kiroku 0.7 supplies the explicit checkpoint lifecycle, the visible global head, and the [renewable history-retention lease](../kiroku/history-retention.md) that protects schema-versioned replay; Shibuya 0.9 adds [application-defined dead-letter reasons](../messaging/shibuya-processing.md). That bound carries a behavioral consequence: Keiki 0.9 seals `InCtor` and `WireCtor` construction and classifies replay head identity structurally, so `validateEventStream`, `mkEventStream`, generated validation harnesses, and any consumer inspecting Keiki warnings may report a different conservative warning set after recompilation. Keiro's generated aggregates already use the trusted Template Haskell path; hand-written boundary constructors must move to Keiki's `Via` producers. See [trusted constructor evidence](../keiki/constructor-evidence.md). Runtime event execution and the `keiki-codec-json` wire format are unchanged.
+The runtime requires `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; `keiro` also requires `keiki-codec-json >=0.9 && <0.10`, migration consumers require `kiroku-store-migrations ^>=0.4.0.0`, and `keiro-pgmq` requires the `pgmq-*` 0.6 family (`>=0.6 && <0.7`, PGMQ schema 1.13 through `pgmq-migration` 0.6) with `shibuya-pgmq-adapter ^>=0.16.0.0`, and every `Job` must declare `jobOrdering`. Kiroku 0.7 supplies the explicit checkpoint lifecycle, the visible global head, and the [renewable history-retention lease](../kiroku/history-retention.md) that protects schema-versioned replay; Shibuya 0.9 adds [application-defined dead-letter reasons](../messaging/shibuya-processing.md). That bound carries a behavioral consequence: Keiki 0.9 seals `InCtor` and `WireCtor` construction and classifies replay head identity structurally, so `validateEventStream`, `mkEventStream`, generated validation harnesses, and any consumer inspecting Keiki warnings may report a different conservative warning set after recompilation. Keiro's generated aggregates already use the trusted Template Haskell path; hand-written boundary constructors must move to Keiki's `Via` producers. See [trusted constructor evidence](../keiki/constructor-evidence.md). Runtime event execution and the `keiki-codec-json` wire format are unchanged.
 
 The 0.4 line changed three runtime surfaces incompatibly and those rules still apply: `scheduleTimerOnceTx` returns `Bool`, `markChildFailedTx` takes a failure reason, and `StateCodec` gains `stateShapeHash`.
 
 Migrations `0019` and `0020` accompany the last two of those, and snapshot-enabled code requires Keiki 0.4 or later.
 
-The 0.13 release adopts [typed transient transaction failures](command-cycle-and-errors.md) and schema-qualified Kiroku UUIDv7 migrations. The 0.14 release adds [terminal outbox rejection](../messaging/outbox.md), atomic batch finalization, migration `0031`, and the published [test fixture package](../architecture/test-layout.md). The 0.15 release changes package record APIs and requires explicit [generated-edition adoption](generated-haskell-editions.md); it preserves Language 5, wire formats, and runtime meaning.
+The 0.13 release adopts [typed transient transaction failures](command-cycle-and-errors.md) and schema-qualified Kiroku UUIDv7 migrations. The 0.14 release adds [terminal outbox rejection](../messaging/outbox.md), atomic batch finalization, migration `0031`, and the published [test fixture package](../architecture/test-layout.md). The 0.15 release changes package record APIs and requires explicit [generated-edition adoption](generated-haskell-editions.md); it preserves Language 5, wire formats, and runtime meaning. The 0.16 release makes `Dead` timers resumable through a guarded claim and adds migration `0032` with an ordered writer rollout ([dead timer resume](dead-timer-resume.md)). The 0.17 release derives [producer outbox identities](../messaging/outbox.md) deterministically from the recorded source event — `enqueueProducerEventTx` takes the event and an emission index, message IDs become opaque `<namespace>_v1_<sha256-hex>` text, and historical random IDs need a drained cutover, with no schema migration — requires `jobOrdering` on every [PGMQ job](../messaging/pgmq-jobs.md) and adds `FifoHeads`, guards DLQ purge, and adds the [process-manager reaction runner](../messaging/process-managers.md) and [delegated inbox intake](../messaging/inbox.md). keiro-dsl 0.17 registers Language 6 as an unpublished candidate that may still change in place; keep released services on stable Language 5. See [language versions](language-versions.md).
 
 ## Start here
 
@@ -69,7 +69,7 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Two-schema arrangement](two-schema-arrangement.md) — keep the kiroku store, keiro framework, and application schemas distinct.
 - [Keiro-dsl adoption](dsl-adoption.md) — decide when checked specifications and the evolution gate pay off.
 - [Generated Haskell editions](generated-haskell-editions.md) — migrate pre-v2 ledgers and hand-owned record consumers, reconcile the build, and recover interrupted adoption.
-- [Keiro DSL language versions](language-versions.md) — declare the source language, adopt the stable version 5 contract, and carry the checked contract through tooling.
+- [Keiro DSL language versions](language-versions.md) — declare the source language, stay on the stable version 5 contract while Language 6 is a candidate, and carry the checked contract through tooling.
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) — declare guards and writes that generate the transducer, and mark what stays hand-owned.
 - [Consumer-owned nominal bindings](nominal-bindings.md) — keep existing ID, enum, and scalar-wrapper types in checked aggregate fields.
 - [Enforced identifier domains](identifier-domains.md) — put prefix-bearing aggregate IDs and public contract fields on the frozen TypeID-v7 contract, and roll each adoption out in its own direction.
@@ -87,9 +87,10 @@ Read runtime assembly first, the schema arrangement second, and the DSL adoption
 - [Durable workflows](durable-workflows.md) — journal side effects and deploy the progress mechanisms each workflow uses.
 - [Workflow reliability and recovery](workflow-reliability.md) — size leases, budget failures, and resurrect terminal instances.
 - [Keiro operations console](operations-console.md) — mount code-dependent hooks, preview every mutation, and operate through public APIs.
+- [Dead timer resume](dead-timer-resume.md) — inspect parked timers, resume one under an expiring guarded claim, and roll migration `0032` out behind stopped writers.
 - [Evolution gates and rollout ordering](evolution-and-rollout.md) — pass every gate before deploying a change to a service that holds data.
 - [Telemetry](telemetry.md) — connect tracing, metrics, propagation, and application logging hooks.
-- [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, silent-failure, and Kafka integration traps.
+- [Gotchas](gotchas.md) — avoid shared-stream, global-lock, resource-effect, silent-failure, Kafka integration, timer-rollout, and candidate-language traps.
 
 ## Related Patterns
 

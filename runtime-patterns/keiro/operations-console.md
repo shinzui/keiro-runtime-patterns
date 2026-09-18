@@ -2,10 +2,10 @@
 type: Runbook
 title: "Keiro operations console"
 description: "Mounting and operating keiro-ops with schema checks, preview-before-force mutations, per-group operating rules, application hooks, and stable JSON"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-operations-console
 tags: [keiro, operations-console]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Operate Keiro through `keiro-ops` and mounted supported APIs; never build an administrative side door into framework-owned tables.**
 
-`keiro-ops` is published as part of the Keiro 0.15.0.0 package set and moves with it. Run the console binary built from the same set as the runtime it operates; a console from another cohort is drift, not convenience.
+`keiro-ops` is published as part of the Keiro 0.17.0.0 package set and moves with it. Run the console binary built from the same set as the runtime it operates; a console from another cohort is drift, not convenience.
 
 ## Fail closed before mutation
 
@@ -63,7 +63,7 @@ The console is a safe entry point to a subsystem, never a second authority over 
 
 **`wf`** — `list`, `show`, `steps`, and `journal` are read-only. `cancel` takes effect at the next durable boundary and does not cascade to descendants; `resurrect` acts only on a `failed` instance; `awakeable signal|cancel` repairs one pending promise; `lease release` is for a worker known dead, never to preempt a live one; `gc --retention` is housekeeping, not progress. See [workflow reliability and recovery](workflow-reliability.md).
 
-**`timer`** — classify before mutating. `timer stuck list --min-age --min-attempts` first, then per timer: `requeue` a transient failure, `cancel` obsolete work, or `dead-letter --reason` genuine poison. A reason is required because the transition is terminal and the runtime records failures, not intentions. Never dead-letter a batch to clear a backlog. `drain-once --limit` (default 100) appears only with the `timerFire` hook and is a bounded operator pass, not a replacement for the timer worker. See [process managers and durable timers](../messaging/process-managers.md).
+**`timer`** — classify before mutating. `timer stuck list --min-age --min-attempts` first, then per timer: `requeue` a transient failure, `cancel` obsolete work, or `dead-letter --reason` genuine poison. A reason is required because the runtime records failures, not intentions, and the exact literal is what a later guarded resume must match: since 0.16 `Dead` parks the timer rather than ending it, and resume goes through the library's claim protocol, not the console. ID-only `requeue`, `cancel`, and `dead-letter` refuse any row still carrying a resume token, even an expired one, until recovery runs. See [dead timer resume](dead-timer-resume.md). Never dead-letter a batch to clear a backlog. `drain-once --limit` (default 100) appears only with the `timerFire` hook and is a bounded operator pass, not a replacement for the timer worker. See [process managers and durable timers](../messaging/process-managers.md).
 
 **`outbox`** — `backlog`, `list`, `show`, and `dead-letters list` are read-only. `requeue-stuck --older-than` (default 5m) `--max-attempts` (default 10) reclaims rows stranded in `publishing` by a crashed publisher; rows past the ceiling become dead. It is not a remedy for a failing destination — repair the destination first, or the same rows republish into the same failure. `gc-sent --older-than` (default 30d) deletes publication evidence, so set the age from the audit requirement, not from table size. See [transactional outbox](../messaging/outbox.md).
 
@@ -71,7 +71,7 @@ Use `outbox list --source SOURCE --status rejected` to inspect permanent publica
 
 **`inbox`** — `backlog`, `list`, and `show` are read-only; `gc --older-than` (default 30d) deletes retained completed rows. `mark-failed` is a decision never to process a message: record who decided and why, and do not use it as a retry control. See [idempotent inbox](../messaging/inbox.md).
 
-**`pgmq dlq`** — decode with `read` before acting. `redrive` returns entries to the main queue and is correct only after the cause is fixed, otherwise it recycles the same poison at the same cost. Prefer `archive` to `purge`: both empty the queue, only one keeps the evidence. See [typed PGMQ jobs](../messaging/pgmq-jobs.md).
+**`pgmq dlq`** — decode with `read` before acting. `redrive` returns entries to the main queue and is correct only after the cause is fixed, otherwise it recycles the same poison at the same cost. Prefer `archive` to `purge`: both empty the queue, only one keeps the evidence. Forced `purge` uses the guarded library purge and fails without deleting while inspected rows are still hidden; `--force` authorizes the mutation, it does not bypass that refusal. Wait out the 30-second inspection visibility or archive the inspected ids first. `read` output includes `original_headers`. See [typed PGMQ jobs](../messaging/pgmq-jobs.md).
 
 **`projection`** — `position --subscription NAME` is read-only. `prune-dedup --projection NAME --before UTC` deletes redelivery-safety evidence: choose a cutoff older than the longest redelivery window that can still reach that projection, and never prune while its group has an active rebuild. See [read models and projections](read-models-and-projections.md).
 
@@ -95,6 +95,7 @@ Capture the preview, JSON result, operator identity, ticket or incident, binary 
 - [Read models and projections](read-models-and-projections.md)
 - [Evolution gates and rollout ordering](evolution-and-rollout.md)
 - [Process managers and durable timers](../messaging/process-managers.md)
+- [Dead timer resume](dead-timer-resume.md)
 - [Transactional outbox](../messaging/outbox.md)
 - [Idempotent inbox](../messaging/inbox.md)
 - [Typed PGMQ jobs](../messaging/pgmq-jobs.md)

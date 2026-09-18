@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Process Managers And Durable Timers"
-description: "The process manager standard: UTF-8-stable deterministic ids, worker policies, batched durable timers, and the orchestration decision ladder"
-timestamp: 2026-09-06T21:22:15Z
+description: "The process manager standard: UTF-8-stable deterministic ids, the typed reaction runner, worker policies, batched durable timers, and the orchestration decision ladder"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -38,7 +38,7 @@ reviews:
 
 **Use an event-sourced saga for stateful orchestration, deterministic dispatch for crash recovery, and durable timers for deadlines.**
 
-Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.15.0.0, including typed transient store errors), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
+Use this standard when one service coordinates several events or aggregates over time. It defines the released Keiro process-manager boundary (current release 0.17.0.0, including typed transient store errors and the additive `Keiro.ProcessManager.Reaction` runner), its Shibuya worker policy, and the decision ladder between a small reactor, a full process manager, and a durable workflow.
 
 ## The Rule
 
@@ -112,6 +112,27 @@ timerId <- randomUuid
 
 The result of one reaction reports the manager append/duplicate, one `PMCommandResult` per target dispatch, and the number of timers scheduled. A real manager-state error returns `Left CommandError`; target failures stay inside `commandResults` for worker classification.
 
+## Use The Reaction Runner For Optional Advancement
+
+`Keiro.ProcessManager.Reaction` is an additive runner beside the unchanged `ProcessManager` API. Choose it for new managers whose reaction may decline to advance saga state, or whose follow-ups must run only when the saga command durably accepts.
+
+`react :: input -> ReactionPlan ci targetCi` returns one of:
+
+- `NoAdvance followUps` — no saga read or command; unconditional timer follow-ups run in their own transaction;
+- `AdvanceReaction { command, followUps, onAccepted }` — `followUps` run for every outcome, `onAccepted` only when this invocation appends saga events or recovers the exact accepted witness.
+
+A `FollowUp` is `FollowDispatch`, `FollowSchedule Once|Rearm`, or `FollowCancel`. `Once` is insert-only while any row with the timer id exists; `Rearm` moves only a still-`Scheduled` row. Neither revives a `Firing`, `Fired`, `Cancelled`, `Dead`, or foreground-owned row. `FollowCancel` uses `Keiro.Timer.cancelTimerTx`, the transactional form of guarded cancellation; it cannot revoke a callback that already claimed the timer, so make late firing benign in the target.
+
+Put every effect that must belong exclusively to durable acceptance in `onAccepted`. `NoAdvance`, a typed rejection, a no-op, and an eventless acceptance leave no saga receipt, so their unconditional effects may repeat on redelivery, including around a concurrent accepted delivery. The runner makes no exactly-once claim for silent outcomes.
+
+The saga append and its timer subsequence commit in one transaction. Target commands then commit one transaction each, in declared attempt order; replay and concurrent delivery can make commit order differ from attempt order. Accepted redelivery validates the exact first-event witness in the intended saga stream, skips timer SQL, and retries only target fan-out. `ReactionWitnessMissing` and `ReactionWitnessUndecodable` are integrity errors: the worker halts on them rather than inventing a duplicate success.
+
+Target commands use their own identity family, `deterministicReactionCommandId`: a length-prefixed UTF-8 UUIDv5 over `keiro`, `process-reaction`, manager name, correlation id, source event id, physical target stream, and the command's zero-based occurrence among commands to that target. Keep reaction inputs, same-target command order, and payloads stable for a source event.
+
+Run it with `runReactiveProcessManagerOnce`, which returns detailed saga, timer, and target results, or `runReactiveProcessManagerWorkerWith`, which applies the same `WorkerOptions` poison, retry, rejection, and dead-letter policy as the classic worker while retaining only duplicate counts and failures.
+
+**Switching an existing manager name to the reaction runner is an identity migration.** Drain source deliveries, incomplete fan-out, pending timers, and every permitted historical replay first. Otherwise a retained legacy saga witness enables dispatch under a new target id and duplicates the logical action. The same review applies to reordering same-target commands or changing their payloads. There is no positional-id fallback.
+
 ## Run Through The Worker Policy
 
 `runProcessManagerWorkerWith` consumes a Shibuya `Adapter`, decodes each message to `(RecordedEvent, input)`, calls `runProcessManagerOnce`, and finalizes the message exactly once. Use `runProcessManagerWorker` only when the halt-first defaults are the standard you want.
@@ -142,36 +163,43 @@ A manager joining `PaymentCaptured` from `payment-ORD1` with `ShipmentAllocated`
 
 A manager schedules a `TimerRequest` containing a stable `timerId`, manager name, correlation id, `fireAt`, and payload. If the manager state append commits, its timers commit with it.
 
-`runTimerWorkerWith` requeues stale `Firing` rows according to `requeueStuckAfter`, claims the earliest due row with `FOR UPDATE SKIP LOCKED`, and calls the supplied fire action. Returning `Just eventId` marks the timer `Fired`; returning `Nothing` leaves it `Firing` until recovery requeues it.
+`runTimerWorkerWith` first returns expired guarded resume claims to `Dead`, then requeues stale `Firing` rows according to `requeueStuckAfter`, then claims the earliest due row with `FOR UPDATE SKIP LOCKED`, and calls the supplied fire action. Returning `Just eventId` marks the timer `Fired`; returning `Nothing` leaves it `Firing` until recovery requeues it.
 
 Timer firing is at-least-once. A crash can happen after the external action but before `markTimerFired`, and a fire action running longer than the stale-claim window can be claimed again. The fire action must dispatch with a stable event id.
 
-The default worker has no attempt ceiling and requeues stale claims after five minutes. In production, validate explicit options with `mkTimerWorkerOptions`. `maxAttempts = Just n` compares against the post-claim count: the `(n + 1)`th claim moves the timer to `Dead` without firing. Recovery tooling includes `countDueTimers`, `countStuckTimers`, `findStuckTimers`, `requeueStuckTimers`, `cancelTimer`, and `deadLetterTimer`.
+The default worker has no attempt ceiling and requeues stale claims after five minutes. In production, validate explicit options with `mkTimerWorkerOptions`. `maxAttempts = Just n` compares against the post-claim count: the `(n + 1)`th claim moves the timer to `Dead` without firing. `requeueStuckAfter = Nothing` disables only ordinary stale-claim requeue; since 0.16 every pass still recovers expired foreground resume claims. Recovery tooling includes `countDueTimers`, `countStuckTimers`, `findStuckTimers`, `requeueStuckTimers`, `cancelTimer`, `deadLetterTimer`, and read-only `lookupTimerInspection` and `findDeadTimers`.
+
+Use `cancelTimerTx` to cancel inside the transaction that appends the event making a deadline obsolete. It applies the same guarded SQL as `cancelTimer`: an absent row creates no tombstone and terminal rows stay terminal.
+
+`Dead` parks a timer; it is not proof the work is abandoned. Resume one only through the guarded claim protocol in [dead timer inspection and guarded resume](../keiro/dead-timer-resume.md). ID-only mutations — `markTimerFired`, `cancelTimer`, `cancelTimerTx`, `deadLetterTimer`, and stale requeue — refuse any row carrying a resume token, even after its lease expires. Migration `0032` adds those token columns; stop every old timer writer before applying it and deploy all upgraded writers before enabling resume.
 
 Use `drainDueTimersWith` for a bounded backlog pass. It runs the requeue and gauge preamble once, then claims and fires up to the supplied limit with the same per-timer semantics as `runTimerWorkerWith`; do not drain a backlog one row per polling tick.
 
 ## Keiro DSL Contract
 
-Keiro-dsl has first-class `process` and nested `timer` nodes. A process declares rejected and poison policies, and every timer fire declares `on-ok`, `on-reject`, `on-ambiguous`, `on-error`, and `not-mine` outcomes. Keep reaction logic in the hand-owned hole and regenerate structural wiring from the specification; see [Keiro-dsl adoption](../keiro/dsl-adoption.md). Module placement belongs to the separate vertical-structure standard, not this behavior guide.
+Keiro-dsl has first-class `process` and nested `timer` nodes. A process declares rejected and poison policies, and every timer fire declares `on-ok`, `on-reject`, `on-ambiguous`, `on-error`, and `not-mine` outcomes. In published Languages 1 through 5, keep reaction logic in the hand-owned hole (reported as `custom-unverified`) and regenerate structural wiring from the specification; see [Keiro-dsl adoption](../keiro/dsl-adoption.md).
+
+Candidate Language 6 declares process reactions directly and generates them onto the reaction runner. Guards are pure, ordered, and read only the decoded input, never saga state. An `accepted` block is legal only when its saga command is verified to emit an event on acceptance, and it must carry an explicit `silent no-action` alternative; effects outside it become unconditional `followUps`, effects inside it `onAccepted`. The only create-once process hole is the versioned typed decoder `RecordedEvent -> Maybe <Process>Input`; it may decode but must not select or override behavior. Each reaction body declares a positive coordination version: a semantic change without a version increase is breaking, and any accepted change still requires the applicable drain. Versions and fingerprints never enter dispatch or timer identity. Module placement belongs to the separate vertical-structure standard, not this behavior guide.
 
 ## The Decision Ladder
 
 Start at the lowest rung that holds. Promote when the required behavior crosses a rung's boundary.
 
 1. **Hand-rolled stateless reactor.** Use a plain Shibuya worker when the reaction has no per-correlation state and no deadline. It may join a read model for context. Danwa's `AddressedMessageWorker` is the model: it reacts only to relevant mention events, reads the message projection, derives a deterministic outbox id, and returns `AckRetry` while the projection has not caught up. Reactor plus read-model join plus retry-until-projected is the sanctioned shape for “react to X with context from Y.”
-2. **Full Keiro `ProcessManager`.** Use it when the reaction depends on durable history for one correlation, needs a timeout or scheduled retry, or dispatches aggregate commands and benefits from deterministic ids and worker policy. Keiro's `FulfillmentProcess` and `EscalationProcess`, plus the generated HospitalSurge process in keiro-runtime-jitsurei, demonstrate this rung.
+2. **Full Keiro `ProcessManager`.** Use it when the reaction depends on durable history for one correlation, needs a timeout or scheduled retry, or dispatches aggregate commands and benefits from deterministic ids and worker policy. Keiro's `FulfillmentProcess` and `EscalationProcess`, plus the generated HospitalSurge process in keiro-runtime-jitsurei, demonstrate this rung. Use the reaction runner when advancement is optional or effects depend on acceptance.
 3. **Durable workflow.** Use `Keiro.Workflow` when the orchestration reads as one long-lived imperative sequence—do A, await B or sleep, then C, perhaps `continueAsNew`—rather than open-ended reactions to events. Follow the [durable workflow standard](../keiro/durable-workflows.md).
 
 A reactor that accumulates state or hand-written deadline logic is a process manager wearing a costume—promote it.
 
 ## Repair Stuck Timers By Classification
 
-A timer left in `firing` by an interrupted worker is an operator decision, not a retry. Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the terminal transition, so write the one an on-call reader will need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
+A timer left in `firing` by an interrupted worker is an operator decision, not a retry. Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the `Dead` transition and is the literal a later [guarded resume](../keiro/dead-timer-resume.md) must match exactly, so write a stable one an on-call reader and a resuming consumer will both need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
 
 ## Related Patterns
 
 - [Kiroku subscriptions](kiroku-subscriptions.md)
 - [Keiro operations console](../keiro/operations-console.md)
+- [Dead timer inspection and guarded resume](../keiro/dead-timer-resume.md)
 - [Transactional outbox](outbox.md)
 - [Shibuya processing](shibuya-processing.md)
 - [Messaging gotchas](gotchas.md)

@@ -2,10 +2,10 @@
 type: Standard
 title: "Integration Event Contracts"
 description: "The integration event contract: envelope, identity and dedupe rules, topic versioning, trace continuation"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-integration-events
 tags: [messaging, integration-events]
 status: current
@@ -33,7 +33,7 @@ A service must not read another service's tables, Kiroku streams, or private eve
 
 `Keiro.Integration.Event.IntegrationEvent` is the fleet contract:
 
-- `messageId`: stable application identity for this published message;
+- `messageId`: stable, opaque application identity for this published message;
 - `source`: producing bounded context;
 - `destination`: transport destination, conventionally including the contract major version;
 - `key`: optional partition key, normally the aggregate id;
@@ -52,7 +52,7 @@ Text and bytes in the envelope are boundary representations. In service-owned pa
 
 ## Identity And Evolution Rules
 
-1. **Keep `messageId` stable across every delivery attempt.** `mintIntegrationEvent` creates a prefixed UUIDv7 TypeID. Once it is in an outbox row it survives publisher retries. If source-event redelivery can invoke mapping again, either make source checkpoint and enqueue one transaction or reuse a previously allocated stable `messageId` and `OutboxId`; calling `enqueueProducerEventTx` again mints a new message id.
+1. **Keep `messageId` stable across every delivery attempt and every remapping.** Treat it as opaque text, never as a parseable TypeID or a time-ordered UUID. The canonical producer path, `enqueueProducerEventTx`, derives it deterministically from the producer and source-event coordinates as `<namespace>_v1_<sha256-hex>`, so remapping the same private event after rollback or redelivery yields the same identity and a changed mapping surfaces as `ProducerIdentityConflict`. `freshIntegrationEvent` (formerly `mintIntegrationEvent`, now deprecated) generates a random identity: persist that envelope before any retry and reuse it. See [transactional outbox](outbox.md).
 2. **Deduplicate on `(source, messageId)`.** Kafka topic, partition, and offset are diagnostics for one broker delivery, not a logical-message identity. Repartitioning, replay, and republishing can change them.
 3. **Put the contract major in `destination`.** Use names such as `billing.orders.v1`. A breaking payload change gets a new destination and runs beside the old one during migration.
 4. **Use `schemaVersion` for additive evolution within one major destination.** Consumers must ignore unknown additive fields and explicitly reject versions they cannot interpret.

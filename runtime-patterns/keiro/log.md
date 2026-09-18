@@ -1,5 +1,22 @@
 # keiro Update Log
 
+## 2026-09-18
+* **Update**: Move the index to Keiro 0.17.0.0, pgmq-hs 0.6, and the effectful 2.6 bound; summarize 0.16 and 0.17 obligations and route dead timer resume.
+* **Update**: Add the 0.16 timer rollout, worker resume recovery, silent candidate language, and legacy-process-to-reactions identity traps.
+* **Update**: Move the baseline release to Keiro 0.17.0.0.
+* **Update**: Keep consumer IDs opaque in structural shapes until Language 6 is published.
+* **Update**: Reuse bindings for candidate structural leaves and the keyed-map ordering law.
+* **Update**: Allow guard paths to end at candidate nominal ID and enum leaves under equality only.
+* **Update**: Add candidate nominal structural leaves, identifier-keyed maps, and opaque-twin migration evidence.
+* **Update**: Add candidate declared contract IDs and the Optional DeclaredId wrapper rule.
+* **Update**: Record 0.17 AST growth, diff --deny, the check-report stable assertion and processReactions, and stable-language skeletons.
+* **Update**: Add transition-family guard diffing, AggGuardRelationUnknown and AggGuardRemedyUnavailable advisories, repeatable diff --deny, and reaction, intake, and ordering rollout rules.
+* **Update**: Register candidate Language 6, keep it off released services, gate on check-report stable, and record that new writes the stable version.
+* **Update**: Keep legacy consistency names exported until the Language 4 read-model generator retires; drop the stale 0.13 removal date.
+* **Update**: Record keiro.outbox.identity.conflict via recordProducerEnqueueOutcome after the transaction runner returns.
+* **Update**: Move the console to the Keiro 0.17 set; forced DLQ purge refuses while inspected rows are hidden; Dead timers are resumable and ID-only mutations refuse guarded claims.
+* **Added**: Add Dead timer inspection, guarded resume under expiring token claims, and the migration 0032 writer rollout and rollback order.
+
 ## 2026-09-06
 * **Update**: Count committed outbox rejection transitions and initialize the rejection counter.
 * **Update**: Correct the stale removal claim: deprecated read-model compatibility APIs remain exported in 0.15.

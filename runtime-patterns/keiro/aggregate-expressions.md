@@ -2,10 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -58,7 +58,7 @@ aggregate Account
   wire kind=ctorName fields=camelCase schemaVersion=1
 ```
 
-Prefer the qualified `reg.` and `cmd.` roots everywhere. A bare name resolves only when exactly one active command field or register matches it; when both do, `check` reports `AggregateExpressionRootAmbiguous` and you must qualify. Dotted paths may cross **required** `mapped structural record` fields and must end at a supported scalar leaf; optional, union, collection, `Json`, and opaque boundaries fail before scaffolding.
+Prefer the qualified `reg.` and `cmd.` roots everywhere. A bare name resolves only when exactly one active command field or register matches it; when both do, `check` reports `AggregateExpressionRootAmbiguous` and you must qualify. Dotted paths may cross **required** `mapped structural record` fields and must end at a supported scalar leaf; optional, union, collection, `Json`, and opaque boundaries fail before scaffolding. Where candidate Language 6 places a nominal ID or enum inside a structural record, a path may end at that leaf too, and declarative router selection may traverse to it. Such leaves support same-declaration equality only: ordering, optional traversal, and comparison across two ID declarations stay rejected even when their wire prefixes match. Qualify ID and enum literals.
 
 Quoted literals resolve contextually as `Text` or ISO-8601 UTC `Time`; integral literals as `Int`, `Integer`, or `Natural`; Bool literals are `true` and `false`. Multiplication binds above addition and subtraction, which bind above a non-associative comparison; comparisons bind above `&&`, and `&&` binds above `||`. A predicate cannot be written to a `Bool` register — Keiki predicates and Bool terms are distinct.
 

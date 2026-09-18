@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -63,7 +63,9 @@ need the surrounding rules.
   member, and reserve a bare source for a trivial domain with exactly one
   aggregate. Then read
   [Keiro DSL language versions](keiro/language-versions.md) to pick and declare
-  the language contract. On stable Language 5, follow
+  the language contract; keep released services on stable Language 5 while
+  Language 6 is a candidate, and gate CI on the check report's `stable` flag.
+  On stable Language 5, follow
   [semantic-local regeneration](keiro/dsl-semantic-locality.md) and inventory
   every [mapped consumer surface](keiro/mapped-consumer-surfaces.md); use
   [consumer-owned nominal bindings](keiro/nominal-bindings.md) when existing ID,
@@ -100,11 +102,15 @@ need the surrounding rules.
 - **Inspecting or repairing a live runtime:** use the
   [Keiro operations console](keiro/operations-console.md) so schema checks,
   previews, stable JSON, bounded passes, and application-owned hooks wrap the
-  supported lifecycle APIs.
+  supported lifecycle APIs. Resume a parked `Dead` timer only through
+  [dead timer resume](keiro/dead-timer-resume.md), after the migration `0032`
+  writer rollout.
 - **Choosing a transport:** use the
   [transport-selection matrix](messaging/transport-selection.md) before adopting
   PGMQ, Kafka, or a Kiroku subscription. For PGMQ, also apply the
   [queue lifecycle and reconciliation standard](messaging/pgmq-queue-reconciliation.md).
+  For ordered PGMQ work, choose `FifoHeads` as described in
+  [typed PGMQ jobs](messaging/pgmq-jobs.md).
 - **Implementing process coordination:** start with the
   [process-manager standard](messaging/process-managers.md); use
   [durable workflows](keiro/durable-workflows.md) when the work is a stable,
@@ -116,7 +122,8 @@ need the surrounding rules.
 - **Evolving persisted events:** follow
   [event-schema evolution](keiki/event-schema-evolution.md) for wire kinds,
   versions, defaults, and upcasters, then apply the
-  [Keiro evolution gates](keiro/evolution-and-rollout.md).
+  [Keiro evolution gates](keiro/evolution-and-rollout.md), promoting advisories
+  that must block a deploy with repeatable `diff --deny`.
 - **Evolving database schemas:** follow
   [migration authoring](migrations/authoring.md), then use the
   [migration operations runbook](migrations/operations.md) for verification and

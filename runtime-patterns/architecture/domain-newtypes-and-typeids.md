@@ -2,10 +2,10 @@
 type: Standard
 title: "Domain Newtypes And TypeIDs"
 description: "Give every key domain value a nominal type, and use a TypeID-backed newtype for every service-owned identifier"
-timestamp: 2026-09-01T16:07:10Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-domain-newtypes-and-typeids
 tags: [architecture, domain-types, newtype, typeid, identity]
 status: current
@@ -29,7 +29,7 @@ newtype CommandId = CommandId (KindID "command")
   deriving stock (Eq, Ord)
 ```
 
-Prefer `KindID "prefix"` to an unindexed TypeID in hand-owned code, so the compiler rejects a value from the wrong prefix before runtime. Use the full singular ubiquitous-language prefix from [TypeID prefix naming](../keiro/typeid-prefix-naming.md), mint UUIDv7 values for allocated domain identities, and admit parsed values through the checked contract in [enforced identifier domains](../keiro/identifier-domains.md). A deterministic technical identity follows the derivation and UUID version named by its owning runtime standard; never present a UUIDv5-derived value as a UUIDv7 identity. Do not store a TypeID-shaped value as `Text` inside the domain and rely on naming conventions or call-site discipline.
+Prefer `KindID "prefix"` to an unindexed TypeID in hand-owned code, so the compiler rejects a value from the wrong prefix before runtime. Use the full singular ubiquitous-language prefix from [TypeID prefix naming](../keiro/typeid-prefix-naming.md), mint UUIDv7 values for allocated domain identities, and admit parsed values through the checked contract in [enforced identifier domains](../keiro/identifier-domains.md). A deterministic technical identity follows the derivation and UUID version named by its owning runtime standard; never present a UUIDv5-derived value as a UUIDv7 identity. Keiro's canonical producer outbox identity is such a runtime-owned technical identity: a UUIDv8 `OutboxId` and an opaque `<namespace>_v1_<sha256-hex>` message ID derived per [the transactional outbox](../messaging/outbox.md). Do not wrap either in a TypeID newtype or parse the message ID as a TypeID. Do not store a TypeID-shaped value as `Text` inside the domain and rely on naming conventions or call-site discipline.
 
 Keiro-generated aggregate IDs and contract `typeid` fields already supply the nominal wrapper and checked TypeID domain. Use those generated types directly; do not add a second application wrapper around them. When a hand-owned identifier is retained through a nominal binding, the hand-owned newtype is the one domain type and the binding connects it to Keiro's generated representation.
 

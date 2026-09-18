@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Messaging Gotchas"
-description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.5, Kafka, Kiroku, and Keiro"
-timestamp: 2026-09-06T21:22:15Z
+description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.6, Kafka, Kiroku, and Keiro"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Messaging Gotchas
 
-**Twenty-one ways the messaging stack will bite you, and the rule that prevents each.**
+**Twenty-nine ways the messaging stack will bite you, and the rule that prevents each.**
 
 Treat these as design-review checks, not trivia.
 
@@ -39,7 +39,7 @@ Treat these as design-review checks, not trivia.
 
 5. **Raw PGMQ `maxRetries = 0` skips every handler.** First delivery already has `readCount = 1`, so the adapter dead-letters it immediately. Construct job policies with `mkRetryPolicy`. See [PGMQ jobs](pgmq-jobs.md).
 
-6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in `shibuya-pgmq-adapter` 0.14.0.0; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
+6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in `shibuya-pgmq-adapter` 0.14.0.0 and later; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
 
 7. **PGMQ prefetch can delay messages after shutdown.** It does not lose them; buffered, undispatched messages reappear only after VT. Keep `bufferSize * batchSize * average processing time` below visibility timeout. See [PGMQ jobs](pgmq-jobs.md).
 
@@ -51,29 +51,41 @@ Treat these as design-review checks, not trivia.
 
 11. **Do not validate a dead-letter code per message.** `mkDeadLetterCode` is a startup-time gate; calling it inside a handler turns a naming mistake into a per-delivery failure on the exact path that is already failing. Validate the finite code set once and keep it in configuration. See [Shibuya processing](shibuya-processing.md).
 
-11. **PGMQ worker envelopes do not expose arbitrary headers.** JSONB headers are unordered, so the continuous adapter sets `Envelope.headers = Nothing`; raw headers are available only in the one-shot `JobContext`. See [PGMQ jobs](pgmq-jobs.md).
+12. **PGMQ worker envelopes do not expose arbitrary headers.** JSONB headers are unordered, so the continuous adapter sets `Envelope.headers = Nothing`; raw headers are available only in the one-shot `JobContext`. See [PGMQ jobs](pgmq-jobs.md).
 
-12. **`QueueRef` sanitization is lossy.** `a.b` and `a_b` collide, long or `_dlq`-ending names are hashed, and a rename can point workers at a new empty queue while messages remain in the old one. Freeze logical names and drain before migration. See [PGMQ jobs](pgmq-jobs.md).
+13. **`QueueRef` sanitization is lossy.** `a.b` and `a_b` collide, long or `_dlq`-ending names are hashed, and a rename can point workers at a new empty queue while messages remain in the old one. Freeze logical names and drain before migration. See [PGMQ jobs](pgmq-jobs.md).
 
-13. **PGMQ retries only a statement-error whitelist.** In pgmq-hs 0.5, `Pgmq.Effectful.isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01/02/03, and class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure are permanent. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+14. **PGMQ retries only a statement-error whitelist.** In pgmq-hs 0.5 and 0.6, `Pgmq.Effectful.isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01/02/03, and class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure are permanent. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
-14. **`CommandAmbiguous` is never success.** Multiple matching edges are an aggregate-definition defect; process-manager workers halt, and the DSL rejects an ambiguity outcome of `Fired`. See [process managers](process-managers.md) and the [command error standard](../keiro/command-cycle-and-errors.md).
+15. **`CommandAmbiguous` is never success.** Multiple matching edges are an aggregate-definition defect; process-manager workers halt, and the DSL rejects an ambiguity outcome of `Fired`. See [process managers](process-managers.md) and the [command error standard](../keiro/command-cycle-and-errors.md).
 
-15. **Schema-qualify framework SQL.** Kiroku keeps the event store and LISTEN/NOTIFY contract in `kiroku`; Keiro owns `keiro.keiro_outbox`, `keiro.keiro_inbox`, `keiro.keiro_timers`, and `keiro.keiro_dead_letters`; application projections have a separate owner. Bare `keiro_*` names depend on the wrong search-path assumption. See the [schema arrangement](../keiro/two-schema-arrangement.md).
+16. **Schema-qualify framework SQL.** Kiroku keeps the event store and LISTEN/NOTIFY contract in `kiroku`; Keiro owns `keiro.keiro_outbox`, `keiro.keiro_inbox`, `keiro.keiro_timers`, and `keiro.keiro_dead_letters`; application projections have a separate owner. Bare `keiro_*` names depend on the wrong search-path assumption. See the [schema arrangement](../keiro/two-schema-arrangement.md).
 
-16. **Keiro supplies messaging contracts and primitives, not complete broker wiring.** Applications own the Kafka producer and consumer around `Keiro.Outbox.Kafka` and `Keiro.Inbox.Kafka`. `IntegrationProducer` also does not own a source checkpoint, and `enqueueProducerEventTx` mints a fresh message ID per call; make checkpoint plus enqueue atomic or reuse stable message and outbox identities. See [transactional outbox](outbox.md).
+17. **Keiro supplies messaging contracts and primitives, not complete broker wiring.** Applications own the Kafka producer and consumer around `Keiro.Outbox.Kafka` and `Keiro.Inbox.Kafka`. `IntegrationProducer` also does not own a source checkpoint. `enqueueProducerEventTx` derives deterministic identities from the source event and returns `ProducerIdentityConflict` when a retained row differs; roll back the checkpoint transaction on conflict, record it after the runner returns, and plan a drained cutover from pre-0.17 random message IDs. See [transactional outbox](outbox.md).
 
-17. **Transactional Keiro runners require `KirokuStoreResource`.** `runCommandWithSql`, `runCommandWithSqlEvents`, and `runCommandWithProjections` need the resource acquired with `withKirokuStore`; plain `runCommand` does not. The outbox and inbox transactional continuations live inside the same resource-backed boundary. See [runtime assembly](../keiro/runtime-assembly.md).
+18. **Transactional Keiro runners require `KirokuStoreResource`.** `runCommandWithSql`, `runCommandWithSqlEvents`, and `runCommandWithProjections` need the resource acquired with `withKirokuStore`; plain `runCommand` does not. The outbox and inbox transactional continuations live inside the same resource-backed boundary. See [runtime assembly](../keiro/runtime-assembly.md).
 
-18. **Keep transactional continuations minimal.** An appending transaction retains Kiroku's global `$all` row lock until commit. Slow outbox mapping, inline projections, timer scheduling, or unrelated SQL inside that window stalls every writer. See [transactional outbox](outbox.md) and [process managers](process-managers.md).
+19. **Keep transactional continuations minimal.** An appending transaction retains Kiroku's global `$all` row lock until commit. Slow outbox mapping, inline projections, timer scheduling, or unrelated SQL inside that window stalls every writer. See [transactional outbox](outbox.md) and [process managers](process-managers.md).
 
-19. **PGMQ reconciliation is additive, not destructive repair.** A queue-type mismatch reports `DetectedQueueTypeDrift` and preserves the queue; partition interval and retention are not checked at all. Fail startup and resolve the drift deliberately. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+20. **PGMQ reconciliation is additive, not destructive repair.** A queue-type mismatch reports `DetectedQueueTypeDrift` and preserves the queue; partition interval, retention, and premake are not checked at all. Fail startup and resolve the drift deliberately. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
-20. **A visibility-timeout update can lose a race.** `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Nothing` when the row was already deleted, archived, or popped. Settle that as a lost race rather than retrying it as infrastructure failure. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+21. **A visibility-timeout update can lose a race.** `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Nothing` when the row was already deleted, archived, or popped. Settle that as a lost race rather than retrying it as infrastructure failure. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
-21. **PGMQ notifications are hints.** They are fire-and-forget and throttled, and the missing throttle means 250 ms. Use `notifyChannelName`, keep a poll fallback, and install the 0.5 native migration component for crash-safe notification recovery and serialized enablement. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+22. **PGMQ notifications are hints.** They are fire-and-forget and throttled, and the missing throttle means 250 ms. Use `notifyChannelName`, keep a poll fallback, and install the native `pgmq-migration` component for crash-safe notification recovery and serialized enablement. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
-**Terminal publication rejection releases ordering.** `PublishRejected` is durable audit truth, does not retry, and does not stop `StopTheLine`. Keep temporary broker failures on `PublishFailed`, retain rejected rows, and install migration `0031` before deploying the new readers. See [transactional outbox](outbox.md).
+23. **Terminal publication rejection releases ordering.** `PublishRejected` is durable audit truth, does not retry, and does not stop `StopTheLine`. Keep temporary broker failures on `PublishFailed`, retain rejected rows, and install migration `0031` before deploying the new readers. See [transactional outbox](outbox.md).
+
+24. **Legacy FIFO strategies are not a failure barrier.** `FifoThroughput`/`FifoRoundRobin` (adapter `ThroughputOptimized`/`RoundRobin`) can lease a group's successor before its predecessor settles; Keiro 0.17 rejects them with batch size above one (`UnsafeLegacyFifoBatch`). Use `FifoHeads` (`HeadPerGroup`, PGMQ 1.12+), where `batchSize` bounds groups, not members. See [PGMQ jobs](pgmq-jobs.md).
+
+25. **Inspecting a DLQ hides its rows.** `readDlq`, `redriveDlq`, and `archiveDlq` hide each row they read for 30 seconds, and `purgeDlq` then returns `PurgeDlqBlocked` instead of deleting. Archive inspected ids with `archiveDlqEntries`, check the returned set, and handle the result; `purgeDlqForce` deletes hidden rows too. See [PGMQ jobs](pgmq-jobs.md).
+
+26. **Partition retention drops unprocessed work.** Retention drops whole active and archive partitions whether or not their messages were processed. Size it above the worst outage plus backlog age, build specs with `mkPartitionSpec`, and never read `defaultPartitionLength = Nothing` as zero. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+
+27. **Producer identity is frozen.** Renaming a producer's source or name, or reassigning emission indices, republishes every replayed event under new IDs; after `garbageCollectSent`, a replay republishes the same wire `messageId` and only inbox retention suppresses it. See [transactional outbox](outbox.md).
+
+28. **Moving a process manager to the reaction runner is an identity migration.** `Keiro.ProcessManager.Reaction` uses a target-keyed command-id family. Drain source deliveries, incomplete fan-out, pending timers, and permitted replays first, or a retained legacy saga witness duplicates the action. See [process managers](process-managers.md).
+
+29. **Delegated inbox intake has no inbox rows.** It has no backlog, failed-row, retention, or `keiro-ops inbox` surface. The caller owns attempt counting and must durably dead-letter before acknowledging. Switching between table and delegated intake needs a drain and a replay boundary. See [inbox](inbox.md).
 
 ## Related Patterns
 

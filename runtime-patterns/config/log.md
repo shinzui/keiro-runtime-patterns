@@ -1,5 +1,8 @@
 # config Update Log
 
+## 2026-09-18
+* **Update**: Refresh Shibuya core and PGMQ adapter shutdown version claims to 0.9.0.1 and 0.16.0.0; behaviour is unchanged.
+
 ## 2026-08-14
 * **Update**: Move Shibuya core and PGMQ adapter shutdown claims to the released 0.9.0.0 and 0.14.0.0 versions
 

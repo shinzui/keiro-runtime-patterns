@@ -2,10 +2,10 @@
 type: Pattern
 title: "Transport Selection"
 description: "Choosing a transport: the pgmq vs Kafka vs kiroku-subscription matrix and rule of thumb"
-timestamp: 2026-07-22T18:27:32Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-07-22T18:27:32Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-transport-selection
 tags: [messaging, transport-selection]
 status: current
@@ -38,7 +38,7 @@ Choose the failure and ordering semantics first, then the adapter.
 | Concurrency | `Serial`, `Ahead`, or `Async`; FIFO groups available | **`Serial` only; caller-enforced** | Consumer-group members `Serial`; group is `PartitionedInOrder` |
 | Retry | Change visibility timeout | Seek partition to failed offset | Redeliver before checkpoint advance |
 | Dead letters | Archive, direct queue, or topic route; adapter DLQ transfer is transactional | **No DLQ producer; warn and store offset** | Durable `kiroku.dead_letters` row plus checkpoint advance |
-| Ordering | Per FIFO message group when grouped reads are configured | Per partition, provided processing is serial | Per originating stream within a consumer group |
+| Ordering | Per FIFO message group; grouped-head reads (PGMQ 1.12+) keep a failed head blocking its group | Per partition, provided processing is serial | Per originating stream within a consumer group |
 | Configuration | Queue, VT, polls, attempts, DLQ, FIFO, prefetch | Topics in adapter; consumer properties outside | Subscription target/name, filters, buffering, optional group |
 
 ## Kafka Constraints Are Hard Constraints
@@ -51,7 +51,7 @@ Applications own Kafka on both sides. Keiro's `Keiro.Outbox.Kafka` and `Keiro.In
 
 ## PGMQ Constraints Are Database Constraints
 
-PGMQ provides an attempt count, visibility timeout, lease extension, retry caps, transactional adapter DLQ transfer, and per-group FIFO reads without a separate broker. It also shares PostgreSQL capacity and failure domains. A visibility-timeout expiry increments `readCount` even when no handler returned `AckRetry`; size VT above worst-case processing or extend the lease.
+PGMQ provides an attempt count, visibility timeout, lease extension, retry caps, transactional adapter DLQ transfer, and per-group FIFO reads without a separate broker. Use grouped-head reads (`HeadPerGroup`, Keiro `FifoHeads`) when order must survive failures; the legacy fill strategies can lease a successor before its predecessor settles. It also shares PostgreSQL capacity and failure domains. A visibility-timeout expiry increments `readCount` even when no handler returned `AckRetry`; size VT above worst-case processing or extend the lease.
 
 Adapter `maxRetries = 0` is technically valid and dead-letters a first delivery before its handler. Prefer Keiro's validated `mkRetryPolicy` for jobs.
 

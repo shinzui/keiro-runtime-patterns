@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-09-18
+* **Update**: Route candidate Language 6 gating, FIFO-heads jobs, dead timer resume, and diff --deny.
+
 ## 2026-09-06
 * **Update**: Route generated Haskell and package record API upgrades separately from source-language adoption.
 

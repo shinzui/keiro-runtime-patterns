@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Keiro DSL language versions"
-description: "Declaring a Keiro DSL language contract, adopting published stable version 5, and auditing compatibility-only sources"
-timestamp: 2026-09-06T21:22:15Z
+description: "Declaring a Keiro DSL language contract, adopting published stable version 5, keeping candidate version 6 off released services, and auditing compatibility-only sources"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -24,13 +24,13 @@ language keiro-dsl 5
 context hospital-capacity
 ```
 
-The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares `currentAuthoringLanguageVersion`, which selects an active candidate when the registry holds one and otherwise the published stable version.
+The clause must be the first significant clause; comments and blank lines may precede it. Exactly one may appear. A version is a positive decimal — `0` is not a version. Every skeleton printed by `keiro-dsl new <kind>` declares `currentStableLanguageVersion` — the published stable version — even while a candidate is registered. Opting into a candidate is always a deliberate preamble edit.
 
 Failures at this boundary are reported before any body grammar runs, with their own stable codes: `InvalidLanguageVersion`, `UnsupportedLanguageVersion`, `DuplicateLanguagePreamble`, `MisplacedLanguagePreamble`, and `LanguageFeatureRequiresVersion`. Branch automation on the code, not on the rendered sentence.
 
 ## Author every new source at stable version 5
 
-Version 5 is the sole published stable authoring contract. Versions 1 through 4 are `compatibility-only`: they keep their released semantics forever, are immutable, and are never silently upgraded, but they are not where new work belongs. The registry currently holds no candidate.
+Version 5 is the sole published stable authoring contract. Versions 1 through 4 are `compatibility-only`: they keep their released semantics forever, are immutable, and are never silently upgraded, but they are not where new work belongs. Keiro 0.17.0.0 registers version 6 as the active candidate; it is not published, and a released service does not declare it.
 
 | Version | Syntax profile | Runtime semantics | Support | Admits |
 |---|---|---|---|---|
@@ -39,6 +39,7 @@ Version 5 is the sole published stable authoring contract. Versions 1 through 4 
 | 3 | `keiro-dsl/syntax-profile/2` | `keiro-dsl/runtime-semantics/2` | compatibility-only | Version 2's grammar exactly, with every prefix-bearing ID moved onto the enforced [TypeID-v7 identifier domain](identifier-domains.md) and made abstract in generated code. |
 | 4 | `keiro-dsl/syntax-profile/3` | `keiro-dsl/runtime-semantics/3` | compatibility-only | Version 3's semantics plus field aliases, contract-level TypeID admission, and strict spec-surface validation. |
 | 5 | `keiro-dsl/syntax-profile/4` | `keiro-dsl/runtime-semantics/4` | **stable** | Version 4 plus typed projection catalogs, versioned external-read contracts, mapped workqueue and read-model-query consumers, aggregate-sourced projections, typed domain command outcomes, declarative router selection, and separated projection delivery from query freshness. |
+| 6 | `keiro-dsl/syntax-profile/5` | `keiro-dsl/runtime-semantics/5` | candidate | Version 5 plus delegated intake idempotence, first-class process reactions, `ordering fifo-heads`, declared contract IDs, identifier-keyed maps, and nominal IDs, enums, and scalars as structural leaves. Amendable until published. |
 
 Version 3 remains the clearest case that syntax and runtime behavior are separate axes: it admits exactly the same grammar as version 2 and still changes what the runtime accepts. Read the two identifiers, not the version number.
 
@@ -70,11 +71,33 @@ Two of those features change the meaning of clauses a version-4 source already w
 
 Adopting version 5 is one gate, not a preamble edit: move every workspace member in one change and apply [mapped consumer surfaces](mapped-consumer-surfaces.md), [semantic-local regeneration](dsl-semantic-locality.md), and [projection catalogs](projection-catalogs.md) together.
 
-`currentStableLanguageVersion` is 5, and `currentAuthoringLanguageVersion` resolves to the same value while the registry holds no candidate. `keiro-dsl new` follows the authoring value; inspect a generated skeleton before committing it rather than assuming a development binary prints the published contract.
+`currentStableLanguageVersion` is 5. `currentAuthoringLanguageVersion` resolves to the active candidate, 6, while one is registered; `keiro-dsl new` deliberately follows the stable value instead.
+
+## Keep candidate version 6 off released services
+
+**A candidate is accepted for authoring, but it is not a compatibility contract: keep every released service on version 5 until version 6 is published.**
+
+The registry marks version 6 `Candidate` with `CandidateLanguage` maturity. Published entries are append-only and immutable; the active candidate may be corrected in place until its release boundary, including grammar, diagnostics, generated code, fingerprints, and derived runtime identities. Keiro 0.17.0.0 already exercised that right by changing how candidate reaction timer and fired-event UUIDv5 ids are derived. Anything a candidate source persists — reaction timer ids, dispatch ids, delegated receipt ids, nominal-leaf codec bytes — therefore carries no guarantee across a keiro-dsl upgrade.
+
+- Declare `language keiro-dsl 6` only in a spike, fixture, or branch that can absorb an in-place correction, and never where the generated output writes production data.
+- A candidate source stays silent on stderr — the compatibility notice fires only for `compatibility-only` contracts — so do not treat the absence of a notice as publication. Gate on the check report instead: `language.languageSupport` is `candidate` and `language.stable` is `false`. Make `language.stable == true` a CI assertion for every released service.
+- Do not rely on `--min-language` for this; it enforces a floor and admits a candidate above it.
+- When version 6 is published, adopt it through the ordinary [deliberate adoption](#adopt-a-version-deliberately) path; re-scaffold rather than trusting output generated under the candidate.
+
+## Know what candidate version 6 adds
+
+Syntax profile 5 adds five grammar features over profile 4: `DelegatedInboxSyntax`, `ProcessReactionSyntax`, `WorkqueueFifoHeadsSyntax`, `ContractDeclaredIdSyntax`, and `KeyedMapSyntax`. Runtime semantics 5 adds `DelegatedInboxRuntime` and `StructuralNominalLeaves`; neither contributes a fold discriminator, so adopting the candidate does not by itself move aggregate fold fingerprints.
+
+- **`idempotence delegated` on an intake** generates a typed `runInboxIntake` wrapper over Keiro's delegated inbox, which writes no inbox row: the downstream state transition owns the durable receipt. Omitting the clause means `table` in every language. `delegated` cannot combine with `persist = dedupe-only` (`DelegatedInboxDedupeOnlyPersistence`).
+- **Process `reactions`** replace the single-input, single-timer legacy process body with typed inputs, ordered input-only guards ending in `otherwise`, optional `advance`, accepted-only follow-ups paired with `silent no-action`, timer-free processes, and multiple named timers with rearm, `once`, and `cancel`. The generated module owns the input ADT, pure reaction, `ReactiveProcessManager`, worker wrapper, timer payload codecs and builders, and firing dispatcher; the only create-once hole is `decode<Process>Input :: RecordedEvent -> Maybe <Process>Input`. Declare `reactions version N` and increase it with every semantic change. Runtime behavior is governed by [process managers](../messaging/process-managers.md).
+- **`ordering fifo-heads`** on a workqueue scaffolds Keiro's `FifoHeads` ordering plus FIFO-index provisioning. It is gated: a version 4 or 5 source that used the token during the unreleased window fails with `LanguageFeatureRequiresVersion` and must either move to version 6 or pick a published ordering with batch size one. See [PGMQ jobs](../messaging/pgmq-jobs.md).
+- **Declared contract IDs, identifier-keyed maps, and nominal structural leaves** extend [enforced identifier domains](identifier-domains.md) and [mapped consumer surfaces](mapped-consumer-surfaces.md).
+
+A legacy process body remains valid in every language, including 6. Moving it to reactions is an identity migration, not a syntax upgrade; see [evolution gates and rollout ordering](evolution-and-rollout.md).
 
 ## Expect a stderr notice on a compatibility-only source
 
-`check`, `scaffold`, and the working-tree side of `diff` write one stderr line for any source whose effective contract is not stable, naming the effective version, the source form, the support level, and the runtime-semantics identity. Version 4 now sits on that path too: a service that has not moved to version 5 sees the notice where it previously stayed silent. Adopting the stable version removes the noise rather than adding it.
+`check`, `scaffold`, and the working-tree side of `diff` write one stderr line for any source whose effective contract is `compatibility-only`, naming the effective version, the source form, the support level, and the runtime-semantics identity. Version 4 now sits on that path too: a service that has not moved to version 5 sees the notice where it previously stayed silent. Adopting the stable version removes the noise rather than adding it.
 
 Released compatibility diagnostics stay byte-stable across a publication: the version a `LanguageFeatureRequiresVersion` message recommends is the latest published *compatibility-only* contract, so publishing a successor does not rewrite the predecessor those messages name.
 
@@ -100,7 +123,7 @@ From Keiro 0.8 every registry entry selects an immutable `SyntaxProfile` and a r
 - `languageSupportsFeature` for the direct question about one version;
 - `sourceLanguageDiagnosticMessage` for the message behind a `SourceLanguageErrorCode`.
 
-Never write `4` or `5` into tooling. The registry holds exactly one stable version and at most one candidate; select the one the operation actually means.
+Never write `5` or `6` into tooling. The registry holds exactly one stable version and at most one candidate; select the one the operation actually means. Skeletons, notices, and adoption gates mean stable; only candidate-aware development tooling means authoring.
 
 `LanguageDefinition` is a public product record. Read it through concise record-dot labels and match only the fields the caller needs. `definition.bodyParser` survives only as a compatibility projection and no longer drives parser dispatch; never branch on it.
 

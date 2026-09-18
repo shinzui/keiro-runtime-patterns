@@ -2,10 +2,10 @@
 type: Guide
 title: "Kiroku Observability"
 description: "Wiring kiroku-metrics and kiroku-otel: collector composition, spans, Prometheus names, health probes"
-timestamp: 2026-08-06T22:43:02Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-08-06T22:43:02Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-observability
 tags: [kiroku, observability]
 status: current
@@ -91,7 +91,9 @@ That constrains startup order. Every handle these wrappers close over — `Kirok
 - `/health`, `/health/live`, and `/health/ready`;
 - `/ws` for the WebSocket upgrade when store-aware serving is enabled.
 
-Stable Prometheus names include `kiroku_events_appended_total`, `kiroku_active_subscribers`, `kiroku_pool_connections`, `kiroku_subscription_position`, `kiroku_subscription_lag`, `kiroku_subscriptions_stopped_total`, and `kiroku_hard_deletes_total`. Alert and dashboard against those names, not JSON field layout or rendered descriptions.
+Stable Prometheus names include `kiroku_events_appended_total`, `kiroku_active_subscribers`, `kiroku_pool_connections`, `kiroku_subscription_position`, `kiroku_subscription_lag`, `kiroku_subscriptions_stopped_total`, and `kiroku_hard_deletes_total`. Alert and dashboard against those names, not rendered descriptions.
+
+Treat the documented surface as a frozen wire contract under Kiroku ADR-9 (`mori://shinzui/kiroku/okf/adrs/concepts/ADR-9`): JSON bodies, HTTP statuses, routes, Prometheus metric names, types and labels, WebSocket frame types, and `RecordedEvent` fields are never removed, renamed, or re-typed. Additions are allowed, so write clients that ignore unknown fields, frame types, and enumeration members. Switch on status codes and frame `type`, never on `error` or `message` text. The event object keeps its shipped camelCase keys; every other key, and any key added later, is snake_case.
 
 ## Wire Kubernetes probes deliberately
 

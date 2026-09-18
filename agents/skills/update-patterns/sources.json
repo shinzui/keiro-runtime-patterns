@@ -15,9 +15,9 @@
         "keiki.cabal",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "97d8b07e87ceb2d9b6e6b2b8a60a7de84e15e2bb",
-      "last_checked_at": "2026-09-06T21:23:16Z",
-      "notes": "Reconciled 04296a7..97d8b07 against src/Keiki/Core.hs and codec changelogs, Hackage 0.9.1.0, and the upstream v0.9.1.0 tag. Correct: existing build-time-validation and overview now cover producer-owned exact Bool exhaustion of captured Eq/Ord closures in default inversion ambiguity analysis, unchanged integral proof, and conservative unsupported/opaque/negation boundaries. No new concept: this extends the existing inversion-proof contract. No catalog change: validation/replay API, forward determinism, and codec wire behavior are unchanged; exhaustive proof tests and OKF review bootstrap add evidence only."
+      "last_checked_commit": "79337c57967db09c6ef7e27d68d349fe25e4b92b",
+      "last_checked_at": "2026-09-18T04:30:57Z",
+      "notes": "Reviewed 97d8b07..79337c5: the only change declares every package and its dependencies in mori.dhall. No source, codec, API, or version change; no catalog change."
     },
     {
       "project": "shinzui/keiro",
@@ -38,9 +38,9 @@
         "keiro-test-support",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "de574cdcb0add3fefbb0fdd96d820258d15f8997",
-      "last_checked_at": "2026-09-06T21:23:16Z",
-      "notes": "Reconciled 4a4f8a91..de574cdc against released 0.15.0.0 source and all seven matching upstream package tags; Hackage preferred versions confirmed on 2026-09-06. Correct: concise package record-dot APIs and preserved abstract checked/prepared boundaries, idiomatic-v2 build defaults, every pre-v2 ledger gate, combined legacy migration and recovery, terminal outbox rejection and conditional atomic batch finalization, migration 0031, console/telemetry, and Store 0.8 transient worker classification. Create: keiro/generated-haskell-editions for the independent adoption and rollback protocol. Correct: published keiro-test-support suite fixtures and release bounds; read-model compatibility names remain exported in 0.15 despite stale 0.13 deprecation text. No catalog change: release/capability documentation, blueprints, API-boundary enforcement, compatibility goldens, record inventory tooling, and unimplemented guard/mapped-register/UI requests. Existing Language 5 semantics, canonical/JSON/wire keys, fingerprints, and runtime replay are preserved by the presentation migration. Watch now includes framework migrations and the published test-support package."
+      "last_checked_commit": "11e0bba4f634ac6fa4526e2814bd5a8177e3f050",
+      "last_checked_at": "2026-09-18T04:30:57Z",
+      "notes": "Reconciled de574cdc..11e0bba (0.16.0.0 on Hackage and tagged; 0.17.0.0 release commit treated as released at the user's direction while its Hackage publication was in flight) from source, package changelogs, ADR-42, and migration 0032. Create: keiro/dead-timer-resume for guarded Dead-timer resume, inspection, and the 0032 stop-the-writers rollout. Correct: deterministic producer outbox identity and freshIntegrationEvent, required jobOrdering with FifoHeads and legacy FIFO batch rejection, guarded DLQ purge/archive and header-preserving redrive, mkPartitionSpec, pgmq 0.6/adapter 0.16 bounds and the retained effectful <2.7 bound, reaction runner and cancelTimerTx, delegated inbox, withFreshResourceStorePrepared, candidate Language 6 surfaces (process reactions, delegated intake, fifo-heads gate, declared contract IDs, nominal structural leaves, keyed maps), guard-diff advisories and diff --deny. No catalog change: CPP-gated Command.hs hydration probe, comment-only keiro-core and Metrics.hs changes, benchmarks, record-migration manifest regeneration, and 0.16 DSL no-op release."
     },
     {
       "project": "shinzui/kiroku",
@@ -60,9 +60,9 @@
         "shibuya-kiroku-adapter",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "7051b12342b3002659e39061b03bee2e37275099",
-      "last_checked_at": "2026-09-06T21:23:17Z",
-      "notes": "Reconciled b9aecf3..7051b12 from every changed library source, migrations 0010/0011, release-owned checksum fixup, package changelogs, Hackage, and upstream Store 0.8.0.0 / migrations 0.4.0.0 tags. Correct: TransientTransactionFailure for exactly 40001/40P01, bounded append retry and surviving fresh-stream deadlock cycle, schema-qualified kiroku.uuidv7(), withdrawn 0010 checksum recovery followed by 0011, fresh-session PostgreSQL 17/18 upgrade tests, and Shibuya ApplicationFailure structured DeadLetterOther mapping in adapter 0.5.1.1. No new concept needed: existing transaction, outbox-adjacent subscription, retention, and migration operations standards absorb these rules. No catalog change: defensive Retrying-to-Live worker totality (cursor and delivery contract unchanged), warning cleanup, bounds-only CLI/metrics/otel releases, release blueprint, and unimplemented UI/compaction/hardening plans. Watch now includes the actual migration package, adapter, and CLI rather than the nonexistent root migrations path."
+      "last_checked_commit": "07cd034aafc0d88b6c55abdf3509e25b9d69e63d",
+      "last_checked_at": "2026-09-18T04:30:57Z",
+      "notes": "Reviewed 7051b12..07cd034: no watched source, migration, or version change. Correct: kiroku/observability now states the ADR-9 frozen HTTP/Prometheus/WebSocket wire contract documented in docs/user/metrics.md. No catalog change for planned (unimplemented) CORS, dead-letter read, REST browse, and HTTP checkpoint APIs, compaction plans, or seihou tooling."
     },
     {
       "project": "shinzui/shibuya",
@@ -76,9 +76,9 @@
         "shibuya-metrics",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "bf2cff1e00334636f676bdb015d87fc8e539779c",
-      "last_checked_at": "2026-09-06T21:23:17Z",
-      "notes": "Reconciled 7158f3e..bf2cff1: the complete changed-file inventory contains only UI inspection, CORS/client, and pause/resume improvement requests plus their log. Re-read the messaging processing/adapter coverage; no source, runtime behavior, package version, or catalog claim changes. No new concept for unimplemented requests. Corrected watch paths to actual shibuya-core and shibuya-metrics packages; separately owned adapters remain tracked by their producing repositories."
+      "last_checked_commit": "cb3c4a9ae91de946fa17a6287241ca91699f7c50",
+      "last_checked_at": "2026-09-18T04:30:57Z",
+      "notes": "Reviewed bf2cff1..cb3c4a9: 0.9.0.1 (Hackage) only widens the effectful bound to <2.8 with no API or behaviour change. Correct: version claims in config/kubernetes-deployment; keiro/overview notes Keiro still caps effectful at <2.7. No catalog change for the idle-master-loop and post-0.9 review plans (unimplemented) or nix tooling."
     },
     {
       "project": "shinzui/pgmq-hs",
@@ -95,9 +95,9 @@
         "pgmq-migration/migrations",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "590a46f3e499d8b129976ca15e76acb4c1d928c6",
-      "last_checked_at": "2026-09-06T21:23:17Z",
-      "notes": "Reconciled 9ee9a2f..590a46f: no package source, SQL migration, or version changes. Complete diff adds an OKF improvement-request bundle, its validation target and Mori registration, and proposed UI/inspection/JSON APIs. Existing queue lifecycle, jobs, and gotcha standards remain correct; no catalog change or new concept for proposals."
+      "last_checked_commit": "8fff5fb154a754252116c1a8c3ff1c6cd3b6e25e",
+      "last_checked_at": "2026-09-18T04:30:57Z",
+      "notes": "Reconciled 590a46f..8fff5fb against 0.6.0.0/0.6.1.0 source (Hackage 0.6.1.0), migrations 0004-0006, CHANGELOG, and the 0.6 upgrade guide. Correct: queue-reconciliation and jobs concepts for PGMQ 1.12/1.13, grouped-head reads, premake and PartitionConfig/QueueMetrics field additions, default-partition spill, effectful-core ^>=2.6 || ^>=2.7 with the 2.7.1.1 performance recommendation; isTransient unchanged. No catalog change: ephemeral-pg test-root pinning, nix, release automation, and review/plan documents."
     },
     {
       "project": "shinzui/pg-migrate",
@@ -142,9 +142,9 @@
         "shibuya-pgmq-adapter/src",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "1d882238f22b107b81104d7112833d521fcdb5ea",
-      "last_checked_at": "2026-09-06T21:23:17Z",
-      "notes": "Reconciled fee9b3a..1d88223: complete diff contains only proposed adapter DLQ inspection/redrive and processor-context improvement requests plus their log. No adapter source, package version, SQL, shutdown, or dead-letter contract changed. Existing messaging/config coverage remains correct; no catalog change or new concept for unimplemented requests."
+      "last_checked_commit": "392f7545af32ef893c24139fd194d16ec1172f75",
+      "last_checked_at": "2026-09-18T04:30:58Z",
+      "notes": "Reconciled 1d88223..392f754 against 0.15.0.0/0.16.0.0 source (Hackage 0.16.0.0). Correct: HeadPerGroup grouped-head FIFO (PGMQ 1.12+, batchSize bounds groups) in jobs and transport selection, and shutdown/DLQ version claims. No catalog change: 0.15 bounds-only adoption of pgmq 0.6 and benchmarks."
     }
   ]
 }

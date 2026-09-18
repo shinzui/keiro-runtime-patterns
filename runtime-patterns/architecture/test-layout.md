@@ -2,10 +2,10 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -83,7 +83,7 @@ The comparison module is excluded from ordinary production manifests and scaffol
 
 ## Reuse the published PostgreSQL fixture
 
-`keiro-test-support` is published in the lockstep Keiro cohort from 0.14. Use `Keiro.Test.Postgres.withMigratedSuiteWith` behind the service migration test-support wrapper: it migrates one suite template with Kiroku, Keiro, and the supplied application/transport components, then `withFreshDatabase` or `withFreshStore` clones an isolated database for each example. Supply the complete extra component list before cloning; applying a partial plan against a ledger that already records omitted components fails strict verification. Keep `Fixture` abstract and acquire it through the suite function. Use `withFreshStoreWith` when tests need application schema search-path settings. This fixture reuses migration work without sharing mutable test databases.
+`keiro-test-support` is published in the lockstep Keiro cohort from 0.14. Use `Keiro.Test.Postgres.withMigratedSuiteWith` behind the service migration test-support wrapper: it migrates one suite template with Kiroku, Keiro, and the supplied application/transport components, then `withFreshDatabase` or `withFreshStore` clones an isolated database for each example. Supply the complete extra component list before cloning; applying a partial plan against a ledger that already records omitted components fails strict verification. Keep `Fixture` abstract and acquire it through the suite function. Use `withFreshStoreWith` when tests need application schema search-path settings, and `withFreshResourceStore` when the code under test needs the resource-aware store runner. Use `withFreshResourceStorePrepared` when a test must first create roles or grants as the privileged fixture user: its preparation store is closed before the application store opens with the modified settings, so the test exercises the application's real privileges. This fixture reuses migration work without sharing mutable test databases.
 
 ## Database Isolation Rule
 

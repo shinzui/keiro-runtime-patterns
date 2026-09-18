@@ -2,10 +2,10 @@
 type: Guide
 title: "Brownfield Keiro Adoption"
 description: "Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates"
-timestamp: 2026-09-01T15:59:19Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T15:59:19Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -83,7 +83,7 @@ mapped structural record ArtifactInfo {
 }
 ```
 
-Structural records, string enums, and tagged unions may contain supported scalars, optionals, lists, text-keyed maps, nested mapped types, and explicit `Json` leaves. The checker rejects recursion, ambiguous or non-injective shapes, ill-typed defaults, missing identities, and mapped registers with no declared initial value.
+Structural records, string enums, and tagged unions may contain supported scalars, optionals, lists, text-keyed maps, nested mapped types, and explicit `Json` leaves. Candidate Language 6 adds declared ID, enum, and nominal-scalar leaves and `Map[DeclaredId]` keys; until it is published, a released service keeps a consumer ID inside a structural shape only through a `mapped opaque` boundary, and migrates off it later as a checked `MappedFieldTypeChanged` with codec-comparison evidence. See [mapped consumer surfaces](mapped-consumer-surfaces.md). The checker rejects recursion, ambiguous or non-injective shapes, ill-typed defaults, missing identities, and mapped registers with no declared initial value.
 
 Before writing files, inspect every obligation:
 

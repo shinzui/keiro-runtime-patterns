@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -75,6 +75,8 @@ Scaffolding reports stale paths but never deletes them; review stale generated a
 
 Keiro-dsl 0.15 uses concise product labels and record-dot reads in both the package API and `idiomatic-v2` generated Haskell. Migrate hand-owned consumers, apply the edition gate, repaste the complete Cabal fragment, and compile the service plus its conformance package. Follow [generated Haskell editions](generated-haskell-editions.md); `--force-generated-overwrite` does not authorize an edition change. Source Language 5 and persisted wire meaning remain unchanged.
 
+Keiro-dsl 0.17 grows the public AST for candidate Language 6 without removing or renaming a top-level export: `ProcessNode` replaces `input`, `handle`, and `timer` with `body :: ProcessBody`; `IntakeNode` gains `idempotence`; `WqOrdering` gains `WqFifoHeads`; `ContractType` gains `CDeclaredId`; `TypeExpr` gains `TKeyedMap`; `DiagnosticCode`, `LanguageFeature`, and `RuntimeCapability` gain constructors; and `checkReport`/`workspaceCheckReport` take a `CheckedService`. Tooling that matches exhaustively or constructs these records positionally must be extended even when every service stays on Language 5.
+
 ## Recognize Runtime Holes And Mapping Obligations
 
 The established runtime surface has eight hole kinds:
@@ -130,17 +132,18 @@ keiro-dsl scaffold INPUT --out DIR \
 keiro-dsl diff INPUT --since GIT-REF \
   [--emit-goldens DIR] [--replay-impact-out FILE] [--explain] \
   [--report-out FILE] [--gate SURFACE] \
-  [--coverage-report FILE] [--fail-on-opaque-increase]
+  [--coverage-report FILE] [--fail-on-opaque-increase] \
+  [--deny CODE[,CODE...]]
 ```
 
-- `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation.
+- `new` prints a skeleton for aggregate, process, router, contract, intake, emit, publisher, workqueue, dispatch, workflow, or operation. It declares the published stable language even while a candidate is registered.
 - `INPUT` is normally a `.keiro-workspace` manifest, and all file-taking commands operate on that composed service. Use one bare `.keiro` file only for the trivial single-aggregate exception.
 - `parse` parses and pretty-prints the normalized service specification; `pretty` is the explicit alias for that canonical render. Neither one rewrites a source's language declaration.
 - `inspect --format=json` reports whether each source declared a language version and which version is effective, for a file or for every workspace member in canonical path order. See [Keiro DSL language versions](language-versions.md).
 - `behavior-obligations` inventories every live transition, reachable rejection cell, and replay-only transition of the composed service, for a file or a workspace. See [behavior conformance and obligations](behavior-conformance.md).
 - `check` exits non-zero on errors and optionally emits the normalized spec. `--explain-bindings` lists consumer-owned obligations; coverage reports inventory structural, opaque, explicit-`Json`, snapshot, and unsupported boundaries.
 - `scaffold` validates, then emits generated modules and creates missing typed holes and binding skeletons. Read `semantic impact` independently from `generated-artifact impact`: the first names checked consumers and durable consequences; the second names changed bytes. `--goldens` embeds captured old-payload fixtures into the generated conformance harness so it exercises `decodeRaw` against real historical shapes. The codec-comparison pair emits an explicitly non-production historical comparison module for one persisted structural type.
-- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector and adds the same independent semantic-impact projection for mapped declarations. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit.
+- `diff` classifies changes as `ADDITIVE`, `WARNING`, or `BREAKING` from a six-surface compatibility vector and adds the same independent semantic-impact projection for mapped declarations. `--explain` prints paths, directions, rollout constraints, and remedies; `--report-out` writes stable JSON; repeated `--gate` options strengthen the default surface gate. `--emit-goldens` captures old-shape fixtures while both specifications exist, and `--replay-impact-out` drives the audit. Repeatable `--deny` escalates named advisory diff codes to failure; see [evolution gates](evolution-and-rollout.md).
 
 ## Make warnings fail CI
 
@@ -156,7 +159,7 @@ keiro-dsl check domain/service.keiro-workspace \
 - `--deny-warnings` exits non-zero when any warning-severity diagnostic fires. Prefer it.
 - `--deny CODE[,CODE...]` is the selective fallback when one idiomatic spelling warns by design — router and process benign-inversion spellings are the usual reason. It is repeatable and comma-separated. Deny the codes you accept, never the reverse.
 - `--min-language N` enforces the effective-version floor. See [Keiro DSL language versions](language-versions.md).
-- `--report-out FILE` writes the append-only `keiro-dsl/check-report/1` JSON — source or workspace — through `Keiro.Dsl.CheckReport`. Each entry carries its severity, code, location, and whether a `--deny` selection matched it, so CI can report the finding without re-parsing rendered text.
+- `--report-out FILE` writes the append-only `keiro-dsl/check-report/1` JSON — source or workspace — through `Keiro.Dsl.CheckReport`. Each entry carries its severity, code, location, and whether a `--deny` selection matched it, so CI can report the finding without re-parsing rendered text. The report's `language` object carries `languageSupport` and `stable`; assert `stable` is `true` for released services so a candidate preamble cannot ship. From 0.17 the report also appends `processReactions`, one entry per process with its verification mode, reaction version, fingerprint, and hole obligations.
 
 A denial that could never match is refused rather than silently ignored. `check --deny` rejects any code emitted only by `diff` or by the codec-comparison path, and rejects `CoverageOpaqueGateExceeded` outright because that code is the error `--fail-on-opaque` itself raises. If a `--deny` invocation is accepted, the code it names is genuinely reachable from that command.
 

@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro Messaging Patterns"
-description: "Index of messaging standards for Keiro services, including pgmq-hs 0.5 queue lifecycle and reconciliation"
-timestamp: 2026-09-06T21:22:15Z
+description: "Index of messaging standards for Keiro services, including pgmq-hs 0.6 queue lifecycle and reconciliation"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -35,20 +35,20 @@ Use this area for process managers, public integration contracts, transactional 
 
 ## Orchestrating Inside A Service
 
-- [Process managers and durable timers](process-managers.md) — saga state, deterministic dispatch, worker policies, timers, and the orchestration decision ladder.
+- [Process managers and durable timers](process-managers.md) — saga state, deterministic dispatch, the typed reaction runner (`Keiro.ProcessManager.Reaction`), worker policies, timers, and the orchestration decision ladder.
 
 ## Talking To Other Services
 
 - [Integration events](integration-events.md) — the public envelope, identity, versioning, ordering, and trace propagation contract.
 - [Transactional outbox](outbox.md) — safely enqueue outbound integration events, classify terminal rejection, and finalize publication outcomes atomically.
-- [Idempotent inbox](inbox.md) — deduplicate inbound integration events with their local effects.
+- [Idempotent inbox](inbox.md) — deduplicate inbound integration events with their local effects, or delegate the receipt to the downstream state transition.
 
 ## The Processing Substrate
 
 - [Shibuya processing](shibuya-processing.md) — acknowledgement intent, application dead-letter codes, finalization, concurrency, batching, supervision, and shutdown.
 - [Transport selection](transport-selection.md) — choose among PGMQ, Kafka, and Kiroku subscriptions.
-- [Typed PGMQ jobs](pgmq-jobs.md) — background work, retry policy, visibility timeout, FIFO groups, and queue identity.
-- [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) — validated physical names, additive provisioning, drift, notifications, and retry classification.
+- [Typed PGMQ jobs](pgmq-jobs.md) — background work, required job ordering and FIFO-heads, retry policy, visibility timeout, DLQ retention, and queue identity.
+- [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) — validated physical names, PGMQ 1.13 schema, additive provisioning, partition premake and spill, drift, notifications, and retry classification.
 - [Kiroku subscriptions](kiroku-subscriptions.md) — consume a service's own event log through Shibuya.
 
 ## Before Production

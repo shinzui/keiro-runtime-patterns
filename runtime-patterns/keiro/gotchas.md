@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, and bring-your-own Kafka traps"
-timestamp: 2026-09-06T21:22:15Z
+description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and candidate-language traps"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Keiro gotchas
 
-**Nine traps that cost real debugging time.**
+**Fifteen traps that cost real debugging time.**
 
 This checklist captures cross-cutting runtime constraints that are easy to miss when reading one subsystem at a time.
 
@@ -91,6 +91,22 @@ Every pre-v2 ledger, including one with no edition row, refuses ordinary scaffol
 
 `TransientTransactionFailure` is retried by process-manager and router acknowledgement policy, but `runCommand` surfaces it inside `StoreFailed`. Classify it at the caller boundary; see [command errors](command-cycle-and-errors.md).
 
+## Upgrading to 0.16 is a stop-the-writers rollout
+
+Migration `0032` adds guarded-resume token columns, but old binaries do not enforce the token exclusions. Stop or drain every timer writer, including consoles and custom SQL; migrate; deploy all upgraded writers; only then enable resume. Before rolling back, disable resume and drain or recover guarded claims. See [dead timer resume](dead-timer-resume.md).
+
+## `requeueStuckAfter = Nothing` no longer disables all timer recovery
+
+Since 0.16 every timer worker pass returns expired foreground resume claims to `Dead`. A host that resumes timers in the foreground without running a worker must call `recoverExpiredTimerResumes` itself. See [dead timer resume](dead-timer-resume.md).
+
+## A candidate language is silent
+
+A `language keiro-dsl 6` source produces no stderr notice, and `--min-language` accepts it, yet its generated identities can change before publication. Assert `language.stable == true` in the `check --report-out` JSON for every released service. See [language versions](language-versions.md).
+
+## Legacy process to reactions is an identity migration
+
+Target-keyed reaction dispatch ids never match legacy positional ids, so the DSL diff reports `ProcessDispatchIdentityModelChanged`; drain before switching. A `reactions version` bump is not a migration. See [evolution gates](evolution-and-rollout.md) and [process managers](../messaging/process-managers.md).
+
 ## Related Patterns
 
 - [Runtime assembly](runtime-assembly.md)
@@ -98,3 +114,5 @@ Every pre-v2 ledger, including one with no edition row, refuses ordinary scaffol
 - [Command cycle and errors](command-cycle-and-errors.md)
 - [Workflow reliability and recovery](workflow-reliability.md)
 - [Brownfield Keiro adoption](brownfield-adoption.md)
+- [Dead timer resume](dead-timer-resume.md)
+- [Language versions](language-versions.md)

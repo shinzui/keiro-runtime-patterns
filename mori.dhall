@@ -399,6 +399,15 @@ in  Schema.Project::{
             Schema.DocLocation.LocalFile "runtime-patterns/keiro/stream-scoped-repair.md"
         }
       , Schema.DocRef::{
+        , key = "keiro-dead-timer-resume"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Reading parked timers with bounded reason-filtered pages, resuming one under an expiring token claim, and the migration 0032 writer rollout and rollback order"
+        , location =
+            Schema.DocLocation.LocalFile "runtime-patterns/keiro/dead-timer-resume.md"
+        }
+      , Schema.DocRef::{
         , key = "keiro-durable-workflows"
         , kind = Schema.DocKind.Guide
         , audience = Schema.DocAudience.Module

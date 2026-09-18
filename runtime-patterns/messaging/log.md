@@ -1,5 +1,16 @@
 # messaging Update Log
 
+## 2026-09-18
+* **Update**: Route pgmq-hs 0.6, FIFO-heads jobs, the reaction runner, and delegated inbox intake.
+* **Update**: Add FIFO-heads, DLQ-inspection, partition-retention, frozen producer identity, reaction-runner, and delegated-inbox traps; move PGMQ claims to 0.6 and renumber.
+* **Update**: Add delegated intake (runInboxDelegated\*, Keiro.Inbox.Delegated), its receipt contract, caller-owned retry and DLQ, and the cutover as an identity change.
+* **Update**: Add the Keiro.ProcessManager.Reaction runner and its drain-first identity migration, cancelTimerTx, expired-resume recovery in every timer pass, ID-only exclusions, and resumable Dead timers.
+* **Update**: Distinguish the grouped-head FIFO failure barrier from the legacy fill strategies.
+* **Update**: Move to pgmq-hs 0.6: PGMQ 1.13 migrations 0004-0006, breaking QueueMetrics and PartitionConfig fields, creation-only premake, default-partition spill monitoring, and the effectful-core range.
+* **Update**: Require job ordering, add FIFO-heads grouped-head consumption, guarded DLQ purge and id-exact archiving, header-preserving redrive, and validated partition retention for keiro-pgmq 0.17.
+* **Update**: Treat messageId as opaque and derive producer identity deterministically; deprecate mintIntegrationEvent for freshIntegrationEvent.
+* **Update**: Adopt deterministic versioned producer identity, typed enqueue outcomes, conflict handling, the random-ID cutover, and verbatim content\_type publication.
+
 ## 2026-09-06
 * **Update**: Classify Store 0.8 transaction aborts as AckRetry in process-manager and router workers.
 * **Update**: Route publication rejection and atomic finalization through the outbox standard.

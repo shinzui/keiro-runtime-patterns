@@ -1,5 +1,10 @@
 # architecture Update Log
 
+## 2026-09-18
+* **Update**: Add candidate Language 6 guidance, the HoleContractDrift refusal, the process-reaction ledger row, and comment-only QueuePolicy.hs churn.
+* **Update**: Add withFreshResourceStore and withFreshResourceStorePrepared for privileged role or grant preparation.
+* **Update**: Exempt Keiro's deterministic producer outbox identity (UUIDv8 OutboxId, opaque message ID) from TypeID wrapping.
+
 ## 2026-09-06
 * **Update**: Reuse the published cohort test fixture through complete service migration wrappers.
 * **Update**: Require combined legacy name/edition migration and refuse corrupt or pre-v2 ledgers.

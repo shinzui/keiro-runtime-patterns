@@ -1,11 +1,11 @@
 ---
 type: Standard
 title: "Idempotent Inbox"
-description: "Consuming integration events idempotently: runInboxTransaction variants and disposition completeness"
-timestamp: 2026-09-01T16:07:10Z
+description: "Consuming integration events idempotently: runInboxTransaction variants, delegated downstream receipts, and disposition completeness"
+timestamp: 2026-09-18T04:30:00Z
 generated:
-  by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  by: process:claude-code
+  at: "2026-09-18T04:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-inbox
 tags: [messaging, inbox]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Idempotent Inbox
 
-**Commit a consumer's local effect and its deduplication record in one transaction.**
+**Commit a consumer's local effect and its deduplication record in one transaction — in `keiro_inbox` by default, or in one downstream event receipt when intake is delegated.**
 
 At-least-once delivery means a handler will see duplicates. The inbox turns the stable integration identity into an at-most-once local effect within a defined retention window; it does not make the distributed system exactly once.
 
@@ -53,9 +53,24 @@ Each runner inserts a completed inbox row and runs the supplied `Hasql.Transacti
 
 `PersistDedupeOnly` reduces successful-row payload storage but retains identity, routing, occurrence time, and delivery correlation. Failure rows keep the full envelope for operator review.
 
+## Delegate Only To A Complete Downstream Receipt
+
+Table-backed intake is the default. Use delegated intake only when one downstream event receipt covers the complete protected operation; it then performs no `keiro_inbox` reads or writes and needs no `Store` effect.
+
+- `runInboxDelegated`, `runInboxDelegatedWithRetries`, and `runInboxDelegatedBatch` compute the same dedupe key as the table runners and pass it to a handler returning `DelegatedOutcome` (`DelegatedFresh` or `DelegatedDuplicate`). That value is the handler's assertion; the wrapper cannot verify it.
+- Build the handler from `Keiro.Inbox.Delegated`. `delegatedEventId` derives the version-1 receipt as a length-prefixed UTF-8 UUIDv5 over consumer, integration source, dedupe key, resolved target stream, and a stable operation name. `delegatedCommand` probes that id in the target stream before hydration, assigns it to the first event of exactly one atomic append, and accepts only a positive append or a confirmed replay in the same stream. Pass the prepared options it supplies to the command; all protected SQL, projection, and outbox work must commit in that append.
+- `delegatedFromPMCommand` adapts one deterministic process-manager dispatch whose command identity already absorbs the intake identity. It does not prove a multi-command reaction completed.
+- Handle every `DelegatedCommandError`. `DelegatedCommandFailed` and `DelegatedCommandWithoutReceipt` (a successful command that appended no event) are failures; never wrap the whole result as `DelegatedFresh`.
+
+The caller owns durable attempt accounting: supply the one-based attempt and ceiling through `mkDelegatedRetryContext`, and above the ceiling the handler is not invoked (`InboxPreviouslyFailed`). Durably publish or store a dead-letter record before acknowledging a terminal failure; the delegated wrappers write none. `runInboxDelegatedBatch` suppresses repeated identities only within its one sequential call.
+
+Keep table intake for silent commands, zero-event successes, separately committed side effects, general workflow bodies, and multi-command reactions. Delegated consumers have no inbox backlog, failed-row, retention, or `keiro-ops inbox` surface. Renaming the marker event, target, consumer, source, or operation makes a replay look fresh.
+
+Switching a consumer between table and delegated intake changes its persisted identity: inbox rows do not prove downstream receipts exist, and receipts do not populate inbox history. Drain in-flight delivery and fix an explicit cutover and replay boundary before switching in either direction. Candidate Language 6 expresses delegated intake as `idempotence delegated` (omission means `table`); it cannot be combined with `persist = dedupe-only`, and changing the mode is a breaking `IntakeIdempotenceModeChanged` diff. Measure before switching for speed: delegation makes confirmed duplicates much cheaper, but a fresh table batch can win through its shared commit.
+
 ## Define Every Disposition
 
-Before shipping a consumer, decide all four paths:
+Before shipping a consumer, decide all four paths, whichever intake mode it uses:
 
 - fresh and valid: commit the local effect and acknowledge;
 - duplicate: acknowledge without rerunning the effect;
