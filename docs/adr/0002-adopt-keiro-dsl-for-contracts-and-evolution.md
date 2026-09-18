@@ -1,4 +1,17 @@
-# ADR 0002: Adopt keiro-dsl for contracts and evolution
+---
+type: Architecture Decision Record
+title: Adopt keiro-dsl for contracts and evolution
+description: Adopt keiro-dsl to check cross-node contracts and generate structural wiring for services with multiple node families, integration surfaces, or evolving schemas.
+timestamp: 2026-07-29T03:12:45Z
+generated:
+  by: human:nadeem
+  at: "2026-07-29T03:12:45Z"
+docId: ADR-2
+status: Accepted (amended 2026-07-28)
+date: 2026-07-22
+---
+
+# Adopt keiro-dsl for contracts and evolution
 
 ## Status
 

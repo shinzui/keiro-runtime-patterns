@@ -1,8 +1,17 @@
-# ADR 0005: Adopt settei for fleet configuration
+---
+type: Architecture Decision Record
+title: Adopt settei for fleet configuration
+description: Adopt the settei package family as the typed, source-precedence configuration standard for new and materially refactored Keiro services and CLIs.
+timestamp: 2026-07-23T04:11:34Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T04:11:34Z"
+docId: ADR-5
+status: Accepted
+date: 2026-07-22
+---
 
-## Status
-
-Accepted — 2026-07-22
+# Adopt settei for fleet configuration
 
 ## Context
 

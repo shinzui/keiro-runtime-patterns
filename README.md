@@ -39,3 +39,17 @@ appear together in the diff:
 ```bash
 scripts/check-runtime-patterns origin/master
 ```
+
+## Architecture decisions
+
+`docs/adr/` is a second, separate OKF bundle (`adrs`) governed by the shared
+`documentation.architectureDecisions` profile pinned in `docs/adr/profile.dhall`.
+Each record carries a stable `docId` such as `ADR-7`; cite decisions by that
+handle rather than by filename. `scripts/check-runtime-patterns` also validates
+this bundle, enforcing the profile and log freshness, and can be queried the
+same way:
+
+```bash
+mori registry concepts shinzui/keiro-runtime-patterns --bundle adrs
+okf id list docs/adr --profile docs/adr/profile.dhall
+```

@@ -1,8 +1,17 @@
-# ADR 0008: Adopt OKF for the runtime pattern corpus
+---
+type: Architecture Decision Record
+title: Adopt OKF for the runtime pattern corpus
+description: Move the runtime-patterns corpus into one profiled OKF bundle with Mori-registered concepts, generated indexes, and scoped update logs.
+timestamp: 2026-07-23T04:18:38Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T04:18:38Z"
+docId: ADR-8
+status: Accepted
+date: 2026-07-22
+---
 
-## Status
-
-Accepted — 2026-07-22
+# Adopt OKF for the runtime pattern corpus
 
 ## Context
 

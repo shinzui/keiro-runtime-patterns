@@ -1,8 +1,17 @@
-# ADR 0007: Scope runtime standards to Kiroku, not Kioku
+---
+type: Architecture Decision Record
+title: Scope runtime standards to Kiroku, not Kioku
+description: Scope the Keiro runtime standards corpus to the Kiroku event store and exclude the unrelated Kioku agent-memory library.
+timestamp: 2026-07-23T04:11:34Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T04:11:34Z"
+docId: ADR-7
+status: Accepted
+date: 2026-07-22
+---
 
-## Status
-
-Accepted — 2026-07-22
+# Scope runtime standards to Kiroku, not Kioku
 
 ## Context
 

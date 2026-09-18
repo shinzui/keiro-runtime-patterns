@@ -51,6 +51,32 @@ root `index.md` declares `okf_version: "0.2"`; plain `okf index --write`
 preserves it, so do not add the declaration by hand or drop it. Only a
 regeneration from a deleted index needs `--okf-version 0.2`.
 
+## Architecture decisions
+
+`docs/adr/` is its own OKF bundle (`adrs`), separate from `runtime-patterns/`,
+governed by the shared `documentation.architectureDecisions` profile pinned in
+`docs/adr/profile.dhall`. Do not fork or inline that profile; it is a
+version-pinned import from `shinzui/okf-profiles` and upgrades land as a new
+pinned tag.
+
+Every ADR carries a rename-stable `docId` of the form `ADR-N` (positive,
+unpadded). Cite decisions by that handle, not by filename or zero-padded
+legacy number. Before allocating a new handle, check what already exists:
+
+```bash
+okf id list docs/adr --profile docs/adr/profile.dhall
+okf id next docs/adr --profile docs/adr/profile.dhall ADR
+```
+
+When changing an ADR:
+
+1. Update its frontmatter `timestamp` (and `generated.at`) to the material
+   change time, in UTC `Z` form; `date` stays the original decision date.
+2. Add a concise entry to `docs/adr/log.md` with `okf log add`.
+3. Regenerate the index with `okf index docs/adr --write`.
+4. Run `scripts/check-runtime-patterns [BASE_REF]`, which also enforces this
+   bundle's profile and log freshness.
+
 ## Git
 
 Use Conventional Commits for every commit. Commit directly to the current

@@ -7,6 +7,8 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(git -C "$script_dir/.." rev-parse --show-toplevel)"
 bundle_dir="runtime-patterns"
 profile_file="okf/runtime-patterns.dhall"
+adr_bundle_dir="docs/adr"
+adr_profile_file="docs/adr/profile.dhall"
 
 cd "$repo_root"
 
@@ -85,3 +87,50 @@ else
 fi
 
 printf '%s\n' 'runtime-patterns checks passed'
+
+dhall freeze --check "$adr_profile_file"
+dhall type --file "$adr_profile_file" >/dev/null
+
+okf validate "$adr_bundle_dir" \
+  --profile "$adr_profile_file" \
+  --profile-enforce \
+  --log-enforce
+
+adr_before_indexes="$(mktemp)"
+adr_after_indexes="$(mktemp)"
+adr_log_stderr="$(mktemp)"
+trap 'rm -f "$before_indexes" "$after_indexes" "$log_stderr" "$adr_before_indexes" "$adr_after_indexes" "$adr_log_stderr"' EXIT
+
+find "$adr_bundle_dir" -type f -name index.md -print0 \
+  | sort -z \
+  | xargs -0 shasum -a 256 >"$adr_before_indexes"
+
+okf index "$adr_bundle_dir" --write >/dev/null
+
+find "$adr_bundle_dir" -type f -name index.md -print0 \
+  | sort -z \
+  | xargs -0 shasum -a 256 >"$adr_after_indexes"
+
+if ! cmp -s "$adr_before_indexes" "$adr_after_indexes"; then
+  printf '%s\n' \
+    'error: generated ADR indexes were stale or manually edited; review the regenerated files and rerun the check' \
+    >&2
+  diff -u "$adr_before_indexes" "$adr_after_indexes" >&2 || true
+  exit 1
+fi
+
+if [[ -n "$base_ref" ]]; then
+  if git rev-parse --verify --quiet "${base_ref}^{commit}" >/dev/null; then
+    okf log "$adr_bundle_dir" --since "$base_ref" > /dev/null 2>"$adr_log_stderr"
+    if rg -n '^git:' "$adr_log_stderr" >&2; then
+      printf 'error: changed ADR concepts require a change to docs/adr/log.md\n' >&2
+      exit 1
+    fi
+  else
+    printf 'skip: base ref %s does not exist; ADR diff-aware log check skipped\n' "$base_ref"
+  fi
+else
+  printf '%s\n' 'skip: no base ref supplied; ADR diff-aware log check skipped'
+fi
+
+printf '%s\n' 'ADR checks passed'

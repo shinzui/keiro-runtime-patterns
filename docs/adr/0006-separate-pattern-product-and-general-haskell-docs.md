@@ -1,8 +1,17 @@
-# ADR 0006: Separate pattern, product, and general Haskell documentation
+---
+type: Architecture Decision Record
+title: Separate pattern, product, and general Haskell documentation
+description: Assign runtime-specific standards, product documentation, and general Haskell guidance to three distinct repositories, each with one normative owner.
+timestamp: 2026-07-23T04:18:38Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T04:18:38Z"
+docId: ADR-6
+status: Accepted
+date: 2026-07-22
+---
 
-## Status
-
-Accepted — 2026-07-22
+# Separate pattern, product, and general Haskell documentation
 
 ## Context
 

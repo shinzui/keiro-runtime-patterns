@@ -1,4 +1,17 @@
-# ADR 0004: Standardize six-package Generated/Holes verticals
+---
+type: Architecture Decision Record
+title: Standardize six-package Generated/Holes verticals
+description: Standardize every deployed Keiro service on six cabal packages with a keiro-dsl Generated ring and a hand-owned Holes module per aggregate.
+timestamp: 2026-07-29T03:12:45Z
+generated:
+  by: human:nadeem
+  at: "2026-07-29T03:12:45Z"
+docId: ADR-4
+status: Accepted (amended 2026-07-28)
+date: 2026-07-22
+---
+
+# Standardize six-package Generated/Holes verticals
 
 ## Status
 

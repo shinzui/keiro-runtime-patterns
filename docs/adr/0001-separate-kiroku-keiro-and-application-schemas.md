@@ -1,8 +1,17 @@
-# ADR 0001: Separate Kiroku, Keiro, and application schemas
+---
+type: Architecture Decision Record
+title: Separate Kiroku, Keiro, and application schemas
+description: Keep Kiroku's event-store schema, Keiro's framework schema, and application schemas separate instead of sharing one namespace or relying on search_path.
+timestamp: 2026-07-23T04:11:34Z
+generated:
+  by: human:nadeem
+  at: "2026-07-23T04:11:34Z"
+docId: ADR-1
+status: Accepted
+date: 2026-07-22
+---
 
-## Status
-
-Accepted — 2026-07-22
+# Separate Kiroku, Keiro, and application schemas
 
 ## Context
 

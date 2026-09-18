@@ -43,6 +43,13 @@ in  Schema.Project::{
         , description = Some
             "Prescriptive Keiro runtime standards, patterns, guides, and runbooks"
         }
+      , Schema.OkfBundle::{
+        , name = "adrs"
+        , path = "docs/adr"
+        , profile = Some "docs/adr/profile.dhall"
+        , okfVersion = "0.2"
+        , description = Some "Durable architecture decisions"
+        }
       ]
     , docs =
       [ Schema.DocRef::{
