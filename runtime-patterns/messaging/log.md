@@ -1,6 +1,7 @@
 # messaging Update Log
 
 ## 2026-09-18
+* **Update**: Correct interrupted timer guidance to reflect automatic stale-claim requeue and distinguish manual and guarded recovery; record scoped approval.
 * **Update**: Record changes-requested review: operator-only timer wording contradicts automatic stale-claim recovery.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.

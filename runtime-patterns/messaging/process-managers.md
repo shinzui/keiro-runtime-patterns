@@ -2,10 +2,10 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: UTF-8-stable deterministic ids, the typed reaction runner, worker policies, batched durable timers, and the orchestration decision ladder"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-18T13:41:24Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-18T13:41:24Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -43,6 +43,17 @@ reviews:
     effort: unspecified
     context: >-
       Targeted timer-recovery review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro/src/Keiro/Timer.hs (defaultTimerWorkerOptions, timerPassPreamble, claimAndFireOne); source artifact-level URI pending. The operator-only claim for interrupted Firing timers contradicts the default automatic requeue after 300 seconds and the earlier correct worker description in this document. Qualify manual recovery by worker policy and circumstances; do not describe all interrupted timers as non-retrying. Other sections were not exhaustively reverified.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:41:24Z
+    document_timestamp: 2026-09-18T13:41:24Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Approved the targeted timer-recovery correction against mori://shinzui/keiro at 9fb54d56db4f: project-relative keiro/src/Keiro/Timer.hs (defaultTimerWorkerOptions, timerPassPreamble, claimAndFireOne); source artifact-level URI pending. Ordinary stale claims are automatically requeued under the configured policy, defaulting to 300 seconds; manual intervention and guarded resume recovery are distinguished. Other sections were not exhaustively reverified.
 ---
 
 # Process Managers And Durable Timers
@@ -204,7 +215,7 @@ A reactor that accumulates state or hand-written deadline logic is a process man
 
 ## Repair Stuck Timers By Classification
 
-A timer left in `firing` by an interrupted worker is an operator decision, not a retry. Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the `Dead` transition and is the literal a later [guarded resume](../keiro/dead-timer-resume.md) must match exactly, so write a stable one an on-call reader and a resuming consumer will both need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
+An ordinary timer left in `firing` by an interrupted worker is automatically requeued once it exceeds `requeueStuckAfter`; the default threshold is five minutes. Classify it manually when ordinary requeue is disabled, no worker is running, or repeated failures need intervention. Confirm the original firing action has stopped before manually requeueing. Guarded foreground claims follow the separate [resume recovery protocol](../keiro/dead-timer-resume.md). Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the `Dead` transition and is the literal a later [guarded resume](../keiro/dead-timer-resume.md) must match exactly, so write a stable one an on-call reader and a resuming consumer will both need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
 
 ## Related Patterns
 

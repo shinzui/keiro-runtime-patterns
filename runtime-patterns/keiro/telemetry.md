@@ -2,10 +2,10 @@
 type: Standard
 title: "Telemetry"
 description: "Keiro tracing, command-decision and position-distance metrics, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-18T13:41:24Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-09-18T13:41:24Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -32,6 +32,17 @@ reviews:
     effort: unspecified
     context: >-
       Targeted logging-seam review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro/src/Keiro/Workflow/GC.hs (runWorkflowGcWorkerWith); source artifact-level URI pending. The claim that there are only two available runtime logging seams omits the workflow GC hook for failed and partial passes. Document that hook alongside shard and resume logging. Metric and tracing claims were not exhaustively reverified.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:41:24Z
+    document_timestamp: 2026-09-18T13:41:24Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Approved the targeted logging inventory correction against mori://shinzui/keiro at 9fb54d56db4f: project-relative keiro/src/Keiro/Workflow/GC.hs (runWorkflowGcWorker, runWorkflowGcWorkerWith); source artifact-level URI pending. The Text callback reports failed and partial passes, the convenience runner logs to stderr, and failed passes retry on the next tick. Metric and tracing claims were not exhaustively reverified.
 ---
 
 # Telemetry
@@ -72,10 +83,11 @@ Use `traceContextFromCurrentSpan`, `injectTraceContext`, and `traceContextFromHe
 
 ## Wire the application logger
 
-Keiro intentionally ships no structured-logging framework and no request logger. Production services must connect both available runtime seams to their chosen logger:
+Keiro intentionally ships no structured-logging framework and no request logger. Production services must connect the logging hooks for each runtime worker they deploy to their chosen logger:
 
 - Set subscription shard `onShardError` to record `ShardWorkerError`; the default is no hook. It is the signal behind a shard intervention: inspect ownership with `shard status`, and use `shard relinquish` only for a worker known dead, because releasing a live worker's buckets produces concurrent processing. See the [operations console](operations-console.md).
 - Set workflow resume `logEvent` to record `ResumeLogEvent`; its default is a compact stderr renderer.
+- When running workflow garbage collection, use `runWorkflowGcWorkerWith policy pollMicros logPass` to route failed-pass and partial-pass diagnostics to the application logger. Its `logPass` hook receives `Text`; `runWorkflowGcWorker` supplies a compact stderr logger by default. A failed pass retries on the next tick, and a partial pass reports workflows that remain eligible for later collection.
 
 Metrics and traces do not replace these diagnostic events, and the hooks must remain non-blocking enough for their workers.
 

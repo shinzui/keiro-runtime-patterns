@@ -2,10 +2,10 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-09-18T13:41:24Z
 generated:
   by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  at: "2026-09-18T13:41:24Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -32,6 +32,17 @@ reviews:
     effort: unspecified
     context: >-
       Targeted reference-suite review against mori://shinzui/danwa at 79d1c3934f93944aa6e8074130828e540983804d, project-relative danwa-core/danwa-core.cabal and danwa-core/test-domain/Danwa/BehaviorSpec.hs; source artifact-level URIs pending. The domain driver now includes behaviorAssertions and focusedGuardAssertions as well as generated harnessAssertions; its dependencies include aeson, keiki, keiro-core, and text, so the claimed base-plus-core-only dependency surface is stale. The suite remains database-free. Other suite claims were not exhaustively reverified.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:41:24Z
+    document_timestamp: 2026-09-18T13:41:24Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Approved the targeted domain-suite correction against mori://shinzui/danwa at 79d1c3934f93944aa6e8074130828e540983804d: project-relative danwa-core/danwa-core.cabal and danwa-core/test-domain/Danwa/BehaviorSpec.hs; source artifact-level URIs pending. The three assertion collections, six direct dependencies, and database-free execution match the reference driver. Other suite claims were not exhaustively reverified.
 ---
 
 # Test Layout
@@ -59,7 +70,7 @@ from command acceptance.
 
 `<service>-core-test`, under `test/`, is the ordinary core smoke and unit suite.
 
-`<service>-core-domain`, under `test-domain/`, is a deliberately small executable driver rather than a Tasty tree. It concatenates every aggregate's generated `harnessAssertions`, prints each result, and exits with failure if any assertion is false. Its only dependencies are `base` and `<service>-core`, so domain validation never waits for PostgreSQL.
+`<service>-core-domain`, under `test-domain/`, is a deliberately small executable driver rather than a Tasty tree. Combine each aggregate's generated `harnessAssertions` with application-owned behavior and focused guard assertions, print each result, and exit with failure if any assertion is false. The reference driver in `mori://shinzui/danwa` combines `harnessAssertions`, `behaviorAssertions`, and `focusedGuardAssertions`; its direct dependencies are `aeson`, `base`, `danwa-core`, `keiki`, `keiro-core`, and `text`. Declare the dependencies the driver uses and keep this suite database-free, so domain validation never waits for PostgreSQL.
 
 When structural mappings exist, those harness assertions also cover both `StructuralBinding` laws, deterministic fixture labels and branch coverage, declared missing/default/null/unknown-field policy, generated field-witness agreement, and forward-versus-replay equality over the final vertex and every register. Opaque mappings receive boundary round trips only; never label them structurally covered.
 

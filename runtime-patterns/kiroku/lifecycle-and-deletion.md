@@ -2,10 +2,10 @@
 type: Guide
 title: "Kiroku Lifecycle and Deletion"
 description: "Soft and hard deletion, the advisory hard-delete GUC, retention-lease refusal, truncateBefore compaction, and provisional linkToStream"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-18T13:41:24Z
 generated:
-  by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  by: process:codex
+  at: "2026-09-18T13:41:24Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-lifecycle-and-deletion
 tags: [kiroku, lifecycle-and-deletion]
 status: current
@@ -32,6 +32,17 @@ reviews:
     effort: unspecified
     context: >-
       Targeted console-command review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro-ops/src/Keiro/Ops/Stream.hs (commandParser, truncateParser); source artifact-level URI pending. The documented stream clear command does not exist: use stream truncate-before clear STREAM. Other lifecycle claims were not exhaustively reverified.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:41:24Z
+    document_timestamp: 2026-09-18T13:41:24Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Approved the corrected stream truncate-before clear STREAM command against mori://shinzui/keiro at 9fb54d56db4f: project-relative keiro-ops/src/Keiro/Ops/Stream.hs (commandParser, truncateParser); source artifact-level URI pending. This is a targeted command correction; other lifecycle claims were not exhaustively reverified.
 ---
 
 # Kiroku Lifecycle and Deletion
@@ -62,7 +73,7 @@ After appending a snapshot at version V, `setStreamTruncateBefore stream V` make
 
 Do not call this retention or erasure. It is a reversible read-start marker for snapshot-based rehydration.
 
-Move the marker only after proving snapshot coverage. The [Keiro operations console](../keiro/operations-console.md) enforces that order: `snapshot truncation-preflight --before VERSION` checks coverage against the discriminators you supply, and `stream truncate-before set` is the previewed mutation that follows it. `stream clear` restores full per-stream reads. Route soft delete, undelete, and hard delete through the same console rather than ad-hoc SQL, so each one carries a preview, a typed confirmation, and durable operator evidence.
+Move the marker only after proving snapshot coverage. The [Keiro operations console](../keiro/operations-console.md) enforces that order: `snapshot truncation-preflight --before VERSION` checks coverage against the discriminators you supply, and `stream truncate-before set` is the previewed mutation that follows it. `stream truncate-before clear STREAM` restores full per-stream reads. Route soft delete, undelete, and hard delete through the same console rather than ad-hoc SQL, so each one carries a preview, a typed confirmation, and durable operator evidence.
 
 ## Avoid building new patterns on linked streams
 

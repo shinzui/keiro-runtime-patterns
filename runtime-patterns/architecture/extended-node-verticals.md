@@ -2,10 +2,10 @@
 type: Pattern
 title: "Extended Keiro-DSL Node Verticals"
 description: "Where read models, process managers, workflows, routers, publishers, inboxes, queues, and contracts sit in the slice"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-18T13:41:24Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-18T13:41:24Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-extended-node-verticals
 tags: [architecture, extended-node-verticals]
 status: current
@@ -32,6 +32,17 @@ reviews:
     effort: unspecified
     context: >-
       Targeted generated-layout review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro-dsl/src/Keiro/Dsl/Scaffold.hs (scaffoldReadModelForService, pascal/generatedCase) and HaskellName.hs (deriveHaskellName, segmentLogicalName); source artifact-level URIs pending. Current generation converts hospital_readiness to HospitalReadiness and reservation_work to ReservationWork; the prescribed underscore paths describe legacy example output. Typed read models additionally emit QueryContract.hs, omitted from the fixed three-generated-module inventory. Other sections were not exhaustively reverified.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:41:24Z
+    document_timestamp: 2026-09-18T13:41:24Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Approved the targeted corrections to module naming and read-model inventory against mori://shinzui/keiro at 9fb54d56db4f: project-relative keiro-dsl/src/Keiro/Dsl/Scaffold.hs (scaffoldReadModelForService, pascal/generatedCase), HaskellName.hs (deriveHaskellName, segmentLogicalName), and Harness.hs (ReadModelHarness emission); source artifact-level URIs pending. UpperCamelCase segments and the conditional QueryContract module match current source. This approval covers those corrections, not an exhaustive re-review of other sections.
 ---
 
 # Extended Keiro-DSL Node Verticals
@@ -42,7 +53,7 @@ Danwa demonstrates aggregates, inline projections, and operations. Services usin
 
 ## First-Class Read Models
 
-A `readmodel` node is a query model declared independently of an aggregate's inline projection. Put its three generated modules and one hand-owned hole in a directory named exactly after the DSL node:
+A `readmodel` node is a query model declared independently of an aggregate's inline projection. Use the generator's UpperCamelCase module segment for the node directory. The baseline modules are:
 
 ```text
 <Service>/<Node>/Generated/ReadModel.hs
@@ -51,7 +62,9 @@ A `readmodel` node is a query model declared independently of an aggregate's inl
 <Service>/<Node>/ReadModelHoles.hs
 ```
 
-The directory retains the DSL node's snake_case spelling instead of converting it to ordinary Haskell CamelCase. The realized paths include `HospitalCapacity/Hospital_readiness`, `Accepted_transfer_needs`, `Transfer_candidates`, and `Transfer_decisions`. Those underscores are generated identity, not typographical errors.
+A read model with declared query input and result types also generates `<Service>/<Node>/Generated/QueryContract.hs`. Use the emitted manifest for the complete module set.
+
+Logical names such as `hospital_readiness`, `accepted_transfer_needs`, `transfer_candidates`, and `transfer_decisions` produce `HospitalReadiness`, `AcceptedTransferNeeds`, `TransferCandidates`, and `TransferDecisions` module segments. The underscore-bearing paths retained in the example repository are legacy output. Adopt current names through the [generated-name and edition migration](../keiro/generated-haskell-editions.md), preserving the logical DSL names and runtime identities.
 
 ## Processes, Workflows, And Routers
 
@@ -83,7 +96,7 @@ These integration-facing node kinds remain separate verticals:
 <Service>/<Contract>/Generated/Contract.hs
 ```
 
-Keiro-runtime-jitsurei realizes them as `HospitalPublisher`, `IncidentInbox`, snake_case `Reservation_work`, and `Emergency`. Preserve the emitted node spelling and never relocate these modules into a catch-all `Generated.Integration` tree.
+Use the current generated segments `HospitalPublisher`, `IncidentInbox`, `ReservationWork`, and `Emergency` for those example nodes. The example repository's `Reservation_work` directory is legacy output. Preserve the emitted placement and keep these modules in their node verticals.
 
 The generated modules define checked structure, not a complete transport system. Apply the [integration event](../messaging/integration-events.md), [outbox](../messaging/outbox.md), [inbox](../messaging/inbox.md), [PGMQ job](../messaging/pgmq-jobs.md), and [transport-selection](../messaging/transport-selection.md) standards when filling the hand-owned runtime around them.
 

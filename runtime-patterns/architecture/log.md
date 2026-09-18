@@ -1,6 +1,8 @@
 # architecture Update Log
 
 ## 2026-09-18
+* **Update**: Update the reference domain-driver assertion collections and dependencies while retaining database-free execution; record scoped approval.
+* **Update**: Correct generated UpperCamelCase node paths, identify legacy underscore examples, and include conditional QueryContract output; record scoped approval.
 * **Update**: Record changes-requested review: domain-driver assertions and dependencies have grown in the reference service.
 * **Update**: Record changes-requested review: legacy underscore module paths and missing typed QueryContract module.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
