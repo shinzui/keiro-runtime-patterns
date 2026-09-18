@@ -21,6 +21,17 @@ reviews:
     effort: unspecified
     context: >-
       Model technical-accuracy review against the mori-resolved keiro checkout (0.4.0.1 tags plus post-release workspace commits), keiki 0.4.0.0, kiroku-store source, and Hackage release state; verified exported symbols, signatures, version claims, and links.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-09-18T13:12:52Z
+    scope: technical-accuracy
+    outcome: approved
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Full fifteen-item source review after the corrections in d662720. Verified against mori://shinzui/keiro at 11e0bba4f634 (upstream master and the 0.17.0.0 tag at review time; Hackage package verified), plus mori://shinzui/keiki at 79337c57967d and mori://shinzui/kiroku at 07cd034aafc0. Checked command/resource signatures, codec validation, workflow failure logging and suspension, structural bindings, Kafka conversion, edition migration, timer recovery, language metadata, and reaction identity. All fifteen corrected claims hold.
 ---
 
 # Keiro gotchas

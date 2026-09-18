@@ -1,6 +1,7 @@
 # kiroku Update Log
 
 ## 2026-09-18
+* **Update**: Record changes-requested review: replace nonexistent stream clear command with stream truncate-before clear.
 * **Update**: Move the Keiro consumer bound claim to the 0.17.0.0 set.
 * **Update**: Treat the kiroku-metrics HTTP, Prometheus, and WebSocket surface as the frozen ADR-9 wire contract; ignore unknown additions and never switch on error text.
 

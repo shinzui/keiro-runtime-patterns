@@ -21,6 +21,17 @@ reviews:
     effort: unspecified
     context: >-
       Model technical-accuracy review against the mori-resolved keiro checkout (0.4.0.1 tags plus post-release workspace commits), keiki 0.4.0.0, kiroku-store source, and Hackage release state; verified exported symbols, signatures, version claims, and links.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-09-18T04:30:00Z
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Targeted logging-seam review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro/src/Keiro/Workflow/GC.hs (runWorkflowGcWorkerWith); source artifact-level URI pending. The claim that there are only two available runtime logging seams omits the workflow GC hook for failed and partial passes. Document that hook alongside shard and resume logging. Metric and tracing claims were not exhaustively reverified.
 ---
 
 # Telemetry

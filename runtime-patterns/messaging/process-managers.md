@@ -32,6 +32,17 @@ reviews:
     effort: unspecified
     context: >-
       Model re-review of the correction against the keiro changelog and tags: the standard now names the released 0.4 boundary.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-09-18T13:01:11Z
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Targeted timer-recovery review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro/src/Keiro/Timer.hs (defaultTimerWorkerOptions, timerPassPreamble, claimAndFireOne); source artifact-level URI pending. The operator-only claim for interrupted Firing timers contradicts the default automatic requeue after 300 seconds and the earlier correct worker description in this document. Qualify manual recovery by worker policy and circumstances; do not describe all interrupted timers as non-retrying. Other sections were not exhaustively reverified.
 ---
 
 # Process Managers And Durable Timers

@@ -21,6 +21,17 @@ reviews:
     effort: unspecified
     context: >-
       Model technical-accuracy review against the mori-resolved danwa and keiro-runtime-jitsurei reference applications and the keiro-dsl scaffolder at HEAD; verified exported symbols, signatures, version claims, and links.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-09-18T13:01:11Z
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Targeted generated-layout review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro-dsl/src/Keiro/Dsl/Scaffold.hs (scaffoldReadModelForService, pascal/generatedCase) and HaskellName.hs (deriveHaskellName, segmentLogicalName); source artifact-level URIs pending. Current generation converts hospital_readiness to HospitalReadiness and reservation_work to ReservationWork; the prescribed underscore paths describe legacy example output. Typed read models additionally emit QueryContract.hs, omitted from the fixed three-generated-module inventory. Other sections were not exhaustively reverified.
 ---
 
 # Extended Keiro-DSL Node Verticals

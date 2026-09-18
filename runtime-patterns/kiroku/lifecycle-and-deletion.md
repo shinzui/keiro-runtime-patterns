@@ -21,6 +21,17 @@ reviews:
     effort: unspecified
     context: >-
       Model technical-accuracy review against the mori-resolved kiroku-project checkout (kiroku-store, adapters, otel, metrics) and the keiro consumer's Connection API; verified exported symbols, signatures, version claims, and links.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-08-14T17:48:00Z
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Targeted console-command review against mori://shinzui/keiro at 9fb54d56db4f, project-relative keiro-ops/src/Keiro/Ops/Stream.hs (commandParser, truncateParser); source artifact-level URI pending. The documented stream clear command does not exist: use stream truncate-before clear STREAM. Other lifecycle claims were not exhaustively reverified.
 ---
 
 # Kiroku Lifecycle and Deletion

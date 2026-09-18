@@ -21,6 +21,17 @@ reviews:
     effort: unspecified
     context: >-
       Model technical-accuracy review against the mori-resolved danwa and keiro-runtime-jitsurei reference applications and the keiro-dsl scaffolder at HEAD; verified exported symbols, signatures, version claims, and links.
+  - kind: model
+    reviewer: codex
+    reviewed_at: 2026-09-18T13:31:31Z
+    document_timestamp: 2026-09-18T04:48:47Z
+    scope: technical-accuracy
+    outcome: changes-requested
+    provider: openai
+    model: gpt-6
+    effort: unspecified
+    context: >-
+      Targeted reference-suite review against mori://shinzui/danwa at 79d1c3934f93944aa6e8074130828e540983804d, project-relative danwa-core/danwa-core.cabal and danwa-core/test-domain/Danwa/BehaviorSpec.hs; source artifact-level URIs pending. The domain driver now includes behaviorAssertions and focusedGuardAssertions as well as generated harnessAssertions; its dependencies include aeson, keiki, keiro-core, and text, so the claimed base-plus-core-only dependency surface is stale. The suite remains database-free. Other suite claims were not exhaustively reverified.
 ---
 
 # Test Layout
