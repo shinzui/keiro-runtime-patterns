@@ -1,11 +1,11 @@
 ---
 type: Gotcha
 title: "Keiro gotchas"
-description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
-timestamp: 2026-09-18T13:01:11Z
+description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
+timestamp: 2026-09-18T13:12:52Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-18T13:12:52Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -33,7 +33,7 @@ This checklist captures cross-cutting runtime constraints that are easy to miss 
 
 Mounting a keiki `alternative` composite as one `EventStream` gives both machines one stream identity, version counter, ordered log, and snapshot. That is almost never correct for sibling aggregates with separate identities and lifecycles.
 
-The dividing rule is: compose in keiki inside one consistency boundary; across streams, coordinate with a projection, router, process manager, or workflow. See [transducer best practices](../keiki/transducer-best-practices.md) and the keiro repo's `docs/guides/choosing-a-primitive.md`.
+The dividing rule is: compose in keiki inside one consistency boundary; across streams, coordinate with a projection, router, process manager, or workflow. See [transducer best practices](../keiki/transducer-best-practices.md) and [Choosing a Primitive](mori://shinzui/keiro/okf/guides/concepts/choosing-a-primitive).
 
 ## `$all` is a throughput ceiling
 
@@ -43,19 +43,19 @@ Capacity-plan for the ceiling. In particular, keep `runCommandWithSql`, `runComm
 
 ## Transactional runners require the resource effect
 
-`runCommandWithSql`, `runCommandWithSqlEvents`, and `runCommandWithProjections` require `KirokuStoreResource`; plain `runCommand` does not. Acquire it with `withKirokuStore` and interpret it with `runStoreResource`. An unexpected missing-effect compiler error on a transactional runner usually points to this assembly boundary.
+`runCommandWithSql`, `runCommandWithSqlEvents`, and `runCommandWithProjections` require `KirokuStoreResource`; plain `runCommand` does not. Use `withKirokuStore` to acquire the store and install `KirokuStoreResource`; use `runStoreResource` to interpret `Store` through that resource. An unexpected missing-effect compiler error on a transactional runner usually points to this assembly boundary.
 
 See [runtime assembly](runtime-assembly.md).
 
-## A terminally failed workflow stops retrying and stays silent
+## A terminally failed workflow stops retrying
 
-Once a workflow exhausts `maxAttempts`, the runtime appends `WorkflowFailed`, marks the instance `failed`, and removes it from resume discovery. No worker will ever touch it again. There is no log line at the moment it *stops* being retried, only the crash that pushed it over the ceiling.
+Once a workflow exhausts `maxAttempts`, the runtime appends `WorkflowFailed`, marks the instance `failed`, and removes it from ordinary resume discovery until recovery. It emits `ResumeWorkflowMarkedFailed` through the configured `logEvent` hook; the default hook writes a terminal-failure line to stderr. Preserve that event when supplying a custom logger.
 
 Alert on `ResumeSummary.failed` and recover with `resurrectFailedWorkflow`, never with hand-written SQL against the instance and step-index tables. See [workflow reliability and recovery](workflow-reliability.md).
 
 ## A fresh awakeable id cannot be recomputed from workflow coordinates
 
-Allocation returns an opaque random `AwakeableId` journaled under `awkid:<label>`. Any code that derived the id from the workflow name, id, and label — the old `deterministicAwakeableId`/`awaitAwakeableId` shape — is now computing an id that will never be allocated, so its signal silently resolves nothing and the workflow stays suspended until its attempt budget or an operator intervenes.
+Allocation returns an opaque random `AwakeableId` journaled under `awkid:<label>`. Any code that derived the id from the workflow name, id, and label — the old `deterministicAwakeableId`/`awaitAwakeableId` shape — is now computing an id that will never be allocated, so `signalAwakeable` returns `False` for that unknown id and resolves nothing. An unresolved await does not consume the crash-attempt budget; the workflow can remain suspended indefinitely until the allocated id is signalled or an operator intervenes.
 
 Publish the id the allocation returned, through an idempotent action keyed on that id, and republish after `continueAsNew`. `Keiro.Workflow.Awakeable.Compatibility` reproduces generation-0 identifiers for adopting pre-0.12 rows only. See [durable workflows](durable-workflows.md).
 
@@ -101,7 +101,7 @@ Since 0.16 every timer worker pass returns expired foreground resume claims to `
 
 ## The registry stable flag does not enforce the fleet baseline
 
-Language 6 is required from Keiro 0.17.0.0 onward, but that release still reports it as `candidate` with `language.stable = false`, and `new` emits version 5. Set the preamble to `language keiro-dsl 6`, require `--min-language 6`, and check each source reports the adopted `effectiveLanguageVersion`. A `stable == true` gate would reject the required contract. See [language versions](language-versions.md).
+This catalog requires Language 6 for services adopting Keiro 0.17.0.0 onward, but that release still reports it as `candidate` with `language.stable = false`, and `new` emits version 5. Set the preamble to `language keiro-dsl 6`, require `--min-language 6`, and check each source reports the adopted `effectiveLanguageVersion`. A `stable == true` gate would reject the required contract. See [language versions](language-versions.md).
 
 ## Legacy process to reactions is an identity migration
 

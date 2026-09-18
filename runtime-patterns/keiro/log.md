@@ -1,6 +1,7 @@
 # keiro Update Log
 
 ## 2026-09-18
+* **Update**: Revalidate all fifteen gotchas against mori://shinzui/keiro at 11e0bba4f634 (0.17.0.0): correct terminal-failure logging and indefinite awakeable suspension, distinguish Store interpretation from resource installation, clarify the catalog Language 6 policy, and canonicalize the primitive-guide reference.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.

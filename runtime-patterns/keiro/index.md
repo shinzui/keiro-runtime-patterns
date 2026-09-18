@@ -1,6 +1,6 @@
 # Gotcha
 
-- [Keiro gotchas](gotchas.md) - Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, silent-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps
+- [Keiro gotchas](gotchas.md) - Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps
 
 # Guide
 
