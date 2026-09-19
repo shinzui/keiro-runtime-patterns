@@ -1,5 +1,5 @@
 let profiles =
-      https://raw.githubusercontent.com/shinzui/okf-profiles/v0.8.0/package.dhall
-        sha256:0d66bb25b99e74a10598be06eef30356f331ff9c1c557e8578daf48cbd50d8d3
+      https://raw.githubusercontent.com/shinzui/okf-profiles/v0.18.0/package.dhall
+        sha256:7d3a4a22be12fd0e697d6012ed1eb2efe4cb5dc4700d08fd49aa5e4c0e523df8
 
 in  profiles.documentation.patternCatalog

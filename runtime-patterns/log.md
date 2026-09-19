@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-09-19
+* **Update**: Repinned the catalog descriptor to okf-profiles v0.18.0, which adds opt-in assessable pattern types
+
 ## 2026-09-18
 * **Update**: Require Language 6 from Keiro 0.17.0.0 onward; align authoring guidance with the adopted baseline and retain accurate tooling behavior.
 * **Update**: Prioritize DDD domain design before service structure and route business request retry contracts.
