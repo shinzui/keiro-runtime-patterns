@@ -1,3 +1,7 @@
+# Assessable Standard
+
+- [Behavior conformance and obligations](behavior-conformance.md) - Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness
+
 # Gotcha
 
 - [Keiro gotchas](gotchas.md) - Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps
@@ -21,7 +25,6 @@
 # Standard
 
 - [Aggregate scalar expressions and transition ownership](aggregate-expressions.md) - Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned
-- [Behavior conformance and obligations](behavior-conformance.md) - Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness
 - [Command cycle and errors](command-cycle-and-errors.md) - Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling
 - [Dead timer inspection and guarded resume](dead-timer-resume.md) - Reading parked timers with bounded reason-filtered pages, resuming one under an expiring token claim, and the migration 0032 writer rollout and rollback order
 - [Semantic-local Keiro DSL regeneration](dsl-semantic-locality.md) - Separating checked semantic consumers, generated-artifact churn, and source provenance while keeping service conformance complete

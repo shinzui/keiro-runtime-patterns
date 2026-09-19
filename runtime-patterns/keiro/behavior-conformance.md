@@ -1,14 +1,53 @@
 ---
-type: Standard
+type: Assessable Standard
 title: "Behavior conformance and obligations"
 description: "Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness"
-timestamp: 2026-08-06T02:47:25Z
+timestamp: 2026-09-19T15:34:04Z
 generated:
   by: human:nadeem
-  at: "2026-08-06T02:47:25Z"
+  at: "2026-09-19T15:34:04Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-behavior-conformance
 tags: [keiro, behavior-conformance]
 status: current
+patternId: PAT-1
+applicability:
+  scope: >-
+    Services that declare Keiro aggregates in a .keiro specification and
+    scaffold the generated behavior contract for them.
+  languages: [haskell]
+  dependenciesAny:
+    - mori://shinzui/keiro
+criteria:
+  - id: conformance-report-generated
+    statement: >-
+      Every declared aggregate's generated behavior contract runs in CI and
+      produces a keiro/behavior-conformance/1 report covering all nine key sets.
+    evidenceKind: report
+    severity: required
+  - id: conformance-gate-passes
+    statement: >-
+      behaviorConformancePassed holds for every declared aggregate: the report
+      has no pending, missing, duplicate, stale, or failed key.
+    evidenceKind: report
+    severity: required
+  - id: unverified-keys-kept-honest
+    statement: >-
+      Keys whose evidence is not proof-strength stay in the unverified set;
+      conformance tooling never relabels them as verified or source-proved.
+    evidenceKind: review
+    severity: required
+  - id: gaps-closed-by-witnesses
+    statement: >-
+      A missing, stale, or failed key is resolved with an executed witness or a
+      reconciled spec change, never by deleting the obligation.
+    evidenceKind: review
+    severity: required
+  - id: fail-on-unverified-deliberate
+    statement: >-
+      The fail-on-unverified policy is enabled only for aggregates whose guards
+      are fully generated and total, never as a blanket default.
+    evidenceKind: review
+    severity: advisory
 ---
 
 # Behavior conformance and obligations

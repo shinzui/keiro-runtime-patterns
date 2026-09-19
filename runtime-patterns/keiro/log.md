@@ -1,5 +1,8 @@
 # keiro Update Log
 
+## 2026-09-19
+* **Update**: Promoted behavior conformance to an assessable standard (PAT-1) with five stable criteria that keep gate failures separate from honestly unverified keys
+
 ## 2026-09-18
 * **Update**: Add workflow GC failed/partial-pass logging and its retry behavior to the logging inventory; record scoped approval.
 * **Update**: Record changes-requested review: include the workflow GC failed/partial-pass logging hook.
