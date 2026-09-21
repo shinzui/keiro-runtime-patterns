@@ -1,5 +1,18 @@
 # keiro Update Log
 
+## 2026-09-21
+* **Update**: Adopt the verified Keiro 0.18 release cohort and route checked mapping and replay guidance.
+* **Update**: Prefer supported checked refinement policies before opaque fallback.
+* **Update**: Specify bare containers, calendar dates, text sets, refined bytes, nullability and remaining obligations.
+* **Update**: Document five new candidate Language 6 mapping capabilities in Keiro 0.18.
+* **Update**: Adopt explicit UUIDv5/v7 admission and bare optional ID mappings in Keiro 0.18.
+* **Update**: Apply frozen checked admission policies before choosing opaque bindings.
+* **Update**: Require independent cross-build replay evidence and directional ID admission rollout.
+* **Update**: Preserve journal step names and historical result readers; do not use renames as decoder migrations.
+* **Update**: Require a generated-first audit to minimize avoidable behavior and codec holes.
+* **Update**: Correct mapped queue/query coverage and replace eligible opaque wrappers.
+* **Update**: Use Language 6 examples and distinguish checked codecs from supported register expressions.
+
 ## 2026-09-19
 * **Update**: Promoted behavior conformance to an assessable standard (PAT-1) with five stable criteria that keep gate failures separate from honestly unverified keys
 

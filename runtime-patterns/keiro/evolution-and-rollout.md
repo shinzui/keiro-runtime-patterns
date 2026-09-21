@@ -2,10 +2,10 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -62,15 +62,25 @@ For a workspace, `diff` reconstructs the old manifest and old member set from Gi
 
 Tooling should branch on the machine-readable `DiagnosticCode` — `UpcasterChainGap`, `AggGuardTightened`, `AggGuardRelationUnknown`, `AggGuardRemedyUnavailable`, `AggFoldSurfaceChanged`, `DeprecatedEventReplayHazard`, `EventRetirementInProgress`, `RouterDecideSurfaceChanged`, `ProcessDecideSurfaceChanged`, `ProcessTimerPayloadChanged`, `OwnershipMoved`, `WorkspaceAuthorityChanged` — not on the human-readable explanation.
 
-`IdDomainContractChanged` arrived with language version 3 and is the sharpest of the mapped-declaration codes: it is compatible on `private-history-read`, `old-binary-read-new-events`, and `persisted-identity`; advisory on `snapshot-hydration` and `consumer-build`; **breaking** on `public-consumer`; and it carries a producer-last rollout constraint. Old history stays readable through an internal legacy decoder while current command and public decoding reject the same text, so the rollout order is the whole safety argument. See [enforced identifier domains](identifier-domains.md).
+For the original language-3 aggregate-ID adoption, `IdDomainContractChanged` is compatible on `private-history-read`, `old-binary-read-new-events`, and `persisted-identity`; advisory on `snapshot-hydration` and `consumer-build`; **breaking** on `public-consumer`; and producer-last. Keiro 0.18 also uses this code for explicit v7/v5-or-v7 domain changes: widening hazards old readers, while narrowing hazards retained UUIDv5 history. Read the actual directional vector; the original adoption vector is not universal. See [enforced identifier domains](identifier-domains.md).
 
 Three more code families arrived with the version-2 source language. `SourceLanguageDeclarationChanged` is a declaration-only change: an all-compatible vector and no semantic action. The nominal family lands on the surface its change actually reaches — `NominalRepresentationChanged` is wire-breaking, `NominalBindingChanged` points at binding laws and replay evidence, `NominalInitialChanged` and `NominalCanonicalTypeChanged` reach snapshot and consumer-build, and `NominalIdDecoderTightened` is an advisory that still obliges a committed old-payload fixture and a targeted audit. See [consumer-owned nominal bindings](nominal-bindings.md) and [Keiro DSL language versions](language-versions.md).
 
 Language 5 adds read-side families whose consequences leave the codebase entirely. `QueryFreshnessChanged` is **breaking** when a query weakens to `immediate` or narrows its waited head scope; a scope-preserving rewrite is equivalent and a strengthening reports the additive `CompatibilityStrengthened`. The catalog cursor, source-ordering, target-dependency, handler-order, and projection-owner codes each name a rebuild-group consequence rather than a wire change; a target-dependency or handler-order change means the group's replay order moved. External-read findings distinguish retirement, version addition, compatibility change, and result-shape change, and a result-shape change is a break for **out-of-process readers you do not build** — plan it as an announced consumer migration, not a deploy. See [read models and projections](read-models-and-projections.md) and [typed projection catalogs](projection-catalogs.md).
 
+## Compare retained history across independent builds
+
+Before replacing opaque mappings or hand-owned behavior, capture baseline and candidate observations with separate binaries over the same immutable consumer history. Use `Keiro.Test.ReplayCompatibility` and the comparator in `mori://shinzui/keiro` (`scripts/check-replay-compatibility.py`; artifact-level URI pending) with `--baseline`, `--candidate`, `--inventory`, and `--require-all`.
+
+Derive the inventory independently from persisted surfaces, compatibility findings, aggregate replay impact, mapped consequences, process reactions, and application-owned workflow or hole behavior. Bind it to the exact build pair, corpus hash, high-water marks, and determinism inputs. Missing, unverified, empty, duplicate, or divergent observations fail; a wire-neutral DSL diff does not discharge a binding or hole-body change.
+
+Compare serialized aggregate prefixes, durable identities, process follow-ups and timers, workflow results, journal keys, and continuations. Keep baseline evidence immutable. Repository fixtures establish toolchain behavior, not approval of a consumer's retained history or permission to delete historical readers. Audit the tail after the captured high-water mark or control writer cutover.
+
+Deploy expanded readers before enabling values older readers reject. Widening ID admission and canonicalizing dates, sets, or bytes require direction-specific checks even if historical reading passes. After an incompatible write, recover forward with a compatible reader or upcaster; do not rewrite history to permit binary rollback.
+
 ## Gate transducer changes with a targeted replay audit
 
-The rule is one sentence: let the differ decide whether an audit is needed, then audit only the affected streams.
+Use the differ to select affected aggregate streams. Independently inventory hand-written bindings, holes, dependencies, processes, and workflows; the differ cannot inspect their implementation changes.
 
 ```sh
 keiro-dsl diff SERVICE-INPUT --since HEAD --replay-impact-out impact.json

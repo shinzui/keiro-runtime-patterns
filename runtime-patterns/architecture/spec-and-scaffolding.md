@@ -2,10 +2,10 @@
 type: Standard
 title: "Specification And Scaffolding"
 description: "Placing a Keiro service source of truth, declaring mapped consumers, and running semantic-local whole-service check, scaffold, and conformance"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-spec-and-scaffolding
 tags: [architecture, spec-and-scaffolding]
 status: current
@@ -66,6 +66,8 @@ The manifest owns the stable service identity and member set. Each aggregate sta
 When a private aggregate payload or register uses an application type, first apply [domain newtypes and TypeIDs](domain-newtypes-and-typeids.md): the application type must be nominal rather than a raw primitive or type synonym, and every service-owned ID must be TypeID-backed. Then declare it before the aggregate as `mapped structural`, `mapped opaque`, or — under language version 2 — a nominal binding. A structural declaration owns the complete private-event wire policy and names a total hand-owned binding, deterministic fixtures, stable canonical/binding identities, and any register initial. An opaque declaration names the consumer codec identity and version and makes no nested compatibility claim. A nominal binding (`id … using`, `enum … using`, or `mapped nominal`) keeps a consumer type in a direct field across a total isomorphism; see [consumer-owned nominal bindings](../keiro/nominal-bindings.md).
 
 Do not create a second generated domain type merely to satisfy the DSL, and do not let both a consumer `ToJSON` instance and generated structural codec write current events. The generated codec is authoritative for structural private-event JSON; the binding converts domain values without owning wire rules.
+
+On Keiro 0.18.0.0, prefer named bare `mapped structural value` declarations for optional/list/map wrappers, `Day`, and `Set Text`, and `mapped refined` with `wire base16-bytes` for unrestricted bytes. Use explicit v5-or-v7 ID admission for retained identities instead of an opaque ID codec. Apply [checked mapping rules](../keiro/mapped-consumer-surfaces.md) and the [hole-minimization checklist](../keiro/dsl-adoption.md) before filling skeletons: generate supported guards, writes, event copies, router selection, and process reactions. Keep only unsupported behavior and application boundaries hand-owned.
 
 Language 5 carries the same mapped declarations through persisted workqueue payloads, paired read-model query contracts, and aggregate-sourced projection handlers. Declare those consumers in the specification and apply their independent drain, caller-build, handler-review, and group-rebuild consequences from [mapped consumer surfaces](../keiro/mapped-consumer-surfaces.md).
 

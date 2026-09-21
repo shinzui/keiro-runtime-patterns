@@ -2,10 +2,10 @@
 type: Guide
 title: "Brownfield Keiro Adoption"
 description: "Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -47,7 +47,7 @@ For the read side, build a source-to-target ownership matrix before writing the 
 
 Capture sanitized production examples before deriving the declaration. Include every observed union tag, absent and explicit-null optionals, old bug-era payloads, and the oldest supported version. Constructor names and today's `ToJSON` instance are evidence, not the contract; Aeson options and old releases may have written something different.
 
-Public contracts and queue payloads keep their separately owned DSL grammars. Structural mapped coverage currently applies to private aggregate payloads and mapped registers. Snapshot payloads remain a consumer-JSON cache boundary; mapping fingerprints invalidate incompatible seeds, but the generated event codec is not the snapshot codec.
+Structural mappings cover private aggregate payloads, mapped registers, typed queue fields, and query contracts; projection consumers derive from aggregate event sources. Keiro 0.18.0.0 adds [bare containers, calendar dates, text sets, and refined bytes](mapped-consumer-surfaces.md), so audit old opaque wrappers for replacement before implementing new codecs. Public contracts remain separately owned apart from declared ID fields. Snapshot payloads remain a consumer-JSON cache boundary; mapping fingerprints invalidate incompatible seeds, but the generated event codec is not the snapshot codec.
 
 ## Choose one file or a service workspace
 

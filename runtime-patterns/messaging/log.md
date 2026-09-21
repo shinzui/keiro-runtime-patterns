@@ -1,5 +1,9 @@
 # messaging Update Log
 
+## 2026-09-21
+* **Update**: Require the published 0.9.0.3 fixes for idle GC failures and duplicate failure delivery.
+* **Update**: Track published Store 0.8.0.1 and adapter 0.5.1.2 without candidate lifecycle claims.
+
 ## 2026-09-18
 * **Update**: Correct interrupted timer guidance to reflect automatic stale-claim requeue and distinguish manual and guarded recovery; record scoped approval.
 * **Update**: Record changes-requested review: operator-only timer wording contradicts automatic stale-claim recovery.

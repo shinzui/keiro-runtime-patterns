@@ -2,10 +2,10 @@
 type: Standard
 title: "Enforced identifier domains"
 description: "Apply the TypeID default through the frozen v7 admission contract for aggregate IDs and public contract fields, with the rollout each surface requires"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-identifier-domains
 tags: [keiro, identifier-domains]
 status: current
@@ -33,7 +33,15 @@ The two adoptions roll out in opposite directions. Do not carry the version-3 ha
 
 `validateIdDomainText` returns the specific `IdDomainFailure` — `IdDomainNonCanonical`, `IdDomainWrongPrefix`, `IdDomainMalformed`, or `IdDomainNotUuidV7`. Branch on the constructor; do not parse the rendered text. `idDomainAcceptsText` is the Boolean shorthand for a predicate, and `idDomainSampleText` supplies a conforming value for fixtures and documentation.
 
-Nothing here is configurable. `enforcedIdDomainVersion` is a frozen string; a future admission policy arrives as a new version identifier and a new language version, never as a change to this one.
+The v7 policy is frozen. Keiro 0.18.0.0 adds an explicit alternative under Language 6; omitting `domain` preserves the original v7 policy and identity.
+
+## Admit retained UUIDv5 identities explicitly
+
+Declare `id RetainedId prefix=retained domain=typeid-v5-or-v7` when the domain must accept canonical TypeIDs backed by UUIDv5 as well as UUIDv7. Use the same declaration, optionally with a total consumer binding, in direct fields, structural leaves, ID-keyed maps, queues, query types, router identities, and declared public-contract fields. Do not maintain an opaque ID twin for this case.
+
+The frozen runtime constructor is `typeIdV5OrV7Domain`; its identity is `keiro-dsl/id-domain/typeid-v5-or-v7/1`. It still enforces canonical lowercase text, prefix, and RFC UUID variant. `IdDomainContract` now carries `IdAdmission`, and failures include `IdDomainVersionNotAdmitted` and `IdDomainVariantNotRfc4122`; extend exhaustive matches. This selects admission only: preserve ID generators, deterministic seeds, namespaces, stream names, and stored identities.
+
+Read `IdDomainContractChanged` by direction. Widening v7 to v5-or-v7 makes new UUIDv5 writes unreadable by old v7 readers; deploy readers before writers. Narrowing back can reject retained UUIDv5 history; retain a historical reader and prove the affected histories before cutover. Both directions change affected fold/replay identity. The older language-3 adoption vector below is not a universal vector for this new change.
 
 The declaration must also choose a human-readable prefix. Admission rules answer whether a value is valid; they do not make an abbreviated prefix intelligible. Follow [TypeID prefix naming](typeid-prefix-naming.md): use the full ubiquitous-language noun by default and treat a later prefix rename as a durable migration.
 
@@ -68,11 +76,11 @@ Generated decoders use `parseKindIdV7Value` with `explicitParseField`, so Aeson 
 
 ## Name a declared ID on a contract field under version 6
 
-[Language 6](language-versions.md) lets a contract event field name a top-level `id` declaration — `templateId: TemplateId` — instead of repeating `typeid "template"`. The generated or consumer-bound domain type keeps that declaration's TypeID-v7 admission and compatibility identity, so the public field cannot drift from the prefix the aggregate owns. Only `id` declarations are accepted; enums, nominal scalars, and mapped declarations are rejected. Use Language 6 from Keiro 0.17.0.0 onward; the older `typeid` spelling remains valid.
+[Language 6](language-versions.md) lets a contract event field name a top-level `id` declaration — `templateId: TemplateId` — instead of repeating `typeid "template"`. The generated or consumer-bound domain type keeps that declaration's selected admission domain and compatibility identity, so the public field cannot drift from the prefix the aggregate owns. Only `id` declarations are accepted; enums, nominal scalars, and mapped declarations are rejected. Use Language 6 from Keiro 0.17.0.0 onward; the older `typeid` spelling remains valid.
 
 Moving between `typeid "template"` and `TemplateId` with the same prefix preserves JSON bytes but changes the Haskell type, so consumers must rebuild. A prefix change remains a breaking public-contract change.
 
-The same candidate admits declared IDs as structural leaves and as `Map[DeclaredId] T` keys; see [mapped consumer surfaces](mapped-consumer-surfaces.md). A direct `Optional DeclaredId` command or event field is still rejected in every language; wrap it in a one-field `mapped structural record` with `on-missing=null`, as the diagnostic prints.
+The same candidate admits declared IDs as structural leaves and as `Map[DeclaredId] T` keys; see [mapped consumer surfaces](mapped-consumer-surfaces.md). A direct `Optional DeclaredId` command or event field is still rejected. In Keiro 0.18.0.0, use a named `mapped structural value` with `wire Optional DeclaredId` to preserve bare optional JSON; use a one-field structural record only when an object wrapper is the intended wire shape.
 
 ## Roll a contract-field adoption producer-first, and drain
 

@@ -2,10 +2,10 @@
 type: Standard
 title: "Mapped consumer surfaces"
 description: "Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-mapped-consumer-surfaces
 tags: [keiro, mapped-consumer-surfaces]
 status: current
@@ -50,9 +50,41 @@ Queue payloads keep the schema-version-1 envelope contract while their typed fie
 
 Aggregate guards and declarative router selection may traverse required structural paths down to these leaves; see [aggregate scalar expressions](aggregate-expressions.md).
 
+## Replace avoidable codec holes with checked values
+
+Use Keiro 0.18.0.0 and Language 6 for these declarations. Prefer a checked policy whenever it describes the complete admitted domain; do not write an opaque codec merely to preserve an existing Haskell wrapper.
+
+| Value | Declaration wire clause | Generated policy |
+| --- | --- | --- |
+| Optional, list, or text-keyed map wrapper | `mapped structural value` with `wire Optional Text`, `wire List Text`, or `wire Map Text Text` | A bare JSON value, without an artificial object wrapper. |
+| Calendar date | `mapped structural value` with `wire Day` (also usable inside containers and records) | Proleptic Gregorian dates; historical signed years and redundant year zeroes are accepted without a year-width cap; invalid dates fail. The canonical writer has no positive sign or redundant year zeroes beyond four-digit padding. No timezone conversion. |
+| Text set | `mapped structural value` with `wire Set Text` | Accept array permutations and duplicates; emit distinct strings in Unicode code-point order. No case folding or Unicode normalization. Only `Set Text` is supported. |
+| Unrestricted bytes | `mapped refined` with `wire base16-bytes` | Decode even-length ASCII hex of either case, including empty input and leading zeroes; emit lowercase. Reject prefixes, whitespace, odd lengths, and non-hex digits. |
+
+For example, keep an optional domain label without a custom JSON codec:
+
+```text
+mapped structural value MaybeLabel {
+  haskell package=orders-domain module=Orders.Values type=MaybeLabel
+  binding = "Orders.Bindings.maybeLabelBinding"
+  binding-version = "1"
+  canonical-type = "orders.MaybeLabel.v1"
+  fixtures = "Orders.Bindings.maybeLabelFixtures"
+  wire Optional Text
+}
+```
+
+Supply only the total `StructuralBinding MaybeLabel (Maybe Text)`, deterministic labelled fixtures, and `CanonicalTypeName`; add an initial when used as a register. A `mapped refined` byte binding likewise crosses the decoded `ByteString`, not hex text. Admission and normalization belong to the frozen Keiro policy before the binding runs. A fixed-length digest or rejecting smart constructor is not a total binding over unrestricted bytes; retain an explicit opaque boundary if no supported policy describes it.
+
+Nullability is transitive through named bare mappings. Do not hide `Optional (Optional ...)`, optional `Json`, or an optional opaque null-capable value behind an alias; `MappedNonInjectiveNullability` rejects the ambiguous encoding. A direct private-event mapped field whose bare root is `Optional` accepts an omitted key exactly as explicit `null`. A required field inside a structural record remains required even when its value can be null.
+
+Carry these mappings through aggregate values, queues, query aliases, and typed process reaction inputs. Keep process source-event decoding and workflow result codecs application-owned. Dates, sets, and refined bytes do not gain symbolic arithmetic, comparisons, or map-key support merely by acquiring checked codecs. Use declared IDs for typed map keys. Public contract fields do not acquire general mapped codecs.
+
+Scaffold creates binding skeletons only when absent; regeneration preserves filled bindings. Run generated binding laws, fixture coverage, historical codec comparison, and [replay compatibility](evolution-and-rollout.md) before retiring an opaque implementation. Preserve old readers even when the current writer becomes generated.
+
 ## Establish a service baseline before changing a mapping
 
-Move the whole source or workspace to Language 5, declare the complete queue/query/catalog authority, run `check` with binding and coverage evidence, and resolve every opaque or unsupported boundary. Scaffold once, fill the new create-once obligations, compile the runtime package, and run the generated service conformance target.
+Move the whole source or workspace to the required Language 6 baseline, declare the complete queue/query/catalog authority, run `check` with binding and coverage evidence, and resolve every opaque or unsupported boundary. Use Keiro 0.18.0.0 for the checked value policies above. Scaffold once, fill the new create-once obligations, compile the runtime package, and run the generated service conformance target.
 
 Persist the new semantic-impact baseline, then run `diff` against the deployed revision. A preamble-only edit is not adoption, and a green repository qualification does not authorize a queue drain, schema migration, projection rebuild, or fleet rollout.
 

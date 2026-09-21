@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -81,9 +81,20 @@ Keiro-dsl 0.15 uses concise product labels and record-dot reads in both the pack
 
 Keiro-dsl 0.17 grows the public AST for Language 6 without removing or renaming a top-level export: `ProcessNode` replaces `input`, `handle`, and `timer` with `body :: ProcessBody`; `IntakeNode` gains `idempotence`; `WqOrdering` gains `WqFifoHeads`; `ContractType` gains `CDeclaredId`; `TypeExpr` gains `TKeyedMap`; `DiagnosticCode`, `LanguageFeature`, and `RuntimeCapability` gain constructors; and `checkReport`/`workspaceCheckReport` take a `CheckedService`. Tooling that matches exhaustively or constructs these records positionally must be extended even before a service migrates from Language 5.
 
+## Minimize hand-owned holes before filling skeletons
+
+Use the current checked surface before introducing a hole:
+
+- Declare aggregate scalar guards and writes, and use `fields(Command)` for identity event payloads; do not implement generated decisions or identity-copy hooks again.
+- Use declarative router selection and Language 6 process `reactions` for supported dispatch, advance, follow-up, and timer behavior. A reaction process retains its source-event decoder; it does not need a hand-written reaction runner.
+- Use [checked value mappings](mapped-consumer-surfaces.md) for bare containers, dates, text sets, and base16 bytes, and [explicit ID admission](identifier-domains.md) for retained UUIDv5/v7 identities. Keep domain newtypes through total bindings rather than writing opaque codec twins.
+- Review `check --explain-bindings`, coverage, and `behavior-obligations` before writing Haskell. Every retained `implementation hole`, opaque boundary, or custom resolver must correspond to behavior the checked surface cannot express.
+
+Do not equate zero holes with correctness. Total bindings, fixtures, register initials, source decoders, SQL, external effects, and workflow persistence remain application obligations. Mapped-register constructor expressions are not implemented: use supported whole-value writes or an explicitly versioned transition hole when construction cannot be expressed. Prove replay compatibility before deleting superseded implementations.
+
 ## Recognize Runtime Holes And Mapping Obligations
 
-The established runtime surface has eight hole kinds:
+Classify remaining application obligations with these eight categories; this is not a requirement to implement eight holes in every service:
 
 1. Deterministic identifier or string derivation; opaque strategies carry a captured fixture, never only a prose rule.
 2. Failure-to-action disposition, including ack, bounded retry, and dead-letter choices.

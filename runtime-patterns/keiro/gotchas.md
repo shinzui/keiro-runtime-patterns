@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Keiro gotchas"
 description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
-timestamp: 2026-09-18T13:12:52Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:12:52Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -78,7 +78,7 @@ Restore the missing rung or deduplicate the conflicting sources instead. `mkEven
 
 ## Structural Does Not Mean Fallible Validation
 
-A `StructuralBinding domain shape` must convert every valid generated shape to the consumer type and back. If construction can reject, normalize away information, or depend on an invariant absent from the shape, the declaration is not structural. Model the invariant in the checked shape or declare the boundary `mapped opaque`.
+A `StructuralBinding domain shape` must convert every valid generated shape to the consumer type and back. If construction can reject, normalize away information, or depend on an invariant absent from the shape, the binding is not total. First select a supported [checked mapping policy](mapped-consumer-surfaces.md): dates, text sets, and base16 bytes normalize at the Keiro codec boundary before a total binding runs. A fixed-length byte invariant is not part of unrestricted `base16-bytes`. Use `mapped opaque` only when no checked shape or policy describes the domain.
 
 Finite fixture laws are evidence against mistakes, not a way to bless a partial conversion. See [brownfield Keiro adoption](brownfield-adoption.md).
 

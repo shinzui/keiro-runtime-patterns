@@ -2,10 +2,10 @@
 type: Overview
 title: "Kiroku Event-Store Standards"
 description: "Index of Kiroku Store 0.8 standards, including retryable transaction failures, checkpoint inventory, and replay-history retention"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-overview
 tags: [kiroku, overview]
 status: current
@@ -29,7 +29,7 @@ reviews:
 
 This area is the fleet’s prescriptive Kiroku guide for Keiro services. It covers the event-store rules shared by command handlers, projections, subscriptions, operations, and observability.
 
-Keiro 0.17.0.0 requires `kiroku-store >=0.8 && <0.9` and `kiroku-store-migrations ^>=0.4.0.0`. Store 0.8 adds the retryable `TransientTransactionFailure` constructor; extend exhaustive error matches and apply [bounded retry](transactions-and-projections.md). Earlier releases also extended the `Store` effect, so update custom or mock interpreters when crossing them: 0.5 makes the [first-run checkpoint decision explicit](./subscriptions.md) and adds the transactional reset; 0.6 adds the [visible global head](./append-and-read.md); 0.7 adds [replay-history retention leases](./history-retention.md), the transaction-scoped stream guard, and the `HistoryRetentionActive` refusal. On the migration side, `0009` publishes the frozen [checkpoint relation](./checkpoint-inventory.md) and corrected `0010` plus `0011` install and converge the retention schema on `kiroku.uuidv7()`. Databases that applied withdrawn `0010` require the [guarded checksum recovery](../migrations/operations.md) before normal migration; Hackage deprecates migration releases 0.3.2.0 and 0.3.2.1.
+Keiro 0.18.0.0 requires `kiroku-store >=0.8 && <0.9` and `kiroku-store-migrations ^>=0.4.0.0`. Store 0.8 adds the retryable `TransientTransactionFailure` constructor; extend exhaustive error matches and apply [bounded retry](transactions-and-projections.md). Earlier releases also extended the `Store` effect, so update custom or mock interpreters when crossing them: 0.5 makes the [first-run checkpoint decision explicit](./subscriptions.md) and adds the transactional reset; 0.6 adds the [visible global head](./append-and-read.md); 0.7 adds [replay-history retention leases](./history-retention.md), the transaction-scoped stream guard, and the `HistoryRetentionActive` refusal. On the migration side, `0009` publishes the frozen [checkpoint relation](./checkpoint-inventory.md) and corrected `0010` plus `0011` install and converge the retention schema on `kiroku.uuidv7()`. Databases that applied withdrawn `0010` require the [guarded checksum recovery](../migrations/operations.md) before normal migration; Hackage deprecates migration releases 0.3.2.0 and 0.3.2.1.
 
 ## Start here
 

@@ -1,5 +1,9 @@
 # migrations Update Log
 
+## 2026-09-21
+* **Update**: Separate the pg-migrate 1.2 and Kiroku migrations 0.5 release from the retained Keiro cohort.
+* **Update**: Use the stable per-user ephemeral database configuration and check cohort compatibility.
+
 ## 2026-09-18
 * **Update**: Add the Keiro 0032 stop-the-writers exception to the migrate-then-deploy flow.
 

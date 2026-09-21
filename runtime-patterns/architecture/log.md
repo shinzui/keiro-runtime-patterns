@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-09-21
+* **Update**: Prefer checked value mappings and generated behavior before implementing holes.
+
 ## 2026-09-18
 * **Update**: Update the reference domain-driver assertion collections and dependencies while retaining database-free execution; record scoped approval.
 * **Update**: Correct generated UpperCamelCase node paths, identify legacy underscore examples, and include conditional QueryContract output; record scoped approval.

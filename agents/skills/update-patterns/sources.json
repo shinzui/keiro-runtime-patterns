@@ -15,9 +15,9 @@
         "keiki.cabal",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "79337c57967db09c6ef7e27d68d349fe25e4b92b",
-      "last_checked_at": "2026-09-18T04:30:57Z",
-      "notes": "Reviewed 97d8b07..79337c5: the only change declares every package and its dependencies in mori.dhall. No source, codec, API, or version change; no catalog change."
+      "last_checked_commit": "3ed37eb08bde38ab8af8c0855d9e8cca87db7f4e",
+      "last_checked_at": "2026-09-21T20:24:19Z",
+      "notes": "Reviewed 79337c5..3ed37eb: no watched library, codec, API, or release change. No catalog change: terminology bundle, provenance skills, and Nix tooling only."
     },
     {
       "project": "shinzui/keiro",
@@ -38,9 +38,9 @@
         "keiro-test-support",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "11e0bba4f634ac6fa4526e2814bd5a8177e3f050",
-      "last_checked_at": "2026-09-18T04:30:57Z",
-      "notes": "Reconciled de574cdc..11e0bba (0.16.0.0 on Hackage and tagged; 0.17.0.0 confirmed on Hackage for all seven packages, every keiro*-0.17.0.0 tag at 11e0bba) from source, package changelogs, ADR-42, and migration 0032. Create: keiro/dead-timer-resume for guarded Dead-timer resume, inspection, and the 0032 stop-the-writers rollout. Correct: deterministic producer outbox identity and freshIntegrationEvent, required jobOrdering with FifoHeads and legacy FIFO batch rejection, guarded DLQ purge/archive and header-preserving redrive, mkPartitionSpec, pgmq 0.6/adapter 0.16 bounds and the retained effectful <2.7 bound, reaction runner and cancelTimerTx, delegated inbox, withFreshResourceStorePrepared, candidate Language 6 surfaces (process reactions, delegated intake, fifo-heads gate, declared contract IDs, nominal structural leaves, keyed maps), guard-diff advisories and diff --deny. No catalog change: CPP-gated Command.hs hydration probe, comment-only keiro-core and Metrics.hs changes, benchmarks, record-migration manifest regeneration, and 0.16 DSL no-op release. Follow-up audit re-verified every changed claim against source and upstream docs/user, the 0.16->0.17 upgrade blueprint, and previously unowned concepts: corrected the candidate-correction history, a misplaced FIFO-index sentence, the effectful-core bound wording, and the pre-existing wake_at timer example; added outbox conflict/isolation/selector-ambiguity rules, consumers-first FifoHeads rollout, claim mutation semantics, reaction timer evolution codes, nested nominal fold impact, reaction scaffold layout, 0032 stop-the-writers migration exception, foreground resume recovery, and glossary terms. Policy correction at the same verified 0.17.0.0 release: require Language 6 for new and upgraded services. The released registry still marks 5 Stable and 6 Candidate, Skeleton uses currentStableLanguageVersion, and CheckReport reports stable=false for 6; document those facts while requiring an explicit version-6 preamble and adopted-version CI gate. No upstream drift or watermark advance."
+      "last_checked_commit": "c68dbdd7d1a76a67212067012dcf2321efba1e11",
+      "last_checked_at": "2026-09-21T20:24:19Z",
+      "notes": "Reconciled 11e0bba4..c68dbdd7 against source, compiled checked-mapping examples, frozen codecs, replay evidence, and all seven Hackage 0.18.0.0 packages plus upstream tags at b12bbdd7. Correct existing concepts: bare containers and transitive nullability, omitted optional event fields, calendar days, structural text sets, refined base16 bytes, explicit v5/v7 admission, generated-first hole minimization, directional replay evidence, and stable workflow step names. No new concept: existing mapping, identity, adoption, and evolution standards absorb the capabilities. Mapped-register construction remains planned, not available. No catalog runtime change: migration timeout patch was reverted, SQL payloads unchanged; re-export checks, manifests, fixtures, terminology and build tooling are supporting evidence. Test-support moves to ephemeral-pg 0.3.1 while migration cohort bounds remain unchanged."
     },
     {
       "project": "shinzui/kiroku",
@@ -60,9 +60,9 @@
         "shibuya-kiroku-adapter",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "07cd034aafc0d88b6c55abdf3509e25b9d69e63d",
-      "last_checked_at": "2026-09-18T04:30:57Z",
-      "notes": "Reviewed 7051b12..07cd034: no watched source, migration, or version change. Correct: kiroku/observability now states the ADR-9 frozen HTTP/Prometheus/WebSocket wire contract documented in docs/user/metrics.md. No catalog change for planned (unimplemented) CORS, dead-letter read, REST browse, and HTTP checkpoint APIs, compaction plans, or seihou tooling."
+      "last_checked_commit": "758b81acddf482b08643acf8802f095e621a3e07",
+      "last_checked_at": "2026-09-21T20:24:19Z",
+      "notes": "Reviewed 07cd034..758b81a (published Store 0.8.0.1, adapter 0.5.1.2, migrations 0.5.0.0; Hackage and tags checked). Correct release guidance and migration/test-support cohort notes. No runtime change: store/adapter patches only change test dependencies; migration SQL/checksums unchanged, 0.5 follows pg-migrate 1.2. Stop at the released commit: subsequent ownership fixes and effectful bounds belong to the unpublished coordinated Shibuya 0.10 lifecycle candidate."
     },
     {
       "project": "shinzui/shibuya",
@@ -76,9 +76,9 @@
         "shibuya-metrics",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "cb3c4a9ae91de946fa17a6287241ca91699f7c50",
-      "last_checked_at": "2026-09-18T04:30:57Z",
-      "notes": "Reviewed bf2cff1..cb3c4a9: 0.9.0.1 (Hackage) only widens the effectful bound to <2.8 with no API or behaviour change. Correct: version claims in config/kubernetes-deployment; keiro/overview notes Keiro still caps effectful at <2.7. No catalog change for the idle-master-loop and post-0.9 review plans (unimplemented) or nix tooling."
+      "last_checked_commit": "7512b5c692af1c005392e4445cfa26a9be41f9ea",
+      "last_checked_at": "2026-09-21T20:24:20Z",
+      "notes": "Reviewed cb3c4a9..7512b5c against Master.hs and released 0.9.0.2/0.9.0.3 changes; Hackage and v0.9.0.3 tag checked. Correct processing guidance for idle mailbox removal, unlinked supervisor and single failure delivery. No public API or metrics wire change in this range. Leave later lifecycle/health/WebSocket and dependency changes pending: 0.10.0.0 remains an unpublished coordinated release candidate."
     },
     {
       "project": "shinzui/pgmq-hs",
@@ -111,9 +111,9 @@
         "app",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "8a528b67641608dd92b70369e3b61d587a8aa505",
-      "last_checked_at": "2026-09-06T21:23:17Z",
-      "notes": "Reconciled f39d64e..8a528b6: complete diff changes seihou module tracking and snapshots, local plan skills, and development-shell libpq/OpenSSL pkg-config inputs. No library/app SQL, API, retry, ledger, or release-version change. No catalog change for local build tooling. Migration catalog edits in this reconciliation originate from mori://shinzui/kiroku and mori://shinzui/keiro, not a new pg-migrate runtime capability."
+      "last_checked_commit": "13865052bef62688c40576ad36889221a0ba7e08",
+      "last_checked_at": "2026-09-21T20:24:20Z",
+      "notes": "Reviewed 8a528b6..1386505; verified 1.2.0.0 Hackage test-support and upstream tag. Correct migration model and testing for defaultEphemeralConfig, stable per-user cleanup root, ephemeral-pg 0.3.1 and coordinated 1.2 release. Production source, ledger, migration payloads and APIs unchanged. Keiro 0.18 still constrains the 1.1/kiroku-migrations 0.4 cohort; do not force latest independent packages together."
     },
     {
       "project": "shinzui/settei",
@@ -126,9 +126,9 @@
         "src",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "b326814f9a676347e46d4e14aaf60ca9c322e507",
-      "last_checked_at": "2026-07-30T00:43:08Z",
-      "notes": "Catalog-wide model review baseline."
+      "last_checked_commit": "384f1124079f2bb51a4f450c672dfdd830998862",
+      "last_checked_at": "2026-09-21T20:24:20Z",
+      "notes": "Reviewed b326814..384f112: no runtime source or release change. No catalog change: capability catalog documents existing behavior, guide/ADR provenance and profiles plus Nix/skill tooling only."
     },
     {
       "project": "shinzui/shibuya-pgmq-adapter",
@@ -144,7 +144,7 @@
       ],
       "last_checked_commit": "392f7545af32ef893c24139fd194d16ec1172f75",
       "last_checked_at": "2026-09-18T04:30:58Z",
-      "notes": "Reconciled 1d88223..392f754 against 0.15.0.0/0.16.0.0 source (Hackage 0.16.0.0). Correct: HeadPerGroup grouped-head FIFO (PGMQ 1.12+, batchSize bounds groups) in jobs and transport selection, and shutdown/DLQ version claims. No catalog change: 0.15 bounds-only adoption of pgmq 0.6 and benchmarks."
+      "notes": "Inspected 392f754..9c709d7 source and changelog: recoverable transactional DLQ claims, serialized/cancellation-safe acknowledgements, surfaced PgmqAcknowledgementException, and dependency gates are part of the unpublished 0.16.0.1 candidate requiring Shibuya 0.10. Hackage remains 0.16.0.0. Retain the existing reconciled watermark until the coordinated release; do not apply candidate guarantees to the published production baseline."
     }
   ]
 }

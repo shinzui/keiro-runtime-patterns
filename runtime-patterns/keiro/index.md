@@ -16,7 +16,7 @@
 
 # Overview
 
-- [Keiro runtime patterns](overview.md) - Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, Language 6, generated Haskell editions, and durable workflows
+- [Keiro runtime patterns](overview.md) - Index of Keiro 0.18.0.0 standards: checked value mappings, fewer hand-owned holes, explicit ID admission, and replay-safe adoption
 
 # Runbook
 

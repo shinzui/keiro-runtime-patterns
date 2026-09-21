@@ -2,10 +2,10 @@
 type: Standard
 title: "Consumer-owned nominal bindings"
 description: "Binding direct aggregate IDs, enums, and scalar wrappers to existing Haskell types with total isomorphisms, fixtures, and a decoder-tightening audit"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-nominal-bindings
 tags: [keiro, nominal-bindings]
 status: current
@@ -13,17 +13,17 @@ status: current
 
 # Consumer-owned nominal bindings
 
-**Bind a consumer-owned ID, enum, or scalar wrapper only when the conversion is a total isomorphism in both directions; anything that can reject or normalize a valid representation is `mapped opaque`, not nominal.**
+**Bind a consumer-owned ID, enum, or scalar wrapper nominally only when both directions form a total isomorphism; use a supported checked wire policy for admission or normalization before falling back to `mapped opaque`.**
 
 A consumer-owned domain value follows [domain newtypes and TypeIDs](../architecture/domain-newtypes-and-typeids.md): an ID is TypeID-backed by default, every key scalar has a dedicated `newtype`, and a bare `Text`, `Int`, or type synonym is not a domain type worth preserving through a nominal binding. The primitive named in `mapped nominal AccountNumber : Text` is the checked representation crossing Keiro, not the Haskell application's domain type.
 
-A nominal binding keeps an application's existing type in direct aggregate commands, events, and registers without generating a parallel wrapper. It is the third mapping kind, alongside `mapped structural` and `mapped opaque`, and it requires [language version 2](language-versions.md).
+A nominal binding keeps an application's existing type in direct aggregate commands, events, and registers without generating a parallel wrapper. It complements `mapped structural`, `mapped refined`, and `mapped opaque`, and it requires [language version 2](language-versions.md).
 
 ## Choose nominal only for a total isomorphism
 
 `Keiro.Codec.Nominal.NominalBinding domain representation` holds `nominalToRepresentation` and `nominalFromRepresentation`. Both are total functions and each must invert the other. The module lives in `keiro-core` and is re-exported from `keiro`, so a generated consumer keeps one direct dependency. The generated harness checks the two laws with `nominalDomainRoundTrip` and `nominalRepresentationRoundTrip` over a non-empty `NominalFixtureCases`.
 
-A smart constructor that validates, rejects, canonicalizes, or trims is a *refined* type, not a nominal one. Its round trip is not an isomorphism and the binding laws will fail. Declare it `mapped opaque` and leave the consumer codec authoritative.
+A smart constructor that validates, rejects, canonicalizes, or trims is not a nominal isomorphism. First check whether a [checked value mapping](mapped-consumer-surfaces.md) owns that admission policy: `mapped refined` with `wire base16-bytes`, for example, admits hex before a total binding over decoded bytes. Otherwise declare `mapped opaque` and leave the consumer codec authoritative; never hide a rejecting constructor in a total binding.
 
 Fixtures are evidence, never proof: a finite corpus does not establish the laws for values outside its cases. Choose cases that cover each constructor, each boundary spelling, and every value shape production has actually stored.
 
@@ -86,6 +86,8 @@ Bound scalar registers expose a generated context-level `NominalProjections` fac
 - ordering is solver-visible only for `Int`, `Natural`, and `Time`;
 - bound **IDs and enums cannot be compared at all** in a guard — their symbolic encoding is not structural, so `check` rejects the comparison rather than degrading it silently;
 - nominal arithmetic does not exist. Arithmetic stays on direct `Integer` and `Natural`. See [aggregate scalar expressions](aggregate-expressions.md).
+
+Do not carry the version-2 ID/enum restriction into current Language 6 services: same-declaration ID and enum equality is checked, including eligible required structural paths. Prefer those generated guards over opaque predicates. Explicit v5-or-v7 admission changes the admitted ID domain, not the equality operator or generation policy.
 
 ## Audit an adoption over existing history
 

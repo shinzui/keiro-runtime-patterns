@@ -2,10 +2,10 @@
 type: Guide
 title: "Durable workflows"
 description: "Durable workflow journals, at-least-once step effects, opaque awakeable publication, bounded progress workers, custom wakes, and evolution"
-timestamp: 2026-09-01T16:07:10Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: human:nadeem
-  at: "2026-09-01T16:07:10Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-durable-workflows
 tags: [keiro, durable-workflows]
 status: current
@@ -81,7 +81,7 @@ Stable recorded names are compatibility contracts. Use `patch` for a cross-cutti
 
 Rotation invalidates any awakeable id already handed to an external holder. The next generation allocates a **fresh opaque id**, and the id the prior generation published no longer wakes the live instance. Publish the new id again through the same idempotent, id-keyed callback as part of the new generation's allocation.
 
-A journaled step result is permanent. Never change the type a step decodes into: rename the step so it runs fresh, or guard the change with a stable `patch`. Put specification changes through the [keiro-dsl evolution gate](dsl-adoption.md) and the [rollout ordering rules](evolution-and-rollout.md) before deployment.
+A journaled step result is permanent. Preserve `StepName` and a decoder for every retained result during a refactor. Renaming a step creates a new durable action that can repeat an already completed side effect; use a new name only for intentional new execution with an explicit in-flight rollout. A rename does not repair an incompatible decoder. Keep workflow result codecs application-owned when adopting checked mappings, and fail a stored-result decode rather than treating it as a missing step. Compare retained journal prefixes, generations, step/await/child/timer keys, patches, carried seeds, and continuations across independent builds. Use a stable `patch` for a versioned branch and retain historical readers. Apply the [rollout and replay gates](evolution-and-rollout.md) before deployment.
 
 ## Honor the custom wake-source contract
 

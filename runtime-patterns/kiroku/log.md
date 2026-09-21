@@ -1,5 +1,8 @@
 # kiroku Update Log
 
+## 2026-09-21
+* **Update**: Confirm Keiro 0.18 retains the Store 0.8 and migration 0.4 cohort.
+
 ## 2026-09-18
 * **Update**: Correct the reset command to stream truncate-before clear STREAM; record scoped approval.
 * **Update**: Record changes-requested review: replace nonexistent stream clear command with stream truncate-before clear.

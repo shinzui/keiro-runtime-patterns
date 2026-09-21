@@ -1,11 +1,11 @@
 ---
 type: Overview
 title: "Keiro runtime patterns"
-description: "Index of the released Keiro 0.17.0.0 standards: deterministic producer identity, FIFO-heads jobs, dead timer resume, Language 6, generated Haskell editions, and durable workflows"
-timestamp: 2026-09-18T13:01:11Z
+description: "Index of Keiro 0.18.0.0 standards: checked value mappings, fewer hand-owned holes, explicit ID admission, and replay-safe adoption"
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-overview
 tags: [keiro, overview]
 status: current
@@ -36,11 +36,13 @@ reviews:
 
 # Keiro runtime patterns
 
-**Prescriptive defaults for assembling reliable services on the released Keiro 0.17.0.0 set, Keiki 0.9.1, Kiroku Store 0.8, Shibuya 0.9, and pgmq-hs 0.6.**
+**Prescriptive defaults for assembling reliable services on the released Keiro 0.18.0.0 set, Keiki 0.9.1, Kiroku Store 0.8, Shibuya 0.9, and pgmq-hs 0.6.**
 
 Use this area as the fleet standard for application wiring and operating boundaries; use the Keiro repo's `docs/user/README.md` as the long-form API reference. The 0.2 through 0.4 behavior remains foundational, while 0.5 through 0.11 add composable multi-file service workspaces, an explicit DSL language-version contract, consumer-owned nominal bindings, authoritative typed scalar aggregate expressions, an enforced identifier domain, complete aggregate behavior conformance, and an explicit compilation contract for the generated layer.
 
-Adopt the published Keiro 0.17.0.0 package set. Seven packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, `keiro-migrations`, `keiro-ops`, and `keiro-test-support` — move together; keep every one the service consumes on that cohort. `keiro-test-support` has been published since 0.14 and supplies reusable isolated PostgreSQL fixtures; `jitsurei` remains internal. The runtime admits `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; the migration package requires `kiroku-store-migrations ^>=0.4.0.0`. `keiro` and `keiro-pgmq` still bound `effectful`/`effectful-core` to `>=2.6 && <2.7`, so a Keiro service stays on effectful 2.6 even though Shibuya 0.9.0.1 and pgmq-hs 0.6.1.0 admit 2.7. Verify Hackage and upstream tags before changing bounds.
+Adopt the published Keiro 0.18.0.0 package set. Seven packages — `keiro`, `keiro-core`, `keiro-dsl`, `keiro-pgmq`, `keiro-migrations`, `keiro-ops`, and `keiro-test-support` — move together; keep every one the service consumes on that cohort. `keiro-test-support` has been published since 0.14 and supplies reusable isolated PostgreSQL fixtures; `jitsurei` remains internal. The runtime admits `keiki >=0.9 && <0.10`, `kiroku-store >=0.8 && <0.9`, and `shibuya-core ^>=0.9.0.0`; the migration package requires `kiroku-store-migrations ^>=0.4.0.0`. `keiro` and `keiro-pgmq` still bound `effectful`/`effectful-core` to `>=2.6 && <2.7`, so a Keiro service stays on effectful 2.6 even though Shibuya 0.9.0.1 and pgmq-hs 0.6.1.0 admit 2.7. Verify Hackage and upstream tags before changing bounds.
+
+Keiro 0.18.0.0 adds [checked bare containers, calendar dates, text sets, and refined base16 bytes](mapped-consumer-surfaces.md), [explicit UUIDv5/v7 admission](identifier-domains.md), and [cross-build replay evidence](evolution-and-rollout.md). Use these declarations to replace avoidable opaque codecs, and apply the [hole-minimization checklist](dsl-adoption.md) before implementing custom behavior. Language 6 remains candidate; its new capabilities require the 0.18 package cohort. No migration payload changed in this release.
 
 Apply the obligations introduced by each release when upgrading across it:
 

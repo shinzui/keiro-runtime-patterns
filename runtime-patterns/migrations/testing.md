@@ -2,10 +2,10 @@
 type: Guide
 title: "Migration Testing"
 description: "Integrity gates in the default suite, ephemeral-database tests with withMigratedDatabase, the nested-Either gotcha, and per-service wrappers"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-testing
 tags: [migrations, testing]
 status: current
@@ -78,6 +78,8 @@ withMigratedDatabase
 ```
 
 Use `withMigratedDatabaseOptions` to customize runner options and `withMigratedDatabaseConfig` when the ephemeral server itself needs configuration. Keep `pg-migrate-test-support` out of the production dependency closure.
+
+With pg-migrate-test-support 1.2, obtain `defaultEphemeralConfig :: IO EphemeralPg.Config` and extend it for custom configuration. It pins `temporaryRoot` to `/tmp/ephpg-pg-migrate-<uid>` so startup cleanup sees clusters abandoned by prior sessions; the two default helpers already use it. The package requires ephemeral-pg 0.3.1 or later in the 0.3 series. Exhaustive `Config` construction must account for `sweepStaleOnStart`. Keiro-test-support 0.18 also uses ephemeral-pg 0.3.1; verify the complete service solver plan, since Keiro's migration dependencies still target pg-migrate 1.1 and Kiroku migrations 0.4.
 
 ## Match both `Either` layers
 

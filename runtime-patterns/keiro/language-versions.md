@@ -2,10 +2,10 @@
 type: Standard
 title: "Keiro DSL language versions"
 description: "Requiring Language 6 from Keiro 0.17.0.0, handling registry metadata, and deliberately migrating older sources"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -86,7 +86,9 @@ The released registry in `mori://shinzui/keiro` (`keiro-dsl/src/Keiro/Dsl/Langua
 
 ## Know what version 6 adds
 
-Syntax profile 5 adds five grammar features over profile 4: `DelegatedInboxSyntax`, `ProcessReactionSyntax`, `WorkqueueFifoHeadsSyntax`, `ContractDeclaredIdSyntax`, and `KeyedMapSyntax`. Runtime semantics 5 adds `DelegatedInboxRuntime` and `StructuralNominalLeaves`; neither contributes a fold discriminator, so adopting version 6 does not by itself move aggregate fold fingerprints.
+Syntax profile 5 initially added `DelegatedInboxSyntax`, `ProcessReactionSyntax`, `WorkqueueFifoHeadsSyntax`, `ContractDeclaredIdSyntax`, and `KeyedMapSyntax`. Keiro 0.18.0.0 extends the candidate with `BareStructuralMappingSyntax`, `CalendarDaySyntax`, `TextSetSyntax`, `RefinedBase16Syntax`, and `ExplicitIdAdmissionDomainSyntax`. Runtime semantics 5 adds the corresponding `BareStructuralMappings`, `CalendarDayMappings`, `TextSetMappings`, `RefinedBase16Mappings`, and `ExplicitIdAdmissionDomains` capabilities alongside `DelegatedInboxRuntime` and `StructuralNominalLeaves`. These capabilities add no global fold discriminator: the used declaration and policy identities determine affected fingerprints. Language 6 remains candidate and `new` still emits Language 5 in 0.18.0.0.
+
+Adopt [checked value mappings](mapped-consumer-surfaces.md) for bare containers, calendar days, text sets, and base16 bytes, and [explicit UUID admission](identifier-domains.md) for retained v5/v7 identities. These features require the 0.18 toolchain even though the source preamble remains Language 6. Update exhaustive tooling for `TDay`, `TTextSet`, `ShapeBare`, `ShapeRefined`, `RefinedWirePolicy`, and ID admission fields.
 
 - **`idempotence delegated` on an intake** generates a typed `runInboxIntake` wrapper over Keiro's delegated inbox, which writes no inbox row: the downstream state transition owns the durable receipt. Omitting the clause means `table` in every language. `delegated` cannot combine with `persist = dedupe-only` (`DelegatedInboxDedupeOnlyPersistence`).
 - **Process `reactions`** replace the single-input, single-timer legacy process body with typed inputs, ordered input-only guards ending in `otherwise`, optional `advance`, accepted-only follow-ups paired with `silent no-action`, timer-free processes, and multiple named timers with rearm, `once`, and `cancel`. The generated module owns the input ADT, pure reaction, `ReactiveProcessManager`, worker wrapper, timer payload codecs and builders, and firing dispatcher; the only create-once hole is `decode<Process>Input :: RecordedEvent -> Maybe <Process>Input`. Declare `reactions version N` and increase it with every semantic change. Runtime behavior is governed by [process managers](../messaging/process-managers.md).

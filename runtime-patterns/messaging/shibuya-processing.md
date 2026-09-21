@@ -2,10 +2,10 @@
 type: Guide
 title: "Shibuya Processing Semantics"
 description: "Shibuya processing semantics every worker inherits: ack decisions, application dead-letter codes, retries, batching, supervision, shutdown"
-timestamp: 2026-08-14T17:48:00Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: human:nadeem
-  at: "2026-08-14T17:48:00Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-shibuya-processing
 tags: [messaging, shibuya-processing]
 status: current
@@ -90,6 +90,8 @@ Message IDs must be unique inside a batch. Batch handlers remain subject to the 
 `runApp` starts named processors with a bounded inbox per processor. `defaultAppConfig` uses `IgnoreFailures` and an inbox size of 100. Choose `StopAllOnFailure` when one unexpected processor failure invalidates the whole worker process; an intentional `AckHalt` is a graceful processor exit and does not stop siblings.
 
 On shutdown, `stopAppGracefully` first asks adapters to stop producing, then drains in-flight work. `defaultShutdownConfig` allows 30 seconds and returns `False` if it had to force-stop remaining processors. Keep adapter resources alive until shutdown and draining finish.
+
+Use the published Shibuya 0.9.0.3 core/metrics pair within the 0.9 cohort. It removes the idle master mailbox and the supervisor link that could deliver garbage-collection failures to the caller or deliver a processor failure twice. Explicit shutdown and per-processor failure propagation remain required. The 0.10 lifecycle candidate adds different APIs and adapter bounds; do not assume those unreleased guarantees apply to 0.9.
 
 ## Related Patterns
 

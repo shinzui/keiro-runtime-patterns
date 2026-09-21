@@ -2,10 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-21T20:25:00Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-09-21T20:25:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -33,10 +33,12 @@ Aggregate commands, events, and registers share one checked DSL type model. The 
 
 Direct `Json`, `Optional`, `List`, and `Map` aggregate fields do not exist. Express those wire shapes through a `mapped structural` declaration.
 
+In Keiro 0.18.0.0, use a named bare mapping for `Optional`, `List`, text-keyed `Map`, `Day`, or `Set Text`, and `mapped refined` for base16 bytes; see [checked value mappings](mapped-consumer-surfaces.md). Codec support does not add these carriers to the scalar expression language. Mapped-register construction syntax remains unavailable: prefer supported whole-value copies and retain an explicit transition hole only when the update cannot be declared.
+
 ## Write guards and writes against explicit roots
 
 ```text
-language keiro-dsl 4
+language keiro-dsl 6
 context accounting
 
 aggregate Account
