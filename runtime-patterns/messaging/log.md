@@ -1,5 +1,9 @@
 # messaging Update Log
 
+## 2026-09-30
+* **Update**: Route the reconciliation standard, overview, and gotcha 14 to the connection-faults standard and record the mid-statement disconnect trap
+* **Addition**: Add the PGMQ connection faults and retry budgets standard: released 0.6.1.1 disconnect shapes are permanent (BUG-1), adapter poll and ack budget sizing, exhaustion under supervision, and idempotent enqueues under lost replies
+
 ## 2026-09-21
 * **Update**: Require the published 0.9.0.3 fixes for idle GC failures and duplicate failure delivery.
 * **Update**: Track published Store 0.8.0.1 and adapter 0.5.1.2 without candidate lifecycle claims.

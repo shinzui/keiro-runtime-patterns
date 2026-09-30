@@ -649,6 +649,14 @@ in  Schema.Project::{
             Schema.DocLocation.LocalFile "runtime-patterns/messaging/pgmq-queue-reconciliation.md"
         }
       , Schema.DocRef::{
+        , key = "messaging-pgmq-connection-faults"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Adapter retry budgets for PostgreSQL restarts, backend terminations, and TCP resets; exhaustion under supervision; idempotent enqueues under lost replies"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/pgmq-connection-faults.md"
+        }
+      , Schema.DocRef::{
         , key = "messaging-kiroku-subscriptions"
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module

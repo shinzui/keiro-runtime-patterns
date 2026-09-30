@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Messaging Patterns"
 description: "Index of messaging standards for Keiro services, including pgmq-hs 0.6 queue lifecycle and reconciliation"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-30T21:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-30T21:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -49,6 +49,7 @@ Use this area for process managers, public integration contracts, transactional 
 - [Transport selection](transport-selection.md) — choose among PGMQ, Kafka, and Kiroku subscriptions.
 - [Typed PGMQ jobs](pgmq-jobs.md) — background work, required job ordering and FIFO-heads, retry policy, visibility timeout, DLQ retention, and queue identity.
 - [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) — validated physical names, PGMQ 1.13 schema, additive provisioning, partition premake and spill, drift, notifications, and retry classification.
+- [PGMQ connection faults and retry budgets](pgmq-connection-faults.md) — what a restart, backend termination, or TCP reset looks like to the runtime, adapter poll and ack budgets, exhaustion under supervision, and idempotent enqueues under lost replies.
 - [Kiroku subscriptions](kiroku-subscriptions.md) — consume a service's own event log through Shibuya.
 
 ## Before Production

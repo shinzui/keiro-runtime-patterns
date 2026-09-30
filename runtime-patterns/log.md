@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-09-30
+* **Update**: Route the transport choice to the PGMQ connection-faults standard for retry budgets, supervision, and idempotent enqueues
+
 ## 2026-09-19
 * **Update**: Repinned the catalog descriptor to okf-profiles v0.18.0, which adds opt-in assessable pattern types
 

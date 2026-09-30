@@ -2,10 +2,10 @@
 type: Standard
 title: "PGMQ queue lifecycle and reconciliation"
 description: "Validated durable queue names, additive startup reconciliation, truthful drift reports, notification recovery, and PGMQ 1.13 schema, partition premake, and retry classification in pgmq-hs 0.6"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-09-30T21:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  at: "2026-09-30T21:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-queue-reconciliation
 tags: [messaging, pgmq-queue-reconciliation]
 status: current
@@ -57,11 +57,12 @@ Install the `pgmq-migration` native component when the application owns the sche
 
 `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Maybe Message`. `Nothing` means the row was already deleted, archived, or popped; settle it as a lost race, not a database outage.
 
-`isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01, 57P02, 57P03, and SQLSTATE class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure remain permanent. Branch on this classifier rather than restating a partial list.
+`isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01, 57P02, 57P03, and SQLSTATE class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure remain permanent. Branch on this classifier rather than restating a partial list. A connection lost while a statement is in flight is reported through the statement constructors and is therefore permanent in 0.6.1.1 (`mori://shinzui/pgmq-hs/okf/bug-reports/concepts/BUG-1`); size the adapter's retry budgets, decide what exhaustion does, and keep enqueues idempotent with [PGMQ connection faults and retry budgets](pgmq-connection-faults.md).
 
 ## Related Patterns
 
 - [Typed PGMQ jobs](pgmq-jobs.md)
+- [PGMQ connection faults and retry budgets](pgmq-connection-faults.md)
 - [Transport selection](transport-selection.md)
 - [Messaging gotchas](gotchas.md)
 - [Migration authoring](../migrations/authoring.md)

@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Messaging Gotchas"
 description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.6, Kafka, Kiroku, and Keiro"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-09-30T21:30:00Z
 generated:
   by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  at: "2026-09-30T21:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -55,7 +55,7 @@ Treat these as design-review checks, not trivia.
 
 13. **`QueueRef` sanitization is lossy.** `a.b` and `a_b` collide, long or `_dlq`-ending names are hashed, and a rename can point workers at a new empty queue while messages remain in the old one. Freeze logical names and drain before migration. See [PGMQ jobs](pgmq-jobs.md).
 
-14. **PGMQ retries only a statement-error whitelist.** In pgmq-hs 0.5 and 0.6, `Pgmq.Effectful.isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01/02/03, and class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure are permanent. See [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
+14. **PGMQ retries only a statement-error whitelist, and a mid-statement disconnect is outside it.** In pgmq-hs 0.5 and 0.6, `Pgmq.Effectful.isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01/02/03, and class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure are permanent. A connection lost while a statement is in flight arrives as a statement error (an empty SQLSTATE, or `UnexpectedRowCountStatementError 1 1 1`), so in 0.6.1.1 the adapter does not retry the first in-flight failure and the polling stream fails; tracked as `mori://shinzui/pgmq-hs/okf/bug-reports/concepts/BUG-1`. Size budgets and keep enqueues idempotent with [PGMQ connection faults](pgmq-connection-faults.md); see also [PGMQ queue lifecycle](pgmq-queue-reconciliation.md).
 
 15. **`CommandAmbiguous` is never success.** Multiple matching edges are an aggregate-definition defect; process-manager workers halt, and the DSL rejects an ambiguity outcome of `Fired`. See [process managers](process-managers.md) and the [command error standard](../keiro/command-cycle-and-errors.md).
 

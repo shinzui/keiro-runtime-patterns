@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-09-30T21:30:00Z
 generated:
-  by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  by: process:claude-code
+  at: "2026-09-30T21:30:00Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -124,7 +124,9 @@ need the surrounding rules.
   PGMQ, Kafka, or a Kiroku subscription. For PGMQ, also apply the
   [queue lifecycle and reconciliation standard](messaging/pgmq-queue-reconciliation.md).
   For ordered PGMQ work, choose `FifoHeads` as described in
-  [typed PGMQ jobs](messaging/pgmq-jobs.md).
+  [typed PGMQ jobs](messaging/pgmq-jobs.md). Size the adapter's poll and ack
+  retry budgets, choose the supervision strategy, and keep enqueues idempotent
+  with [PGMQ connection faults and retry budgets](messaging/pgmq-connection-faults.md).
 - **Implementing process coordination:** start with the
   [process-manager standard](messaging/process-managers.md); use
   [durable workflows](keiro/durable-workflows.md) when the work is a stable,
