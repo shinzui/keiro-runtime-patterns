@@ -2,10 +2,10 @@
 type: Architecture Decision Record
 title: Separate pattern, product, and general Haskell documentation
 description: Assign runtime-specific standards, product documentation, and general Haskell guidance to three distinct repositories, each with one normative owner.
-timestamp: 2026-07-23T04:18:38Z
+timestamp: 2026-10-11T23:28:30Z
 generated:
-  by: human:nadeem
-  at: "2026-07-23T04:18:38Z"
+  by: process:codex
+  at: "2026-10-11T23:28:30Z"
 docId: ADR-6
 status: Accepted
 date: 2026-07-22
@@ -24,6 +24,8 @@ The Keiro ecosystem has three documentation repositories with overlapping audien
 Keep runtime-specific implementation standards in `keiro-runtime-patterns`, product explanations and navigation in `keiro-runtime-docs`, and generally applicable Haskell standards in `haskell-jitsurei`.
 
 Cross-link or cite the owning document instead of duplicating its normative content. Register implementation-facing documents with Mori so tools and agents can discover the current owner. A product-site rewrite or synchronization project is separate work and must not silently become part of a runtime-pattern change.
+
+A generated, versioned presentation at `mori://shinzui/keiro-runtime-docs` may publish the complete committed catalog. It must preserve canonical identities, source wording, metadata, and a full source commit. Corrections to normative rules still land here first. Product navigation, audit-reading guidance, and supplementary diagrams remain site-owned and visibly separate. Catalog-to-site publication review is independent of library-to-catalog source watermarks. See `mori://shinzui/keiro-runtime-docs/plans/48-publish-the-runtime-pattern-catalog-with-svg-diagrams-and-incremental-synchronization`.
 
 ## Consequences
 
