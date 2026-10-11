@@ -2,10 +2,10 @@
 type: Standard
 title: "Domain Design And Runtime Choices"
 description: "Design bounded contexts, invariants, aggregates, domain events, and workflows before service layout and runtime mechanisms"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-domain-design
 tags: [architecture, ddd, aggregates, invariants, domain-events, workflows]
 status: current
@@ -95,7 +95,7 @@ Choose the smallest mechanism that preserves those rules:
 | Business responsibility | Runtime choice |
 | --- | --- |
 | One atomic decision over one identity | Validated aggregate stream |
-| Derived query state | Inline or subscription projection with explicit freshness |
+| Derived query state | Subscription projection by default, with explicit freshness |
 | Event-driven coordination with durable state, timers, or compensation | Process manager |
 | A durable sequence with named steps, waits, callbacks, or child work | Durable workflow |
 | Stateless event fan-out to selected targets | Router |
@@ -113,10 +113,15 @@ Specify whether the caller needs immediate command acceptance, an updated local
 view, or the eventual completion of a cross-context process. These are different
 business promises.
 
-Use an inline projection when its state must commit with accepted events. Use a
-subscription projection when lag is acceptable, with an explicit
+Return the command result directly when sufficient. Default query models to
+subscription delivery, including local aggregate views. For read-your-write,
+use a bounded post-commit position wait through the
 [read-model freshness policy](../keiro/read-models-and-projections.md).
-A committed command can succeed while a later query wait times out. Expose
+A timeout means committed with view pending; retry the query, not the command.
+Keep only minimum state needed by a specified atomic invariant synchronous,
+such as an identity-to-winning-aggregate index. Rich views stay asynchronous.
+Measure unrelated-writer latency because inline SQL extends the store-wide
+append lock interval. Expose
 pending workflow state when completion requires other participants; do not
 present local acceptance as completion of the entire process.
 

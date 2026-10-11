@@ -2,10 +2,10 @@
 type: Standard
 title: "Read models and projections"
 description: "Truthful read-model freshness, guarded external SQL contracts, catalog-backed projection application, targeted repair, and snapshot limits"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Read models and projections
 
-**Register typed queries before serving them, apply projections through the validated catalog, and treat snapshots as advisory until history is truncated.**
+**Default query models to asynchronous delivery, wait after commit for read-your-write, and keep only minimum atomic invariant state synchronous. Register queries and apply projections through the validated catalog; snapshots remain advisory until history is truncated.**
 
 This standard governs projection ownership, registration, freshness waits, asynchronous fencing, rebuilds, targeted repair, and the one condition that makes snapshots load-bearing.
 
@@ -61,13 +61,31 @@ Waiting targets the newest visible event, not Kiroku's authoritative append coun
 
 ## Choose inline or asynchronous application
 
-Use `runCommandWithCatalogProjections` for state the command side must update atomically with its events. It derives the handlers and rebuild-group locks from the validated catalog; projection failure or a fenced group aborts the append transaction.
+Use `applyAsyncProjectionFromCatalog` in subscription workers for query models by default, including aggregate-local views. Its `CatalogAsyncApplyOutcome` is part of the checkpoint protocol: acknowledge `CatalogAsyncApplied` and `CatalogAsyncDuplicate`; on `CatalogAsyncFenced`, do not checkpoint past the event—fail or park it until the group is live. Unregistered groups, unknown projections, unavailable serving revisions, and invalid serving bindings also require repair without acknowledging unapplied work. The application owns worker startup and supervision.
 
-Use `applyAsyncProjectionFromCatalog` in subscription workers. Its `AsyncApplyOutcome` is part of the checkpoint protocol: acknowledge `AsyncApplied` and `AsyncDuplicate`; on `AsyncFenced`, do not checkpoint past the event—fail or park it until the group is live.
+Use `runCommandWithCatalogProjections` only for minimum state a specified invariant requires to commit atomically with its events. It derives handlers and rebuild-group locks from the validated catalog; projection failure or a fenced group aborts the append transaction. Immediate reader convenience alone does not justify inline delivery. Reactor `targetProjections` should default to empty; those compatibility hooks do not acquire catalog rebuild fences.
+
+Kiroku holds its global `$all` row lock until append transaction end. Every inline handler or post-append guard extends that interval and can delay unrelated writers in the same store. Keep SQL bounded, indexed, and local. Never poll subscriptions, make network calls, or perform unbounded work inside the transaction. Measure cumulative inline work, mixed-traffic throughput, and ordinary-writer p95/p99 latency. Async workers still share database capacity; removing work from the append transaction does not eliminate all contention.
 
 Each path dispatches only the revision handler bound to its own delivery capability. A revision may change the SQL behind a projection; it must never turn a subscription-delivered effect into command-time work or the reverse. See [typed projection catalogs and rebuild groups](projection-catalogs.md).
 
 Handlers must derive time-dependent values from recorded event time or payload data. `NOW()`, wall-clock reads, random values, network calls, and other ambient effects make replay diverge from the live result. Keep external side effects out of replay adapters.
+
+## Return acceptance, then wait for the view
+
+Return the command result directly when it contains what the caller needs. Otherwise, after confirmed command completion, use `runQueryWithFreshness` with `WaitForPosition (defaultHeadWaitOptions { target = Just position, timeoutMicros = 500000, pollMicros = 10000 })`, where `position` is the successful `CommandResult.globalPosition` and the timeout is an application budget, not a universal default.
+
+A compatible `DurableQueryCursor` and a supervised subscription worker are prerequisites. A cursor is trustworthy only if required events cannot be checkpointed without applying the projection. Return **committed, view pending** on `ReadModelWaitTimeout`, retain the receipt, and retry the query/wait without resubmitting the command. Registration, shape, cursor, and liveness errors mean view unavailable and require separate diagnosis. Store/transport errors after a confirmed commit also do not undo it; preserve command commit uncertainty when confirmation was never obtained.
+
+A silent no-op or rolled-back refusal has no new committed position. Return its decision or canonical identity; use a retained winning receipt only when one exists, never the losing candidate's tentative position. A position wait proves a known progress boundary, not an atomic command-and-query operation or freshness against future writes. The handler fragment is in [Keiro's async guide](mori://shinzui/keiro/okf/guides/concepts/DOC-6).
+
+## Separate identity authority from rich query models
+
+For ensure/reuse across candidate aggregate IDs, the minimal synchronous index maps `(anchor type, anchor ID, property definition ID, state ID)` to the winning note ID. Keep content, tags, display joins, search, and reporting in asynchronous targets. Retain mappings across archive if reuse is the business rule; define deletion, re-anchoring, legacy migration, and replay explicitly. Only add synchronous receipt metadata when the caller contract actually needs it. Every live writer that changes the identity must participate in one proven serialization protocol; a synchronous index alone does not close a check/write race.
+
+Declare separate owners and rebuild groups where dependencies permit independent lifecycles. Do not give the identity row a foreign key to a rich-view row that may not yet exist, or bypass real dependencies to force separation. The identity index is command authority even though it is event-derived: fail closed while it is unavailable and never substitute a lagging view. Prove ensure/reuse with the rich-view worker paused, then verify one original payload after catch-up; also test independent group fencing, replay, and concurrent connections in one database.
+
+The public composition for a typed relational guard plus catalog delivery is **planned**, under [Keiro ExecPlan 306](mori://shinzui/keiro/plans/306-support-atomic-relational-preconditions-for-synchronous-catalog-commands) and [IR-53](mori://shinzui/keiro/okf/improvement-requests/concepts/IR-53). It is not a released API. Do not call the proposed symbol, copy private catalog SQL, or use pre-command SELECT followed by append as a uniqueness guarantee. Keep unsafe writes disabled until a supported proven protocol is available; adopt only after verifying the actual dependency release and its contract.
 
 ## Choose the offline or online group lifecycle
 

@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed projection catalogs and rebuild groups"
 description: "One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-projection-catalogs
 tags: [keiro, projection-catalogs]
 status: current
@@ -41,7 +41,7 @@ Call `registerProjectionCatalog` once after migrations, result-type and private-
 
 Derive typed query registrations, inline projection sets, asynchronous handlers, inventory, and operations from the validated value. Do not keep parallel maps in startup code, workers, or an operations executable.
 
-Use `runCommandWithCatalogProjections` for inline state that must commit with its source events. Use `applyAsyncProjectionFromCatalog` for subscription-driven state. Treat `AsyncApplyOutcome` as checkpoint protocol: acknowledge `AsyncApplied` and `AsyncDuplicate`; do not checkpoint an `AsyncFenced` delivery past a group that is rebuilding.
+Default query targets to subscription delivery through `applyAsyncProjectionFromCatalog`, with bounded post-commit position waits when callers need read-your-write. Use `runCommandWithCatalogProjections` only for minimum state required by an explicit atomic invariant. Separate that state from rich query targets using distinct owners and groups where dependencies permit. See [delivery and freshness guidance](read-models-and-projections.md). Treat `CatalogAsyncApplyOutcome` as checkpoint protocol: acknowledge `CatalogAsyncApplied` and `CatalogAsyncDuplicate`; do not checkpoint a `CatalogAsyncFenced` delivery or any invalid catalog/serving-binding outcome past unapplied work.
 
 Once a group adopts schema-versioned generations, the group lock must return its persisted serving revision, monotonically increasing serving epoch, and total physical-target binding as one fact. A missing compiled revision, missing generation, or extra target is a refusal before application SQL; never fall back to an unversioned handler after promotion.
 

@@ -1,5 +1,8 @@
 # keiro Update Log
 
+## 2026-10-11
+* **Update**: Make async query models and post-commit position waits the agent default; constrain inline work to minimum invariant state, document shared-store costs and the planned guarded API, and align catalog, command, and gotcha guidance.
+
 ## 2026-09-21
 * **Update**: Adopt the verified Keiro 0.18 release cohort and route checked mapping and replay guidance.
 * **Update**: Prefer supported checked refinement policies before opaque fallback.

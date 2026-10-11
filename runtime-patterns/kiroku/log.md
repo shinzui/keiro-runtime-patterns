@@ -1,5 +1,8 @@
 # kiroku Update Log
 
+## 2026-10-11
+* **Update**: Limit append continuations to required atomic SQL; route rich query models to async delivery and keep position waits outside append transactions.
+
 ## 2026-09-21
 * **Update**: Confirm Keiro 0.18 retains the Store 0.8 and migration 0.4 cohort.
 

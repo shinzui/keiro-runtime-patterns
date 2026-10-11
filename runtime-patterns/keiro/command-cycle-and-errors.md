@@ -2,10 +2,10 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling"
-timestamp: 2026-09-18T04:48:47Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:codex
-  at: "2026-09-18T04:48:47Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
@@ -118,8 +118,11 @@ Do not substitute it for a general command endpoint contract.
 
 Return acceptance independently from read-side freshness. Preserve the committed
 position when available and use the [read-model freshness protocol](read-models-and-projections.md)
-for read-your-write. A query timeout after a successful append is not command
-failure. External effects use stable downstream operation keys and the
+for read-your-write only after the append transaction has completed. A query
+timeout means committed with view pending; retain the receipt and retry the
+query/wait without resubmitting the command. Diagnose view registration, schema,
+cursor, and liveness errors separately. Never invent a position for a silent
+no-op or rolled-back refusal, or wait on an uncommitted candidate position. External effects use stable downstream operation keys and the
 [outbox](../messaging/outbox.md) or idempotent workflow steps.
 
 Prove the boundary with concurrent identical requests, conflicting payloads

@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Transactions and Projections"
 description: "Atomic append plus projection with runTransactionAppendingResource, and why the other combinators are traps"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-transactions-and-projections
 tags: [kiroku, transactions-and-projections]
 status: current
@@ -55,7 +55,7 @@ Prefer the highest-level surface that expresses the operation. The lower-level f
 
 An append updates Kiroku’s global `$all` bookkeeping row. PostgreSQL holds that row lock until the surrounding transaction commits or rolls back, so the continuation blocks every other appender to the same store.
 
-Use the continuation only for the bounded SQL needed to keep a projection, outbox, or other read-model row atomic with the event. Precompute inputs before entering it. Do not make HTTP calls, wait on another service, perform slow computation, or run unbounded per-row work while the lock is held.
+Use the continuation only for bounded SQL required by an explicit atomic invariant or durable outbox contract. Default rich query models to subscriptions and wait for a committed position after the command returns; never wait for a subscription inside the append transaction. For Keiro-managed targets, use catalog runners so rebuild fences and serving bindings are honored. A minimal synchronous identity index may enforce an invariant while a separate async owner builds the rich view; see [Keiro delivery guidance](../keiro/read-models-and-projections.md). Precompute inputs before entering it. Do not make HTTP calls, wait on another service, perform slow computation, or run unbounded per-row work while the lock is held.
 
 ## Choose retry behavior deliberately
 

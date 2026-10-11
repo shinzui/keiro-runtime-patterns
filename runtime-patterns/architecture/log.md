@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-10-11
+* **Update**: Align domain design and Conversation example with async query defaults, direct command responses, bounded post-commit waits, and minimum atomic invariant state.
+
 ## 2026-09-21
 * **Update**: Prefer checked value mappings and generated behavior before implementing holes.
 

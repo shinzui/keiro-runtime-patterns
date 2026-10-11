@@ -2,10 +2,10 @@
 type: Pattern
 title: "Worked Conversation Vertical"
 description: "Conversation vertical illustrating domain-first design and current generated/hand-owned ownership"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-worked-example-conversation
 tags: [architecture, worked-example-conversation]
 status: current
@@ -82,9 +82,10 @@ accepted, rejected, and no-op outcomes separately.
 Request → application handler → validated aggregate → decision → atomic event append
 ```
 
-Choose inline catalog projections when the query state must commit with the
-accepted events. Otherwise use a subscription projection with an explicit
-freshness policy. When the caller must observe its accepted write through an
+Default the Conversation query view to a subscription projection with an
+explicit freshness policy. Return the command result directly where sufficient.
+Use inline catalog projections only for minimum state required by an explicit
+atomic invariant, with a measured append-throughput budget. When the caller must observe its accepted write through an
 asynchronous model, return its committed position and use a supported position
 wait. A timeout after commit does not undo acceptance or justify issuing a new
 business command.

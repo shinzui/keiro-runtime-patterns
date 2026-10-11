@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Keiro gotchas"
 description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-11T21:13:17Z
 generated:
-  by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  by: process:codex-cli
+  at: "2026-10-11T21:13:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -50,7 +50,7 @@ The dividing rule is: compose in keiki inside one consistency boundary; across s
 
 Every append participates in kiroku's single-row `$all` global-position lock. This deliberate serialization gives a simple deterministic global order but caps write throughput across otherwise unrelated streams.
 
-Capacity-plan for the ceiling. In particular, keep `runCommandWithSql`, `runCommandWithSqlEvents`, and inline projection callbacks minimal because every extra round trip extends the store-wide lock window.
+Capacity-plan for the ceiling. Default query models to async delivery; return command results or wait after commit for reader freshness. Keep only minimum atomic invariant state in `runCommandWithSql`, `runCommandWithSqlEvents`, and inline callbacks because every extra round trip extends the store-wide lock window. Benchmark unrelated ordinary writers alongside guarded/inline traffic, including duplicate-heavy ensure attempts. Async delivery still shares database resources. See [delivery and freshness](read-models-and-projections.md).
 
 ## Transactional runners require the resource effect
 
