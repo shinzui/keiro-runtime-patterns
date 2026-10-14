@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-10-14T21:58:53Z
+timestamp: 2026-10-14T22:14:04Z
 generated:
   by: process:codex
-  at: "2026-10-14T21:58:53Z"
+  at: "2026-10-14T22:14:04Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -88,9 +88,10 @@ Use the current checked surface before introducing a hole:
 - Declare aggregate scalar guards and writes, and use `fields(Command)` for identity event payloads; do not implement generated decisions or identity-copy hooks again.
 - Use declarative router selection and Language 6 process `reactions` for supported dispatch, advance, follow-up, and timer behavior. A reaction process retains its source-event decoder; it does not need a hand-written reaction runner.
 - Use [checked value mappings](mapped-consumer-surfaces.md) for bare containers, dates, text sets, and base16 bytes, and [explicit ID admission](identifier-domains.md) for retained UUIDv5/v7 identities. Keep domain newtypes through total bindings rather than writing opaque codec twins.
+- On Keiro 0.21 with Language 6, use [declared mapped construction](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts): `write target := initial` selects the mapping's declared initial, and `write target := mapped(...)` applies its pure, total, versioned scalar `write-lift`. Prefer these forms or supported whole-value writes before introducing a transition hole.
 - Review `check --explain-bindings`, coverage, and `behavior-obligations` before writing Haskell. Every retained `implementation hole`, opaque boundary, or custom resolver must correspond to behavior the checked surface cannot express.
 
-Do not equate zero holes with correctness. Total bindings, fixtures, register initials, source decoders, SQL, external effects, and workflow persistence remain application obligations. Mapped-register constructor expressions are not implemented: use supported whole-value writes or an explicitly versioned transition hole when construction cannot be expressed. Prove replay compatibility before deleting superseded implementations.
+Do not equate zero holes with correctness. Total bindings, fixtures, register initials, source decoders, SQL, external effects, and workflow persistence remain application obligations. Retain an explicitly versioned transition hole when construction cannot be expressed by the supported forms; do not assert that a rejecting smart constructor is a total lift. Prove replay compatibility before deleting superseded implementations.
 
 ## Recognize Runtime Holes And Mapping Obligations
 

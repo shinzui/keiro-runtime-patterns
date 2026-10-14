@@ -1,6 +1,7 @@
 # keiro Update Log
 
 ## 2026-10-14
+* **Update**: Correct the DSL adoption hole-minimization checklist for Keiro 0.21 mapped initial and write-lift construction; retain holes only for unsupported construction and preserve replay evidence.
 * **Update**: Add mapped-lift versioning, released guard, stopped shard resize and skipped-snapshot evidence traps.
 * **Update**: Allow only registered runtime binding-view additions while retaining definition reconciliation and schema drift gates.
 * **Update**: Require typed subscription startup handling and atomic stopped checkpoint/lease resize after all owners relinquish.
