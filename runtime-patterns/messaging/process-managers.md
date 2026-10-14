@@ -2,10 +2,10 @@
 type: Standard
 title: "Process Managers And Durable Timers"
 description: "The process manager standard: UTF-8-stable deterministic ids, the typed reaction runner, worker policies, batched durable timers, and the orchestration decision ladder"
-timestamp: 2026-09-18T13:41:24Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:41:24Z"
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-process-managers
 tags: [messaging, process-managers]
 status: current
@@ -216,6 +216,10 @@ A reactor that accumulates state or hand-written deadline logic is a process man
 ## Repair Stuck Timers By Classification
 
 An ordinary timer left in `firing` by an interrupted worker is automatically requeued once it exceeds `requeueStuckAfter`; the default threshold is five minutes. Classify it manually when ordinary requeue is disabled, no worker is running, or repeated failures need intervention. Confirm the original firing action has stopped before manually requeueing. Guarded foreground claims follow the separate [resume recovery protocol](../keiro/dead-timer-resume.md). Use the [Keiro operations console](../keiro/operations-console.md): list candidates with `timer stuck list --min-age --min-attempts`, then requeue a transient failure, cancel obsolete work, or `dead-letter --reason` genuine poison. The reason is recorded with the `Dead` transition and is the literal a later [guarded resume](../keiro/dead-timer-resume.md) must match exactly, so write a stable one an on-call reader and a resuming consumer will both need. `timer drain-once --limit` is a bounded operator pass over the application's dispatch hook and never a substitute for running the timer worker.
+
+## Configure the subscription retry ceiling
+
+On the released Kiroku adapter 0.6.0.1, set `KirokuAdapterConfig.retryPolicy` explicitly when five total deliveries do not match the recovery budget. Sharded workers forward `ShardedWorkerOptions.retryPolicy` through the same Kiroku ladder. Exhaustion still records a durable subscription dead letter and advances progress; retries do not become unbounded merely because the command failure is transient. Use [typed decode refusal and resize rules](../kiroku/subscriptions.md) when upgrading the Store 0.11 cohort.
 
 ## Related Patterns
 

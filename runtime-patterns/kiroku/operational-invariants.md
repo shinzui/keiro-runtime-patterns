@@ -1,11 +1,11 @@
 ---
 type: Runbook
 title: "Kiroku Operational Invariants"
-description: "The ten invariants every kiroku-backed service must respect in production"
-timestamp: 2026-09-06T21:22:15Z
+description: "The operational invariants every kiroku-backed service must respect in production"
+timestamp: 2026-10-14T22:02:59Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-10-14T22:02:59Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-operational-invariants
 tags: [kiroku, operational-invariants]
 status: current
@@ -36,7 +36,7 @@ reviews:
 
 # Kiroku Operational Invariants
 
-**Treat these ten rules as production invariants, not optional tuning advice.**
+**Treat these rules as production invariants, not optional tuning advice.**
 
 Use this runbook when reviewing, deploying, or diagnosing any Kiroku-backed service. Each invariant links to the focused pattern that explains its API and rationale.
 
@@ -62,7 +62,7 @@ Use the strictest honest `ExpectedVersion`, preserve a supplied `eventId` across
 
 ## 6. Know every retry boundary
 
-Direct append retries serialization and deadlock failures once, then surfaces a repeated conflict as `TransientTransactionFailure`. Multi-stream pre-locking covers only existing rows; concurrent fresh-stream appends can still deadlock, so preserve bounded caller retry and stable event IDs. Retrying transaction combinators may rerun their whole body; use `NoRetry` for externally visible effects. Subscription retry permits five total deliveries before dead-lettering. Notifier reconnection backs off 1, 2, 4, 8, 16, then 30 seconds, while publisher and category paths retain a 30-second safety poll. See [Transactions and Projections](./transactions-and-projections.md) and [Subscriptions](./subscriptions.md).
+Direct append retries serialization and deadlock failures once, then surfaces a repeated conflict as `TransientTransactionFailure`. Multi-stream pre-locking covers only existing rows; concurrent fresh-stream appends can still deadlock, so preserve bounded caller retry and stable event IDs. Retrying transaction combinators may rerun their whole body; use `NoRetry` for externally visible effects. Ordinary subscription retry defaults to five total deliveries before dead-lettering; default typed decode exhaustion stops before the failed event instead. Notifier reconnection backs off 1, 2, 4, 8, 16, then 30 seconds, while publisher and category paths retain a 30-second safety poll. See [Transactions and Projections](./transactions-and-projections.md) and [Subscriptions](./subscriptions.md).
 
 ## 7. Make subscription handling idempotent
 
@@ -79,6 +79,10 @@ Delivery is at least once and checkpointing is per batch. Use `withSubscription`
 ## 10. Put authorization around erasure
 
 The hard-delete GUC is an accident guard, not a security boundary. Deny `DELETE` to the normal application role, use a separately authorized path, and append an application event recording who decided what, why, and when before physical deletion. See [Lifecycle and Deletion](./lifecycle-and-deletion.md).
+
+## 11. Coordinate topology and release cutovers
+
+Stop every member before resize or target rebinding and use the public transactional operations. Keiro sharded groups must also relinquish every lease and resize lease rows with checkpoints atomically. Startup mismatch is a typed refusal, not repair permission. Apply the [Kiroku migration order](../migrations/operations.md#upgrade-the-kiroku-store-in-order) and configure explicit [decode disposition](subscriptions.md#handle-undecodable-events-without-skipping-history).
 
 ## Related Patterns
 

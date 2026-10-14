@@ -2,10 +2,10 @@
 type: Standard
 title: "Integration Event Contracts"
 description: "The integration event contract: envelope, identity and dedupe rules, topic versioning, trace continuation"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-integration-events
 tags: [messaging, integration-events]
 status: current
@@ -64,6 +64,14 @@ One private event may fan out to several public contracts, each with its own `me
 ## Continue The Trace
 
 Capture the producing trace in `TraceContext`. The outbox persists `traceparent` and `tracestate`, the transport carries them as headers, and the inbox persists them again. Start the consumer span with that remote parent; do not replace the cross-service trace with an unrelated root span.
+
+## Declare public scalar lists
+
+On Keiro 0.21 with Language 6, public fields may be `List text`, `List int`, `List DeclaredId`, or `List typeid "prefix"`. Use the exact case-sensitive `List` spelling. Arrays retain order and duplicates; `[]` is valid. The generated decoder requires the field, rejects null/non-array values, validates every element at its indexed path, and rejects the whole payload on any bad element. Each ID element enforces its prefix and resolved admission policy.
+
+Keep nested containers, optional fields, records, unions, enums and general mapped declarations outside this public contract grammar. A declared ID may itself be named `List`, `Optional`, `Map`, or `Set`; a bare declared name is not a container application. Do not use a list payload field as publisher `outboxId` or intake `dedupe` identity (`ContractListFieldUsedAsKey`). Canonical envelope identities retain precedence over colliding payload field names.
+
+Treat scalar/list changes and element type, prefix or admission changes as public breaking evolution. A literal-to-declared ID substitution is build-only only when shape, prefix and admission are unchanged. Deploy expanded readers before writing newly admitted values and drain or version the contract when old readers cannot accept the result.
 
 ## Related Patterns
 

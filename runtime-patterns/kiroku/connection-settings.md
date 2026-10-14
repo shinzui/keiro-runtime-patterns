@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Connection Settings"
 description: "Store schema and NOTIFY channel, extraSearchPath seam, timeouts, and synchronous handler discipline"
-timestamp: 2026-07-30T01:11:55Z
+timestamp: 2026-10-14T21:56:57Z
 generated:
-  by: human:nadeem
-  at: "2026-07-30T01:11:55Z"
+  by: process:codex
+  at: "2026-10-14T21:56:57Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-connection-settings
 tags: [kiroku, connection-settings]
 status: current
@@ -74,6 +74,10 @@ settings = withProjectionSchema "danwa" base
 Both `eventHandler` and `observationHandler` run synchronously on the emitting store, notifier, publisher, worker, or pool thread. Use them only for bounded in-memory updates or enqueue work into a bounded queue drained elsewhere. Network I/O or a blocking exporter in either callback can stall store operation.
 
 Build all handlers and `storeSettings` before calling `withStore`; the resulting handle captures them for its lifetime. When several effectful actions must share one open store, `runKirokuStoreWith` (kiroku-store 0.3.1.0) runs them against a single acquired handle instead of paying a pool, `LISTEN` connection, and publisher per action.
+
+## Return typed decode failures
+
+Under Store 0.11, `StoreSettings.decodeHook` returns `IO (Either DecodeFailure RecordedEvent)`. Return `Right` for a successful transform and `Left` for a data refusal; throwing remains a programming failure. Reads fail with `EventDecodeFailed` instead of returning partial decoded data. Configure [subscription decode disposition](subscriptions.md#handle-undecodable-events-without-skipping-history) before enabling a rejecting hook.
 
 ## Related Patterns
 

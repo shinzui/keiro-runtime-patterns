@@ -2,10 +2,10 @@
 type: Standard
 title: "Runtime assembly"
 description: "Store acquisition, validated event streams and projection catalogs, structural mapping evidence, resources, options, and startup order"
-timestamp: 2026-09-18T05:30:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T05:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-runtime-assembly
 tags: [keiro, runtime-assembly]
 status: current
@@ -121,6 +121,12 @@ guardMigrations provider plan = do
 Every timer worker pass recovers expired guarded timer claims, whatever `requeueStuckAfter` says. A host that resumes `Dead` timers in the foreground without running a timer worker must call `recoverExpiredTimerResumes` before discovery and periodically afterwards; see [dead timer resume](dead-timer-resume.md).
 
 Catalog registration and worker startup should fail the process rather than leave a partially assembled runtime alive. Before starting any worker against a populated event store, resolve its missing-checkpoint policy explicitly; the read-only [durable checkpoint inventory](../kiroku/checkpoint-inventory.md) can prove what exists but cannot choose or mutate that lifecycle.
+
+## Resize stopped shard groups atomically
+
+Construct subscription capacities and group size with Kiroku's validated constructors. Treat `SomeSubscriptionStartupFailure` (including `ShardCountMismatch`) and `ShardReaderStartupFailed` as startup/configuration refusal signals, not poison-event retries. `EventDecodeFailed` is deterministic and the default subscription policy stops on undecodable history.
+
+Stop every worker and explicitly relinquish every recorded owner before `resizeShardCount` / `resizeShardCountTx`. Even an expired lease owner blocks resize. The operation atomically equalizes Kiroku checkpoints at the old minimum and replaces Keiro lease rows; same-size resize can replay handled events. Never resize one table privately. Keep handlers idempotent and inspect the returned old/new topology report before restart.
 
 ## Related Patterns
 

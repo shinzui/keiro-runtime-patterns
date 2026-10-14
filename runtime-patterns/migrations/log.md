@@ -1,5 +1,11 @@
 # migrations Update Log
 
+## 2026-10-14
+* **Update**: Adopt the 0.21 test-support dependency cohort and route tests through the Kiroku migration cutover boundaries.
+* **Update**: Route the stopped-writer, stopped-subscription and index-build Kiroku migration boundaries.
+* **Update**: Adopt the coherent Keiro 0.21 / Kiroku migration 0.7.1 / pg-migrate 1.2 cohort.
+* **Update**: Document stopped-writer 0012, stopped-subscription 0013/0014, index-build 0015 and registry-aware binding-view verification.
+
 ## 2026-09-21
 * **Update**: Separate the pg-migrate 1.2 and Kiroku migrations 0.5 release from the retained Keiro cohort.
 * **Update**: Use the stable per-user ephemeral database configuration and check cohort compatibility.

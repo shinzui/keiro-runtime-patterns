@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Keiro gotchas"
 description: "Shared-stream, global-lock, opaque-awakeable, structural-mapping, codec-authority, terminal-workflow-failure, bring-your-own Kafka, timer-rollout, and language-registry metadata traps"
-timestamp: 2026-10-11T21:13:17Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:codex-cli
-  at: "2026-10-11T21:13:17Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-gotchas
 tags: [keiro, gotchas]
 status: current
@@ -117,6 +117,13 @@ This catalog requires Language 6 for services adopting Keiro 0.17.0.0 onward, bu
 ## Legacy process to reactions is an identity migration
 
 Target-keyed reaction dispatch ids never match legacy positional ids, so the DSL diff reports `ProcessDispatchIdentityModelChanged`; drain before switching. A `reactions version` bump is not a migration. See [evolution gates](evolution-and-rollout.md) and [process managers](../messaging/process-managers.md).
+
+## Apply the current release boundaries
+
+- A mapped codec does not require a transition hole merely to clear or construct its register: use the 0.21 [initial/lift forms](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts). Version every changed hand-written lift body and audit replay.
+- A relational precondition is released: use the [guarded catalog runner](projection-catalogs.md#check-relational-command-preconditions-under-the-catalog-fence), preserving rollback and callback restrictions rather than inventing a SELECT/append race.
+- A shard-count mismatch refuses startup before writing rows. Stop and relinquish all owners, then use atomic checkpoint/lease resize; a same-size change can replay events.
+- A skipped snapshot sample is not a pass. Observe the process-wide limit, skipped counter and verifier-failure counter separately from divergence.
 
 ## Related Patterns
 

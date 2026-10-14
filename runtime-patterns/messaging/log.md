@@ -1,5 +1,18 @@
 # messaging Update Log
 
+## 2026-10-14
+* **Update**: Expose the released configurable Kiroku adapter retry ceiling and its durable exhaustion boundary.
+* **Update**: Require client-side standard polling while shared-pool server long polls can starve finalization.
+* **Update**: Route released Shibuya inspection and Kiroku durable browsing and recoverable live tails.
+* **Update**: Retain the published classifier boundary, add recoverable acknowledgement semantics and avoid server long-poll connection starvation.
+* **Update**: Adopt pgmq-hs 0.6.1.1 migration bounds and keep unpublished inspection/disconnect APIs outside the baseline.
+* **Update**: Adopt recoverable 0.16.1.0 finalizers and require standard polling while server long-poll starvation and orphan-read defects remain.
+* **Update**: Require ordered scalar list decoding, forbid list identity keys and classify shape/element admission evolution.
+* **Update**: Add release-cutover, retained failure, batch-key and server long-poll traps and correct finalizer exhaustion semantics.
+* **Added**: Define released 0.10.0.1 health, retained lifecycle and WebSocket semantics while separating unpublished controls.
+* **Update**: Adopt retained finalizer failures, validated concurrency, total shutdown deadlines and separately bounded batch-key cardinality.
+* **Update**: Adopt validated adapter capacities and configurable retry/stall policy, paced single processors, and public stopped-group resize/rebind.
+
 ## 2026-09-30
 * **Update**: Route the reconciliation standard, overview, and gotcha 14 to the connection-faults standard and record the mid-statement disconnect trap
 * **Addition**: Add the PGMQ connection faults and retry budgets standard: released 0.6.1.1 disconnect shapes are permanent (BUG-1), adapter poll and ack budget sizing, exhaustion under supervision, and idempotent enqueues under lost replies

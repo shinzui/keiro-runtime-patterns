@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Subscriptions Through Shibuya"
 description: "Consuming the event log through the shibuya-kiroku bridge: ack-coupled checkpoints, guardKirokuHandler, consumer groups"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:56:57Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:56:57Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-kiroku-subscriptions
 tags: [messaging, kiroku-subscriptions]
 status: current
@@ -36,17 +36,17 @@ reviews:
 - `AckDeadLetter reason` writes `kiroku.dead_letters` and atomically advances past the event.
 - `AckHalt` cancels the subscription without advancing, so the event returns after restart.
 
-Use the published `shibuya-kiroku-adapter` 0.5.1.2 with Store 0.8.0.1 and Shibuya 0.9.0.3. These Kiroku patch releases update test dependencies without changing runtime semantics. `ApplicationFailure code detail` maps to `DeadLetterOther`, preserving the canonical `code: detail` summary and structured JSON `{"kind":"other","summary":…, "detail":{"code":…,"detail":…}}`. Query the application code through `reason->'detail'->>'code'`; never parse the summary. The built-in poison, invalid-payload, and max-attempt encodings remain unchanged.
+Use `shibuya-kiroku-adapter` 0.6.0.1 with Store 0.11.0.0 and Shibuya 0.10.0.1. The adapter configuration carries validated `BatchSize`, `StreamBufferSize` and `ConsumerGroupSize`, plus configurable `retryPolicy` and optional `handlerStallWarnAfter`. Construct capacities before acquiring workers and apply the [store cutover](../migrations/operations.md#upgrade-the-kiroku-store-in-order). `ApplicationFailure code detail` maps to `DeadLetterOther`, preserving the canonical `code: detail` summary and structured JSON `{"kind":"other","summary":…, "detail":{"code":…,"detail":…}}`. Query the application code through `reason->'detail'->>'code'`; never parse the summary. The built-in poison, invalid-payload, and max-attempt encodings remain unchanged.
 
 `Envelope.attempt` is the zero-based redelivery count. The adapter's bridge queue may be larger, but ack coupling keeps effective in-flight delivery at one event per member.
 
 ## Guard Exceptions To Avoid A Spin
 
-With Shibuya 0.9.0.0, the supervised runner catches a thrown handler and finalizes it as `AckRetry 0`; a bare handler does not leave the Kiroku reply unfilled. It can, however, retry immediately and create a hot loop. Prefer the adapter guard:
+With Shibuya 0.10.0.1, the supervised runner catches a thrown handler and finalizes it as `AckRetry 0`; a bare handler does not leave the Kiroku reply unfilled. It can, however, retry immediately and create a hot loop. Prefer the adapter guard:
 
 ```haskell
 -- CORRECT: thrown synchronous failures retry after one second.
-mkProcessor adapter (guardKirokuHandler handler)
+kirokuProcessor adapter handler
 
 -- LEGAL BUT DANGEROUS: persistent throws become AckRetry 0.
 mkProcessor adapter handler
@@ -67,6 +67,12 @@ Start from `defaultKirokuAdapterConfig` or `defaultConsumerGroupConfig`. Prefer 
 The default subscription retry policy allows five total deliveries. Delivery remains at-least-once and checkpointed per event through this adapter, so every handler effect must be idempotent.
 
 Monitor `subscriptionStates`, but interpret it correctly: the map contains only live subscriptions. Stop, cancel, and crash remove the key; there is no durable `stopped` phase. Alert on a missing expected `(subscriptionName, member)`, not only on an unhealthy state value. Query `kiroku.dead_letters` for terminal failures; `kirokuEventBridge` increments its metric only when it observes Kiroku's terminal dead-letter event.
+
+## Resize and rebind stopped groups
+
+Construct sizes with `mkConsumerGroupSize` and members with `mkConsumerGroup`; `defaultConsumerGroupConfig` takes the validated size. Stop every member before `resizeConsumerGroupTx`, including same-size reassignment; all new members resume from the old minimum checkpoint. Use `rebindSubscriptionTargetTx` with an explicit target and position for a stopped target change. Keiro lease-managed groups instead use `resizeShardCount` / `resizeShardCountTx` after relinquishing every lease, including expired owners. Never update only one side of that topology.
+
+Treat `SomeSubscriptionStartupFailure` as a deployment/configuration refusal. A positive stall-warning interval is advisory; it cannot finalize a raw pending acknowledgement. Inspect terminal events through [public durable dead-letter reads](../kiroku/inspection.md), preserving their structured reason.
 
 ## Related Patterns
 

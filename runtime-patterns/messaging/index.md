@@ -28,4 +28,5 @@
 - [Typed Background Jobs On PGMQ](pgmq-jobs.md) - Typed background jobs on keiro-pgmq 0.17: required job ordering, FIFO-heads, retry and VT rules, guarded DLQ retention, and partitioned provisioning
 - [PGMQ queue lifecycle and reconciliation](pgmq-queue-reconciliation.md) - Validated durable queue names, additive startup reconciliation, truthful drift reports, notification recovery, and PGMQ 1.13 schema, partition premake, and retry classification in pgmq-hs 0.6
 - [Process Managers And Durable Timers](process-managers.md) - The process manager standard: UTF-8-stable deterministic ids, the typed reaction runner, worker policies, batched durable timers, and the orchestration decision ladder
+- [Shibuya health and inspection](shibuya-inspection.md) - Serve released Shibuya lifecycle health and bounded WebSocket selections without assuming unpublished browser controls
 

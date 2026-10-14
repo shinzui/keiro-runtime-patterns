@@ -2,10 +2,10 @@
 type: Standard
 title: "Aggregate scalar expressions and transition ownership"
 description: "Declaring typed guards and writes that generate the Keiki transducer, and marking the transitions that stay hand-owned"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-aggregate-expressions
 tags: [keiro, aggregate-expressions]
 status: current
@@ -33,7 +33,7 @@ Aggregate commands, events, and registers share one checked DSL type model. The 
 
 Direct `Json`, `Optional`, `List`, and `Map` aggregate fields do not exist. Express those wire shapes through a `mapped structural` declaration.
 
-In Keiro 0.18.0.0, use a named bare mapping for `Optional`, `List`, text-keyed `Map`, `Day`, or `Set Text`, and `mapped refined` for base16 bytes; see [checked value mappings](mapped-consumer-surfaces.md). Codec support does not add these carriers to the scalar expression language. Mapped-register construction syntax remains unavailable: prefer supported whole-value copies and retain an explicit transition hole only when the update cannot be declared.
+In Keiro 0.18.0.0, use a named bare mapping for `Optional`, `List`, text-keyed `Map`, `Day`, or `Set Text`, and `mapped refined` for base16 bytes; see [checked value mappings](mapped-consumer-surfaces.md). Codec support does not add these carriers to the scalar expression language. Keiro 0.21 adds the declaration-owned construction forms below; prefer them or whole-value copies before retaining a transition hole.
 
 ## Write guards and writes against explicit roots
 
@@ -137,6 +137,26 @@ Predicate verification covers guards. For coverage of the transitions themselves
 ## Migrate off version 1 by hand
 
 Version-1 generated output is frozen, and version-1 whole-transducer holes are unchanged. The scaffolder never overwrites or claims to translate consumer behavior, so moving an aggregate off version 1 means rewriting its guards and writes in the spec and deleting the hand-owned logic they replace. Do it one aggregate at a time, and prove each with the replay audit before deleting the code it supersedes.
+
+## Construct mapped registers with declared lifts
+
+On Keiro 0.21 with Language 6, clear a mapped target with `write dormantSince := initial`, or construct it with `write dormantSince := mapped(cmd.markedAt)`. These are complete write right-hand sides only: never use them in guards, event fields, outcomes, or nested arithmetic. A mapped initial requires a declared initial symbol; direct and consumer-nominal targets are rejected. When a command field or register is named `initial`, qualify that ordinary root as `cmd.initial` or `reg.initial`; bare construction reports `AggregateExpressionWriteInitialShadowed`.
+
+Declare one `write-lift` on an opaque or structural mapping:
+
+```text
+write-lift from Time {
+  function = "Example.Bindings.atTime"
+  version = "1"
+  fixtures = "Example.Bindings.atTimeCases"
+}
+```
+
+Use exactly one direct scalar source: `Text`, `Int`, `Integer`, `Bool`, `Natural`, or `Time`. Supply a pure, total unary function into the mapped target and `NonEmpty (Text, source, target)` cases with unique nonblank labels. Inputs may contain direct command/register roots, literals and admitted arithmetic; projected mapped/nominal fields and predicates are rejected recursively. Refined mappings may select their initial but cannot declare lifts. Existing whole-value copies stay ordinary writes.
+
+Keep the transition generated: the lift constructs a value and never receives an edge builder. Preserve command recovery from the head emitted event and run the generated conformance package; `check` alone cannot establish runtime recovery. Finite cases do not prove arbitrary Haskell totality. A throwing lift can break replay. Bump its explicit version whenever its body changes, then compare retained-history observations under both builds.
+
+Used function/source/version provenance enters aggregate fold identity and invalidates affected snapshots; replay impact conservatively includes old events for a changed construction-using fold. Cases-only changes and unused lifts are consumer-build advisories, not replay changes. A snapshot miss does not prove changed replay is safe. See [mapped surfaces](mapped-consumer-surfaces.md) and [evolution gates](evolution-and-rollout.md).
 
 ## Related Patterns
 

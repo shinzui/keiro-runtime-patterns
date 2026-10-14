@@ -2,10 +2,10 @@
 type: Guide
 title: "The pg-migrate Model"
 description: "The pg-migrate model: components, manifests, exact-byte embedding, the ledger, the RecompilePlugin, and its layered integrity gates"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: human:nadeem
-  at: "2026-09-21T20:25:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-pg-migrate-model
 tags: [migrations, pg-migrate-model]
 status: current
@@ -27,7 +27,7 @@ reviews:
 
 **Libraries export stable migration components; applications compose and run one compile-time plan.**
 
-Use this guide to understand the pg-migrate 1.1/1.2 model before authoring service migrations. Version 1.2 preserves production APIs, ledger behavior, and migration payloads; its coordinated release changes the [test-support configuration](testing.md). Kiroku migrations 0.5 follows pg-migrate 1.2 without changing SQL or checksums. Keiro 0.18 still requires Kiroku migrations 0.4 and pg-migrate 1.1: keep that compatible cohort until its bounds are updated rather than forcing the independent latest versions together.
+Use this guide to understand the pg-migrate 1.1/1.2 model before authoring service migrations. Version 1.2 preserves production APIs, ledger behavior, and migration payloads; its coordinated release changes the [test-support configuration](testing.md). Keiro 0.21 requires the pg-migrate 1.2 family and Kiroku migrations 0.7.1.0. PGMQ migration 0.6.1.1 admits pg-migrate 1.2 alongside 1.1 without changing its SQL. Keep the dependency cohort coherent and apply the [Kiroku 0012–0015 cutovers](operations.md#upgrade-the-kiroku-store-in-order); these newer Kiroku releases do change schema.
 
 ## Model ownership as components
 

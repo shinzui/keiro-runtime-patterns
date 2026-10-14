@@ -2,10 +2,10 @@
 type: Gotcha
 title: "Messaging Gotchas"
 description: "Consolidated messaging gotcha catalogue across Shibuya, pgmq-hs 0.6, Kafka, Kiroku, and Keiro"
-timestamp: 2026-09-30T21:30:00Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-30T21:30:00Z"
+  by: process:codex
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-gotchas
 tags: [messaging, gotchas]
 status: current
@@ -25,7 +25,7 @@ reviews:
 
 # Messaging Gotchas
 
-**Twenty-nine ways the messaging stack will bite you, and the rule that prevents each.**
+**Check the delivery, identity, failure and release boundaries before operating the messaging stack.**
 
 Treat these as design-review checks, not trivia.
 
@@ -39,11 +39,11 @@ Treat these as design-review checks, not trivia.
 
 5. **Raw PGMQ `maxRetries = 0` skips every handler.** First delivery already has `readCount = 1`, so the adapter dead-letters it immediately. Construct job policies with `mkRetryPolicy`. See [PGMQ jobs](pgmq-jobs.md).
 
-6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in `shibuya-pgmq-adapter` 0.14.0.0 and later; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
+6. **Know which PGMQ DLQ boundary you use.** The supervised adapter's direct/topic DLQ send plus source delete is transactional in `shibuya-pgmq-adapter` 0.14.0.0 and later; use 0.16.1.0 for a source-row claim that prevents a repeated DLQ copy after a committed transaction loses its reply; Keiro's `runJobOnce*` sends and deletes separately, so a crash can leave both copies. Keep one-shot handlers idempotent and reconcile duplicates. See [PGMQ jobs](pgmq-jobs.md).
 
 7. **PGMQ prefetch can delay messages after shutdown.** It does not lose them; buffered, undispatched messages reappear only after VT. Keep `bufferSize * batchSize * average processing time` below visibility timeout. See [PGMQ jobs](pgmq-jobs.md).
 
-8. **Finalizers must be idempotent.** Shibuya retries the same decision after 10 ms, 50 ms, and 250 ms when finalization throws, then halts the processor. See [Shibuya processing](shibuya-processing.md).
+8. **Finalizers must be idempotent.** Shibuya retries the same decision after 10 ms, 50 ms, and 250 ms when finalization throws, then retains a failed processor lifecycle and raises `ProcessorFailure`. See [Shibuya processing](shibuya-processing.md).
 
 9. **A throwing handler becomes `AckRetry 0`.** An always-throwing handler can produce an immediate redelivery storm. Decode, validate, and convert expected poison or permanent failures to explicit decisions. See [Shibuya processing](shibuya-processing.md).
 
@@ -86,6 +86,14 @@ Treat these as design-review checks, not trivia.
 28. **Moving a process manager to the reaction runner is an identity migration.** `Keiro.ProcessManager.Reaction` uses a target-keyed command-id family. Drain source deliveries, incomplete fan-out, pending timers, and permitted replays first, or a retained legacy saga witness duplicates the action. See [process managers](process-managers.md).
 
 29. **Delegated inbox intake has no inbox rows.** It has no backlog, failed-row, retention, or `keiro-ops inbox` surface. The caller owns attempt counting and must durably dead-letter before acknowledging. Switching between table and delegated intake needs a drain and a replay boundary. See [inbox](inbox.md).
+
+## Additional release-cutover checks
+
+- **A changed group size must equalize progress.** Stop workers, use Kiroku's public resize, and use Keiro's atomic checkpoint-plus-lease resize for sharded groups. An expired recorded lease owner still blocks the Keiro operation.
+- **An inbox bound does not bound active batch keys.** Limit key cardinality separately; see [Shibuya processing](shibuya-processing.md#bound-batch-key-cardinality-separately).
+- **A disappeared processor is not necessarily healthy.** Use retained [Shibuya lifecycle inspection](shibuya-inspection.md), and keep [Kiroku durable inspection](../kiroku/inspection.md) distinct from process-local live registries.
+
+- **Server long polling can consume all pool capacity or outlive its client.** Use `StandardPolling` / Keiro `PollEvery` on adapter 0.16.1.0; see [the polling rule](pgmq-jobs.md#avoid-server-side-long-polling-on-the-released-adapter).
 
 ## Related Patterns
 

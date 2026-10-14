@@ -53,6 +53,22 @@ in  Schema.Project::{
       ]
     , docs =
       [ Schema.DocRef::{
+        , key = "kiroku-inspection"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Public bounded store browsing, durable checkpoint and dead-letter reads, provider discovery, CORS, and recoverable live tails"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/kiroku/inspection.md"
+        }
+      , Schema.DocRef::{
+        , key = "messaging-shibuya-inspection"
+        , kind = Schema.DocKind.BestPractice
+        , audience = Schema.DocAudience.Module
+        , description = Some
+            "Released Shibuya lifecycle health, process-local inspection, WebSocket state, resource bounds, and publication boundaries"
+        , location = Schema.DocLocation.LocalFile "runtime-patterns/messaging/shibuya-inspection.md"
+        }
+      , Schema.DocRef::{
         , key = "architecture-domain-design"
         , kind = Schema.DocKind.BestPractice
         , audience = Schema.DocAudience.Module

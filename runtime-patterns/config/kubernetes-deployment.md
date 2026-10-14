@@ -2,10 +2,10 @@
 type: Runbook
 title: "Kubernetes Deployment Standard"
 description: "Kubernetes operational standard: overlays, mounted sources, check-config gate, no-reload rollouts, graceful shutdown"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-14T21:56:57Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:56:57Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/config-kubernetes-deployment
 tags: [config, kubernetes-deployment]
 status: current
@@ -238,11 +238,11 @@ Set the pod grace period above the Warp timeout and any coordinated application 
 
 ## Drain Shibuya Workers on SIGTERM
 
-Translate SIGTERM into `stopAppGracefully shutdownConfig appHandle`. Released `shibuya-core` 0.9 (0.9.0.1 current) first signals adapter shutdown, waits up to `drainTimeout`, stops the supervisor, and returns whether the drain completed. Its default drain timeout is 30 seconds, and the timed wait requires the executable to be linked with `-threaded`.
+Translate SIGTERM into `stopAppGracefully shutdownConfig appHandle`. Released `shibuya-core` 0.10.0.1 bounds adapter shutdown plus graceful drain with `totalShutdownTimeout` (default 60 seconds), and the in-flight drain itself with `drainTimeout` (default 30 seconds). It returns `False` if forced stop was needed. Link the executable with `-threaded` and keep adapter resources alive until shutdown completes.
 
-Use at least `terminationGracePeriodSeconds: 60` for a worker using the default 30-second drain, leaving time for signal dispatch, adapter shutdown, telemetry flush, and process exit. Increase both budgets together for workloads whose valid handler duration exceeds 30 seconds.
+Set `terminationGracePeriodSeconds` above the configured total shutdown budget, allowing additional time for signal dispatch, forced supervisor cleanup, telemetry flush and process exit. With the default 60-second graceful budget, choose a pod grace period greater than 60 seconds. Increase the drain, total and pod budgets together when valid handlers require longer.
 
-PGMQ is at-least-once. With released `shibuya-pgmq-adapter` 0.14.0.0 and later (0.16.0.0 current), the non-prefetch path releases a just-read undispatched batch by setting its visibility timeout to zero. Opt-in prefetch can leave up to `bufferSize * batchSize` already-read messages invisible until their configured visibility timeout expires. They are redelivered and are not lost, but failover is delayed. Keep prefetch disabled when prompt shutdown release matters, or budget its visibility timeout explicitly.
+PGMQ is at-least-once. With released `shibuya-pgmq-adapter` 0.14.0.0 and later (0.16.1.0 current), the non-prefetch path releases a just-read undispatched batch by setting its visibility timeout to zero. Opt-in prefetch can leave up to `bufferSize * batchSize` already-read messages invisible until their configured visibility timeout expires. They are redelivered and are not lost, but failover is delayed. Keep prefetch disabled when prompt shutdown release matters, or budget its visibility timeout explicitly.
 
 ## Use the Fleet Probe Contract
 

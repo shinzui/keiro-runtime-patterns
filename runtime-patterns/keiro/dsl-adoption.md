@@ -2,10 +2,10 @@
 type: Guide
 title: "Keiro-dsl adoption"
 description: "When to adopt keiro-dsl, including workspaces, mapped consumer surfaces, semantic-local regeneration, the generated-code firewall, conformance, and evolution gates"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-dsl-adoption
 tags: [keiro, dsl-adoption]
 status: current
@@ -193,6 +193,10 @@ Language 5 does not make every accepted surface executable. Public integration c
 Capture goldens in the same change that bumps a version. Once the old specification is no longer the diff base, the old wire shape can only be recovered by hand from production data. For a brownfield migration, capture genuine stored JSON before writing the new declaration and compare the historical and generated codecs explicitly; synthesized fixtures cannot prove a candidate codec agrees with production history.
 
 For the full grammar and examples, see the keiro repo's `docs/user/typed-spec-toolchain.md`.
+
+## Reconcile the 0.21 generated surfaces
+
+Re-scaffold and compile after the 0.21 upgrade. Generated helper names now derive from the whole logical declaration: `job_type` produces `jobType…`, and keyword segments such as `thing_type` produce `thingType…`. Update consumer imports/references and create-once read-model holes while preserving application bodies; do not restore the old glued spellings in generated files. Run the generated behavior gate for history-dependent hole-owned initial transitions and the lift-case checks for [mapped construction](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts).
 
 ## Related Patterns
 

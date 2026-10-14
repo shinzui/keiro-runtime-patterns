@@ -2,10 +2,10 @@
 type: Standard
 title: "Evolution gates and rollout ordering"
 description: "The six-layer evolution gate model, composed-workspace compatibility, structural mapping evidence, replay audits, and durable-value rollout ordering"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-evolution-and-rollout
 tags: [keiro, evolution-and-rollout]
 status: current
@@ -137,6 +137,12 @@ The rule is one sentence: inventory every durable value whose decoder or decisio
 `mkEventStreamUnchecked` skips every gate at the stream boundary. It is emergency forensics, never a rollout workaround.
 
 For the full narrative and per-rule failure modes, see the keiro repo's `docs/guides/evolution-and-replayability.md` and `docs/user/deploy-ordering.md`.
+
+## Read removal and construction reports before the breaking exit
+
+On 0.21, command, event and state removals produce compatibility and replay-impact reports before `diff --since` exits nonzero for a breaking gate. Retain and inspect those outputs even when CI fails. Each revision resolves its own declarations; a current declaration cannot explain an old removed event or ID admission policy.
+
+Public scalar/list shape, element type, prefix, and resolved admission changes are breaking. Literal-to-declared contract ID changes are build-only only when shape, prefix and admission all match. Used mapped-lift execution metadata participates in fold identity; cases-only and unused-lift edits remain build advisories. Hand-written function body changes require a version bump plus independent replay evidence; neither the version token nor cache invalidation proves history equivalence.
 
 ## Related Patterns
 

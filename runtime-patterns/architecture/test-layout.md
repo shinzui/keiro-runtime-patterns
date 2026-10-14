@@ -2,10 +2,10 @@
 type: Standard
 title: "Test Layout"
 description: "The per-package test-suite standard, including structural mapping conformance and brownfield codec evidence"
-timestamp: 2026-09-18T13:41:24Z
+timestamp: 2026-10-14T22:04:06Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:41:24Z"
+  at: "2026-10-14T22:04:06Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/architecture-test-layout
 tags: [architecture, test-layout]
 status: current
@@ -125,6 +125,12 @@ The comparison module is excluded from ordinary production manifests and scaffol
 ## Database Isolation Rule
 
 No test opens a developer or shared database. Core, server, and worker integration suites receive their connection string only from `<service>-migrations:test-support`, which installs the same complete migration plan used by the service. This makes schema ownership executable and ensures tests fail when the runtime and migration package disagree.
+
+## Exercise contention inside one database
+
+For competing commands, identity checks and catalog fencing, use `withFreshResourceStoresSameDatabase` from `Keiro.Test.Postgres`. It gives independent resource-aware pools against one migrated clone; `withFreshStores2` gives two independent databases and cannot prove same-store serialization. Use `withFreshResourceStoresSameDatabaseWithConnection` when an independent SQL observer/controller is needed. Join all work and close every supplied store before the fixture drops its clone.
+
+Keep ordinary correctness fixtures distinct from durability benchmarks. `withMigratedBenchmarkSuite` enables `fsync`, `synchronous_commit`, `full_page_writes` and replica WAL locally. Its optional `KEIRO_GUARDED_CATALOG_PG_ADMIN` accepts a libpq keyword connection string for an exclusively leased benchmark server, creates uniquely named databases and drops only those fixture databases. Supply remote server durability settings separately; this path does not prove or configure them. Never point it at a developer or shared application database. Compare contention using separate connections and committed database outcomes, not two isolated fixtures or handler counts alone.
 
 ## Related Patterns
 

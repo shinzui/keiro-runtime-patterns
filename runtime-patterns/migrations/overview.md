@@ -2,10 +2,10 @@
 type: Overview
 title: "Migration Standards"
 description: "Index of pg-migrate migration standards for keiro services; start here"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/migrations-overview
 tags: [migrations, overview]
 status: current
@@ -42,6 +42,10 @@ Integrity is layered on purpose: compile-time embedding, a review-time lockfile 
 - [Migration Testing](./testing.md) — default-build integrity gates, pure construction checks, ephemeral PostgreSQL, and nested results.
 - [Migration Operations](./operations.md) — inspect, apply, verify ledger and live schema, and repair.
 - [Codd Transition](./codd-transition.md) — why persistent fleets imported history ledger-only.
+
+## Upgrade release cohorts deliberately
+
+For Keiro 0.21 and Kiroku Store 0.11, follow the [0012–0015 migration cutover](operations.md#upgrade-the-kiroku-store-in-order). This crosses a stopped-writer boundary, stopped-subscription boundary, and transactional index builds; ordinary additive-DDL rollout assumptions do not apply.
 
 ## Related Patterns
 

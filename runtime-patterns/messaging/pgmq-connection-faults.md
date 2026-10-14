@@ -2,10 +2,10 @@
 type: Standard
 title: "PGMQ connection faults and retry budgets"
 description: "What a PostgreSQL restart, backend termination, or TCP reset looks like to the runtime, how to size shibuya-pgmq-adapter poll and ack retry budgets, what exhaustion does under supervision, and how to keep enqueues idempotent under lost replies"
-timestamp: 2026-09-30T21:30:00Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-30T21:30:00Z"
+  by: process:codex
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-connection-faults
 tags: [messaging, pgmq, retries, connection-faults]
 status: current
@@ -15,15 +15,15 @@ status: current
 
 **Bound every retry against PostgreSQL, size the budget to the outage you plan to survive, decide what exhaustion does before it happens, and treat a lost reply to an enqueue as a possible duplicate rather than as a failure.**
 
-A connection fault is any event that ends a PostgreSQL connection while the runtime is using it: an immediate or crash restart of the server, `pg_terminate_backend` on the worker's backend, a TCP reset from a proxy or a failover, or an idle connection the server closed. These rules target the released pgmq-hs 0.6.1.1 family, `shibuya-pgmq-adapter` 0.16, and keiro-pgmq 0.17, and they state what those releases do rather than what a candidate promises.
+A connection fault is any event that ends a PostgreSQL connection while the runtime is using it: an immediate or crash restart of the server, `pg_terminate_backend` on the worker's backend, a TCP reset from a proxy or a failover, or an idle connection the server closed. These rules target the released pgmq-hs 0.6.1.1 family, `shibuya-pgmq-adapter` 0.16, and keiro-pgmq 0.21, and they state what those releases do rather than what a candidate promises.
 
 ## Know what the released classifier does with a lost connection
 
 `Pgmq.Effectful.isTransient` is the only retry gate the adapter uses. In pgmq-hs 0.6.1.1 it retries acquisition timeouts, networking and unrecognised connection errors, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01, 57P02, 57P03, and class 53, and calls everything else permanent, as the [queue lifecycle standard](pgmq-queue-reconciliation.md) records.
 
-A connection lost while a statement is in flight does not arrive as a connection error. The hasql driver reports only a failed send as a connection-session failure; a reply that never comes back is reported through the statement-error constructors, in one of two shapes. When the socket closes without a server message (immediate shutdown, TCP reset), the error is a server error whose SQLSTATE is the empty string. When the server sends its own fatal error and then closes (`pg_terminate_backend`, which sends 57P01), the driver receives a stray second result and reports `UnexpectedRowCountStatementError 1 1 1`. Both are permanent in 0.6.1.1, so the adapter does not retry the first in-flight failure at all; only the *next* operations are transient, because the dead pooled connection fails at send and a refused reconnect is a networking error. The defect is recorded as `mori://shinzui/pgmq-hs/okf/bug-reports/concepts/BUG-1`; the remediation request is `mori://shinzui/pgmq-hs/okf/improvement-requests/concepts/IR-4`; the fix is planned in `mori://shinzui/pgmq-hs/plans/26-classify-postgresql-disconnects-surfaced-as-statement-errors-as-transient` and is unreleased. The Kenshou scenarios `pgmq/effectful/concurrency/backend-termination-recovery`, `postgres-restart-recovery`, and `network-partition` in `mori://shinzui/keiro-runtime-kenshou` reproduce all three shapes and are declared known defects against BUG-1 until a release carries the fix.
+A connection lost while a statement is in flight does not arrive as a connection error. The hasql driver reports only a failed send as a connection-session failure; a reply that never comes back is reported through the statement-error constructors, in one of two shapes. When the socket closes without a server message (immediate shutdown, TCP reset), the error is a server error whose SQLSTATE is the empty string. When the server sends its own fatal error and then closes (`pg_terminate_backend`, which sends 57P01), the driver receives a stray second result and reports `UnexpectedRowCountStatementError 1 1 1`. Both are permanent in 0.6.1.1, so the adapter does not retry the first in-flight failure at all; only the *next* operations are transient, because the dead pooled connection fails at send and a refused reconnect is a networking error. The defect is recorded as `mori://shinzui/pgmq-hs/okf/bug-reports/concepts/BUG-1`; the remediation request is `mori://shinzui/pgmq-hs/okf/improvement-requests/concepts/IR-4`; the fix is implemented after the released tag in `mori://shinzui/pgmq-hs/plans/26-classify-postgresql-disconnects-surfaced-as-statement-errors-as-transient` and is unreleased. The Kenshou scenarios `pgmq/effectful/concurrency/backend-termination-recovery`, `postgres-restart-recovery`, and `network-partition` in `mori://shinzui/keiro-runtime-kenshou` reproduce all three shapes and are declared known defects against BUG-1 until a release carries the fix.
 
-Do not write service code against the unreleased classifier or its planned `isAmbiguousReply` companion. This standard will be revised to cite the released version when it ships; until then the rules below hold for both the released and the fixed behaviour.
+Do not write service code against the unreleased classifier or its unreleased `isAmbiguousReply` companion. This standard will be revised to cite the released version when it ships; until then the rules below hold for both the released and the fixed behaviour.
 
 ## Size the adapter budgets to the outage you plan to survive
 
@@ -53,6 +53,14 @@ Every keiro-pgmq `enqueue*` function is a bare `sendMessage` with no retry, and 
 ## Prove the budget with a fault test
 
 Before raising a budget in production, run a fault test that terminates the worker's backend during a poll, restarts the server immediately, and resets the connection at the network layer, and assert that the worker resumes on the same pool within the configured budget without a process restart. The Kenshou scenarios named above do exactly this for the released cohort and record the recovery time per run; run them against the candidate cohort and read the `same-pool-recovers` and transience checks rather than trusting the arithmetic.
+
+## Account for the published DLQ recovery protocol
+
+Adapter 0.16.1.0 claims the source row before producing a transactional DLQ copy. Retrying an ambiguous successful commit therefore does not copy it twice; a failed send rolls the claim back. Acknowledgement handles serialize concurrent calls and remain retryable after cancellation or failure. Exhaustion throws `PgmqAcknowledgementException` through Shibuya's finalizer boundary. These guarantees do not change pgmq-hs 0.6.1.1's receive-side disconnect classification or make a producer enqueue safe to repeat.
+
+## Keep acknowledgement capacity available during intake
+
+Avoid adapter `LongPolling` on 0.16.1.0: server-side polling pins shared pool connections and can starve finalizers even after handlers return. A killed client can also leave a server poll that leases another message before detecting the disconnect. Use `StandardPolling` / Keiro `PollEvery`, then prove acknowledgements complete while intake remains active. Larger retry budgets cannot repair a permanently saturated pool; see [the polling rule](pgmq-jobs.md#avoid-server-side-long-polling-on-the-released-adapter).
 
 ## Related Patterns
 

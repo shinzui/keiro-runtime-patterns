@@ -15,9 +15,9 @@
         "keiki.cabal",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "3ed37eb08bde38ab8af8c0855d9e8cca87db7f4e",
-      "last_checked_at": "2026-09-21T20:24:19Z",
-      "notes": "Reviewed 79337c5..3ed37eb: no watched library, codec, API, or release change. No catalog change: terminology bundle, provenance skills, and Nix tooling only."
+      "last_checked_commit": "127d348a37077f49b4f8e92031ba9cb25605446b",
+      "last_checked_at": "2026-10-14T22:03:30Z",
+      "notes": "Reviewed 3ed37eb..b6a60c2 against the watched diff, SCXML source, changelog, Hackage 0.9.1.0 and v0.9.1.0 tag. No catalog change for tooling, Cabal formatting or guide profile changes. Record through 127d348 only: descriptive SCXML export and its label/validation rules exist after that point but remain unreleased; existing published Mermaid/inspector standards remain correct. Revisit the diagram concept when the export is published."
     },
     {
       "project": "shinzui/keiro",
@@ -38,9 +38,9 @@
         "keiro-test-support",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "c68dbdd7d1a76a67212067012dcf2321efba1e11",
-      "last_checked_at": "2026-09-21T20:24:19Z",
-      "notes": "Reconciled 11e0bba4..c68dbdd7 against source, compiled checked-mapping examples, frozen codecs, replay evidence, and all seven Hackage 0.18.0.0 packages plus upstream tags at b12bbdd7. Correct existing concepts: bare containers and transitive nullability, omitted optional event fields, calendar days, structural text sets, refined base16 bytes, explicit v5/v7 admission, generated-first hole minimization, directional replay evidence, and stable workflow step names. No new concept: existing mapping, identity, adoption, and evolution standards absorb the capabilities. Mapped-register construction remains planned, not available. No catalog runtime change: migration timeout patch was reverted, SQL payloads unchanged; re-export checks, manifests, fixtures, terminology and build tooling are supporting evidence. Test-support moves to ephemeral-pg 0.3.1 while migration cohort bounds remain unchanged."
+      "last_checked_commit": "e6ef560b0a8db0dc091d0f8d7da1bb08c29155be",
+      "last_checked_at": "2026-10-14T22:03:31Z",
+      "notes": "Reconciled c68dbdd7..e6ef560b against watched source/SQL/API diffs, generated harness/fold/replay logic, all seven Hackage 0.21.0.0 packages and matching release tags. Correct existing concepts: current Kiroku/Shibuya/PGMQ/Effectful cohort; bounded sampled snapshot verification; typed subscription startup and deterministic decode failures; atomic stopped checkpoint/lease resize; guarded catalog command rollback and callback restrictions; mapped initial/write-lift construction and used-lift fold evidence; strict scalar contract lists and identity-key refusal; whole-name helpers; history-backed initial-hole witnesses; removal reports and registry-aware binding-view schema checks. Existing concepts absorb these capabilities; no new Keiro concept. No catalog runtime change for supporting plans, fixtures, release/build automation or internal replay-evidence refactoring beyond the corrected rules. Keiro SQL payloads remain unchanged, but Kiroku 0012-0015 cutovers apply. Correct test-layout and migration testing for same-database resource pools and durable/exclusively-leased benchmark fixtures. Source contradicts prose claiming mori://shinzui/keiro/plans/300-poll-pgmq-client-side-for-long-poll-job-workers-to-fix-bug-4-and-bug-6 shipped: Job.toPollingConfig still maps LongPoll to adapter LongPolling; require PollEvery and document the verified defect rather than assuming client-side polling."
     },
     {
       "project": "shinzui/kiroku",
@@ -60,9 +60,9 @@
         "shibuya-kiroku-adapter",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "758b81acddf482b08643acf8802f095e621a3e07",
-      "last_checked_at": "2026-09-21T20:24:19Z",
-      "notes": "Reviewed 07cd034..758b81a (published Store 0.8.0.1, adapter 0.5.1.2, migrations 0.5.0.0; Hackage and tags checked). Correct release guidance and migration/test-support cohort notes. No runtime change: store/adapter patches only change test dependencies; migration SQL/checksums unchanged, 0.5 follows pg-migrate 1.2. Stop at the released commit: subsequent ownership fixes and effectful bounds belong to the unpublished coordinated Shibuya 0.10 lifecycle candidate."
+      "last_checked_commit": "ad866f925ac11484a2ee758fe235035840c85c0a",
+      "last_checked_at": "2026-10-14T22:03:31Z",
+      "notes": "Reconciled 758b81a..ad866f9 against Store, subscription worker/FSM, publisher, SQL, migrations 0012-0015, inspection/provider/wire modules, adapter and release changelogs; Hackage and cohort tags at 7394055 verified. Correct existing append/head, decode-hook, subscription capacities/target binding/topology/retry/stall, adapter ownership/guard and telemetry rules; route stopped-writer and stopped-subscription cutovers plus transactional index-build blocking. Create kiroku/inspection for public bounded browsing, exact cursors, durable dead-letter reads, provider discovery, standalone/process scope, CORS and recoverable tails. No further catalog change for benchmark/test scaffolding, manifests, release evidence or plan/status prose; finite performance acceptance is not a general throughput guarantee."
     },
     {
       "project": "shinzui/shibuya",
@@ -76,9 +76,9 @@
         "shibuya-metrics",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "7512b5c692af1c005392e4445cfa26a9be41f9ea",
-      "last_checked_at": "2026-09-21T20:24:20Z",
-      "notes": "Reviewed cb3c4a9..7512b5c against Master.hs and released 0.9.0.2/0.9.0.3 changes; Hackage and v0.9.0.3 tag checked. Correct processing guidance for idle mailbox removal, unlinked supervisor and single failure delivery. No public API or metrics wire change in this range. Leave later lifecycle/health/WebSocket and dependency changes pending: 0.10.0.0 remains an unpublished coordinated release candidate."
+      "last_checked_commit": "de42f07a874bd7d59aff7e41e7ac07b7333f1397",
+      "last_checked_at": "2026-10-14T22:03:31Z",
+      "notes": "Reviewed 7512b5c..0967f45; reconcile the published 0.10.0.1 cohort through tag de42f07 (Hackage core and metrics verified). Correct processing, gotchas and Kubernetes rules for startup ownership, duplicate/concurrency validation, retained finalization failure, progress-based health, bounded graceful shutdown and separately bounded batch-key cardinality. Create messaging/shibuya-inspection for released lifecycle, loopback host, resource settings, dependency deadlines and terminal WebSocket frames. Retain the watermark at de42f07: later explicit browser/CORS policy, outbound admission/send bounds, detailed latency/progress, intake controls and telemetry lifetime/cancellation work remain unpublished. The inspection concept explicitly separates those capabilities from 0.10.0.1; supporting plans and benchmark evidence do not add published guarantees."
     },
     {
       "project": "shinzui/pgmq-hs",
@@ -95,9 +95,9 @@
         "pgmq-migration/migrations",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "8fff5fb154a754252116c1a8c3ff1c6cd3b6e25e",
-      "last_checked_at": "2026-09-18T04:30:57Z",
-      "notes": "Reconciled 590a46f..8fff5fb against 0.6.0.0/0.6.1.0 source (Hackage 0.6.1.0), migrations 0004-0006, CHANGELOG, and the 0.6 upgrade guide. Correct: queue-reconciliation and jobs concepts for PGMQ 1.12/1.13, grouped-head reads, premake and PartitionConfig/QueueMetrics field additions, default-partition spill, effectful-core ^>=2.6 || ^>=2.7 with the 2.7.1.1 performance recommendation; isTransient unchanged. No catalog change: ephemeral-pg test-root pinning, nix, release automation, and review/plan documents."
+      "last_checked_commit": "696b6bd28f29e1ea53d07bf66d2d6d59f1182fa3",
+      "last_checked_at": "2026-10-14T22:03:32Z",
+      "notes": "Reviewed 8fff5fb..48a1ed0 against changelogs, library/effect source and migration package bounds; Hackage family 0.6.1.1 and v0.6.1.1 tag at 696b6bd verified. Correct existing reconciliation/cohort guidance for pg-migrate 1.2 admission without SQL or production API changes. Keep released disconnect behavior accurate and identify the implemented companion as unreleased. No catalog runtime change for stable ephemeral-PG roots and release/test tooling. Stop at 696b6bd: later receive-side disconnect classification/isAmbiguousReply and non-destructive queue/archive inspection with five new effect constructors are unpublished; revisit retry and inspection standards on release."
     },
     {
       "project": "shinzui/pg-migrate",
@@ -142,9 +142,9 @@
         "shibuya-pgmq-adapter/src",
         "CHANGELOG.md"
       ],
-      "last_checked_commit": "392f7545af32ef893c24139fd194d16ec1172f75",
-      "last_checked_at": "2026-09-18T04:30:58Z",
-      "notes": "Inspected 392f754..9c709d7 source and changelog: recoverable transactional DLQ claims, serialized/cancellation-safe acknowledgements, surfaced PgmqAcknowledgementException, and dependency gates are part of the unpublished 0.16.0.1 candidate requiring Shibuya 0.10. Hackage remains 0.16.0.0. Retain the existing reconciled watermark until the coordinated release; do not apply candidate guarantees to the published production baseline."
+      "last_checked_commit": "237575e70c10bb2e53fe19bb2c6efcd9cda6b2c1",
+      "last_checked_at": "2026-10-14T22:03:32Z",
+      "notes": "Reconciled 392f754..237575e against finalizer source, changelogs, Hackage 0.16.1.0 and v0.16.1.0 tag at 6ce44ab. Correct jobs, connection-faults, transport/gotcha and deployment guidance for source-row-claimed transactional DLQ recovery, serialized cancellation-safe acknowledgement and surfaced PgmqAcknowledgementException. Correct the standing polling rule from source plus mori://shinzui/shibuya-pgmq-adapter/okf/bug-reports/concepts/BUG-1 and mori://shinzui/shibuya-pgmq-adapter/okf/bug-reports/concepts/BUG-4 evidence: LongPolling still issues server read_with_poll and can starve acknowledgements or outlive a killed client; prefer StandardPolling / Keiro PollEvery. No new concept: existing jobs/faults standards cover both defects. No runtime catalog change after the release for telemetry/lifecycle test fixtures and stable ephemeral-PG roots."
     }
   ]
 }

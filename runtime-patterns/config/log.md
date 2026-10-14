@@ -1,5 +1,8 @@
 # config Update Log
 
+## 2026-10-14
+* **Update**: Budget pod grace above the Shibuya total shutdown deadline and adopt the current PGMQ adapter release.
+
 ## 2026-09-18
 * **Update**: Refresh Shibuya core and PGMQ adapter shutdown version claims to 0.9.0.1 and 0.16.0.0; behaviour is unchanged.
 

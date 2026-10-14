@@ -2,10 +2,10 @@
 type: Standard
 title: "PGMQ queue lifecycle and reconciliation"
 description: "Validated durable queue names, additive startup reconciliation, truthful drift reports, notification recovery, and PGMQ 1.13 schema, partition premake, and retry classification in pgmq-hs 0.6"
-timestamp: 2026-09-30T21:30:00Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-30T21:30:00Z"
+  by: process:codex
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-queue-reconciliation
 tags: [messaging, pgmq-queue-reconciliation]
 status: current
@@ -15,9 +15,9 @@ status: current
 
 **Declare queues with validated names, reconcile additively, and turn every reported drift into an operator decision rather than a destructive startup repair.**
 
-These rules target the released pgmq-hs 0.6 package family (0.6.1.0). Upgrade `pgmq-core`, `pgmq-hasql`, `pgmq-effectful`, `pgmq-config`, and `pgmq-migration` together with bounds `>=0.6 && <0.7`; Keiro 0.17 and `shibuya-pgmq-adapter` 0.16 require that family.
+These rules target the released pgmq-hs 0.6.1.1 package family. Upgrade `pgmq-core`, `pgmq-hasql`, `pgmq-effectful`, `pgmq-config`, and `pgmq-migration` together. Keiro 0.21 requires `>=0.6.1.1 && <0.7` with `shibuya-pgmq-adapter` 0.16.1.0.
 
-Crossing from 0.5 breaks two records. `QueueMetrics` gains `defaultPartitionLength :: Maybe Int64`, and `PartitionConfig` gains `premake :: Maybe Int32`; positional constructors and patterns must supply both. The family accepts `effectful-core` `^>=2.6 || ^>=2.7`; on 2.7 use 2.7.1.1 or newer, because 2.7.0.0 slows every dynamically dispatched queue operation. Keiro 0.17 and adapter 0.16 still bound `effectful-core` below 2.7, which decides the version a Keiro service resolves.
+Crossing from 0.5 breaks two records. `QueueMetrics` gains `defaultPartitionLength :: Maybe Int64`, and `PartitionConfig` gains `premake :: Maybe Int32`; positional constructors and patterns must supply both. The family accepts `effectful-core` `^>=2.6 || ^>=2.7`; on 2.7 use 2.7.1.1 or newer, because 2.7.0.0 slows every dynamically dispatched queue operation. Keiro 0.21 and adapter 0.16.1.0 admit the 2.6 family or 2.7.1.1 and later below 2.8; keep their intersected bounds rather than forcing excluded 2.7.0.0–2.7.1.0 releases.
 
 ## Migrate the schema before creating queues
 
@@ -58,6 +58,10 @@ Install the `pgmq-migration` native component when the application owns the sche
 `changeVisibilityTimeout` and `setVisibilityTimeoutAt` return `Maybe Message`. `Nothing` means the row was already deleted, archived, or popped; settle it as a lost race, not a database outage.
 
 `isTransient` retries acquisition, networking, connection-session failures, SQLSTATE 40001, 40P01, 55P03, 57P01, 57P02, 57P03, and SQLSTATE class 53. Authentication, compatibility, decode/row-count, script, missing-type, driver, and every other statement failure remain permanent. Branch on this classifier rather than restating a partial list. A connection lost while a statement is in flight is reported through the statement constructors and is therefore permanent in 0.6.1.1 (`mori://shinzui/pgmq-hs/okf/bug-reports/concepts/BUG-1`); size the adapter's retry budgets, decide what exhaustion does, and keep enqueues idempotent with [PGMQ connection faults and retry budgets](pgmq-connection-faults.md).
+
+## Keep the published family boundary
+
+Use pgmq-hs 0.6.1.1 for the current published family; its migration package admits pg-migrate 1.2 without changing the ledger, API or SQL payloads. Receive-side disconnect classification, `isAmbiguousReply`, and non-destructive queue/archive inspection reads are implemented after that release but remain unpublished. Preserve the [released retry rules](pgmq-connection-faults.md) until a release carries them. Do not use leasing reads as a substitute for the pending inspection API.
 
 ## Related Patterns
 

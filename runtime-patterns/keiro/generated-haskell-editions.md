@@ -2,10 +2,10 @@
 type: Guide
 title: "Generated Haskell edition migration"
 description: "Adopting idiomatic-v2 record APIs through an explicit scaffold gate, durable backups, complete compilation, and recoverable rollback"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-generated-haskell-editions
 tags: [keiro, generated-haskell-editions]
 status: current
@@ -74,6 +74,12 @@ Inspect backups before retrying an interrupted apply. While the ledger still rec
 For a combined `legacy-v1` adoption, also remove the source-move destinations listed in the remediation report and restore their originals from `.keiro-dsl-name-migrations/legacy-v1-to-idiomatic-v1/`. Keep the complete version-control baseline when restoring old sidecar names as well. The remediation report may remain during rollback, Hole edits, and retry; do not delete immutable backups to silence a conflict.
 
 Once the ledger records `idiomatic-v2`, ordinary scaffolding does not rerun old-edition backup conflict checks. Do not interpret an ordinary successful rerun as proof that later hand edits were part of the migration backup.
+
+## Recompile whole-name helpers in 0.21
+
+The 0.21 scaffolder derives workqueue, read-model, contract, hole and harness names through one whole-name authority. Rename `jobtype…` references to `jobType…` and `thingtypeWitness` / `thingtypeGet` to `thingTypeWitness` / `thingTypeGet` where those declarations occur. Update create-once holes by hand without discarding their bodies, then regenerate and compile the complete service conformance package. This package upgrade does not itself publish a new language version.
+
+DSL library clients must also migrate `ContractType` to `CScalar ContractScalarType | CList ContractScalarType`, wrapping scalar fields in `CScalar`, and supply new optional mapped-lift fields. Extend exhaustive expression, diagnostic and binding-obligation matches; recompiling generated modules alone does not cover hand-owned AST tooling.
 
 ## Related Patterns
 

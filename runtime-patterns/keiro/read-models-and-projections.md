@@ -2,10 +2,10 @@
 type: Standard
 title: "Read models and projections"
 description: "Truthful read-model freshness, guarded external SQL contracts, catalog-backed projection application, targeted repair, and snapshot limits"
-timestamp: 2026-10-11T21:13:17Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:codex-cli
-  at: "2026-10-11T21:13:17Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-read-models-and-projections
 tags: [keiro, read-models-and-projections]
 status: current
@@ -85,7 +85,7 @@ For ensure/reuse across candidate aggregate IDs, the minimal synchronous index m
 
 Declare separate owners and rebuild groups where dependencies permit independent lifecycles. Do not give the identity row a foreign key to a rich-view row that may not yet exist, or bypass real dependencies to force separation. The identity index is command authority even though it is event-derived: fail closed while it is unavailable and never substitute a lagging view. Prove ensure/reuse with the rich-view worker paused, then verify one original payload after catch-up; also test independent group fencing, replay, and concurrent connections in one database.
 
-The public composition for a typed relational guard plus catalog delivery is **planned**, under [Keiro ExecPlan 306](mori://shinzui/keiro/plans/306-support-atomic-relational-preconditions-for-synchronous-catalog-commands) and [IR-53](mori://shinzui/keiro/okf/improvement-requests/concepts/IR-53). It is not a released API. Do not call the proposed symbol, copy private catalog SQL, or use pre-command SELECT followed by append as a uniqueness guarantee. Keep unsafe writes disabled until a supported proven protocol is available; adopt only after verifying the actual dependency release and its contract.
+Use the released `runDomainCommandWithCatalogProjectionsGuarded` from Keiro 0.20 onward for a typed relational precondition plus catalog delivery. It checks under the required group locks after tentative append and before inline handlers; `Left refusal` rolls the whole transaction back. Follow the [guarded catalog contract](projection-catalogs.md#check-relational-command-preconditions-under-the-catalog-fence); a pre-command SELECT followed by append still provides no uniqueness guarantee.
 
 ## Choose the offline or online group lifecycle
 
@@ -152,6 +152,10 @@ Rows written before the discriminator gained its third component carry an empty 
 Keiro 0.9 widened the fold fingerprint from a 16-hex-digit FNV-1a-64 to a 32-hex-digit FNV-1a-128 value. The widening is deliberate and invalidates every snapshot discriminated by the earlier token: after the upgrade each stream misses once and rebuilds from events. Plan the replay cost and refresh generated transducers; do not attempt to translate old tokens. Read-model, mapped-wire, and behavior-key identities are separate 64-bit values and did not move.
 
 For depth, consult `mori://shinzui/keiro` at project-relative paths `docs/user/read-models-and-projections.md`, `docs/user/snapshots.md`, `docs/guides/project-read-models.md`, and `docs/guides/online-projection-rebuilds.md`; artifact-level Mori document handles for those repository-local guides are pending.
+
+## Bound sampled snapshot verification
+
+Keiro 0.19 bounds sampled seed replay across the whole process with `RunCommandOptions.seedVerifyInFlightLimit` (default 1). A full limit skips the sample and increments `keiro.snapshot.seed.skipped`; a nonpositive limit removes the bound, while `seedVerifySampleRate <= 0` disables sampling. Unexpected verifier exceptions increment `keiro.snapshot.seed.verification.failed` and emit a diagnostic rather than failing the command. Extend custom option/metric records and alert on divergence and verifier failure separately. Skipped samples are not successful evidence.
 
 ## Related Patterns
 

@@ -2,10 +2,10 @@
 type: Overview
 title: "Kiroku Event-Store Standards"
 description: "Index of Kiroku Store 0.8 standards, including retryable transaction failures, checkpoint inventory, and replay-history retention"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-21T20:25:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-overview
 tags: [kiroku, overview]
 status: current
@@ -29,11 +29,11 @@ reviews:
 
 This area is the fleet’s prescriptive Kiroku guide for Keiro services. It covers the event-store rules shared by command handlers, projections, subscriptions, operations, and observability.
 
-Keiro 0.18.0.0 requires `kiroku-store >=0.8 && <0.9` and `kiroku-store-migrations ^>=0.4.0.0`. Store 0.8 adds the retryable `TransientTransactionFailure` constructor; extend exhaustive error matches and apply [bounded retry](transactions-and-projections.md). Earlier releases also extended the `Store` effect, so update custom or mock interpreters when crossing them: 0.5 makes the [first-run checkpoint decision explicit](./subscriptions.md) and adds the transactional reset; 0.6 adds the [visible global head](./append-and-read.md); 0.7 adds [replay-history retention leases](./history-retention.md), the transaction-scoped stream guard, and the `HistoryRetentionActive` refusal. On the migration side, `0009` publishes the frozen [checkpoint relation](./checkpoint-inventory.md) and corrected `0010` plus `0011` install and converge the retention schema on `kiroku.uuidv7()`. Databases that applied withdrawn `0010` require the [guarded checksum recovery](../migrations/operations.md) before normal migration; Hackage deprecates migration releases 0.3.2.0 and 0.3.2.1.
+Keiro 0.21.0.0 requires `kiroku-store ^>=0.11.0.0` and `kiroku-store-migrations ^>=0.7.1.0`. Use the matching `shibuya-kiroku-adapter` 0.6.0.1 and `kiroku-metrics` 0.3.0.0 cohort. Apply [migrations 0012–0015 in order](../migrations/operations.md#upgrade-the-kiroku-store-in-order): stop old writers across 0012, stop subscription workers across 0013/0014, and plan the 0015 index-build write pause. Store 0.10 adds validated group/capacity types, target-bound checkpoints, typed decode refusals and transactional resize; Store 0.11 adds [bounded inspection](inspection.md) and the opt-in originated stream head. Extend exhaustive effect/error matches and rebuild direct record construction. Store 0.8 adds the retryable `TransientTransactionFailure` constructor; extend exhaustive error matches and apply [bounded retry](transactions-and-projections.md). Earlier releases also extended the `Store` effect, so update custom or mock interpreters when crossing them: 0.5 makes the [first-run checkpoint decision explicit](./subscriptions.md) and adds the transactional reset; 0.6 adds the [visible global head](./append-and-read.md); 0.7 adds [replay-history retention leases](./history-retention.md), the transaction-scoped stream guard, and the `HistoryRetentionActive` refusal. On the migration side, `0009` publishes the frozen [checkpoint relation](./checkpoint-inventory.md) and corrected `0010` plus `0011` install and converge the retention schema on `kiroku.uuidv7()`. Databases that applied withdrawn `0010` require the [guarded checksum recovery](../migrations/operations.md) before normal migration; Hackage deprecates migration releases 0.3.2.0 and 0.3.2.1.
 
 ## Start here
 
-1. [Operational Invariants](./operational-invariants.md) — the ten production rules every service must preserve.
+1. [Operational Invariants](./operational-invariants.md) — the production rules every service must preserve.
 2. [Append and Read Patterns](./append-and-read.md) — concurrency, retry identity, cursors, and replay.
 3. [Transactions and Projections](./transactions-and-projections.md) — the fleet-standard atomic append-plus-projection shape.
 
@@ -45,6 +45,10 @@ Keiro 0.18.0.0 requires `kiroku-store >=0.8 && <0.9` and `kiroku-store-migration
 - [Observability](./observability.md) — metrics, tracing, endpoints, and health probes.
 - [Lifecycle and Deletion](./lifecycle-and-deletion.md) — soft delete, hard delete, compaction, and linked streams.
 - [Replay-History Retention](./history-retention.md) — hold a renewable lease for a long replay, and know what it refuses.
+
+## Inspect durable state
+
+Use [Kiroku read-only inspection](inspection.md) for stream and category browsing, event detail, durable dead letters, provider discovery, browser policy, and recoverable live tails. Label process-local metrics separately from durable checkpoint truth.
 
 ## Related Patterns
 

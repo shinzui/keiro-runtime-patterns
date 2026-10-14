@@ -16,7 +16,7 @@
 
 # Overview
 
-- [Keiro runtime patterns](overview.md) - Index of Keiro 0.18.0.0 standards: checked value mappings, fewer hand-owned holes, explicit ID admission, and replay-safe adoption
+- [Keiro runtime patterns](overview.md) - Index of Keiro 0.21 standards: released dependency cohorts, guarded commands, mapped construction, contract lists, and safe rollout
 
 # Runbook
 

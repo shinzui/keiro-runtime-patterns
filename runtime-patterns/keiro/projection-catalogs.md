@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed projection catalogs and rebuild groups"
 description: "One validated projection inventory, guarded external read contracts, delivery-bound revision writers, and deterministic rebuilds"
-timestamp: 2026-10-11T21:13:17Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
-  by: process:codex-cli
-  at: "2026-10-11T21:13:17Z"
+  by: process:codex
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-projection-catalogs
 tags: [keiro, projection-catalogs]
 status: current
@@ -15,7 +15,7 @@ status: current
 
 **Build one closed-world `ProjectionCatalog`, validate it once, and derive every live writer and rebuild action from that same value.**
 
-This is the read-side baseline for a new service on Keiro 0.17.0.0. Its design is fixed by `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and the checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
+Use this read-side baseline with the released Keiro 0.21.0.0 cohort. Its design is fixed by `mori://shinzui/keiro/masterplans/32-build-typed-projection-catalogs-and-safe-coordinated-rebuilds` and the checkpoint-lifecycle follow-up `mori://shinzui/keiro/masterplans/33-make-subscription-checkpoint-lifecycle-explicit-before-the-next-release`.
 
 ## Keep every identity explicit
 
@@ -104,6 +104,14 @@ The generation boundary is fixed by `mori://shinzui/keiro/okf/adrs/concepts/ADR-
 A revision may additionally declare a `StreamScopedReplay` policy per projection: the projection's exact owned targets, a stream-row clearer, a per-event replay closure, a verification, and the async dedup identities it affects. Validation rejects a duplicate, cross-group, unknown-projection, target-mismatched, dedup-mismatched, or unversioned policy.
 
 That declaration is what makes one stream's rows repairable in place against the persisted serving revision, under an admission limit and without moving subscription checkpoints. It is not a replacement for either group lifecycle; see [targeted stream-scoped projection repair](stream-scoped-repair.md).
+
+## Check relational command preconditions under the catalog fence
+
+Use `runDomainCommandWithCatalogProjectionsGuarded` for the minimal synchronous relational authority a command invariant needs. The runner tentatively appends, resolves all required catalog group fences and serving bindings, then calls `CatalogPreconditionContext -> Tx.Transaction (Either refusal ())`. `Left` returns `PreconditionRefused` after full rollback; `Right ()` applies inline handlers using those exact protected bindings. Silent domain rejection/no-op invokes neither catalog SQL nor the callback, and a refused append supplies no committed receipt or position.
+
+Read `catalogPreconditionBindings` only inside the callback. Retaining the value retains no lock. Keep checks bounded, indexed and transaction-local; no network effects, recursive append, extra stream/group locks, transaction/savepoint/isolation control, `Tx.condemn`, sequences, session locks or effects that survive rollback. Hasql may rerun the callback; `RunCommandOptions.retryLimit` bounds OCC retries, not the driver's transaction retry loop.
+
+Atomic identity checks rely on every participating writer using synchronous authority in the same Kiroku store and its global append lock under ReadCommitted. An asynchronous target, arbitrary external SQL writer, or missed creation path invalidates that guarantee. The callback sees its own tentative append, not proof it won. Test concurrent connections and rich-view workers paused; keep the guard minimal because it extends the store-wide append lock. Correctness is validated, but deferred exhaustive performance gates are not a throughput guarantee.
 
 ## Related Patterns
 

@@ -1,5 +1,23 @@
 # keiro Update Log
 
+## 2026-10-14
+* **Update**: Add mapped-lift versioning, released guard, stopped shard resize and skipped-snapshot evidence traps.
+* **Update**: Allow only registered runtime binding-view additions while retaining definition reconciliation and schema drift gates.
+* **Update**: Require typed subscription startup handling and atomic stopped checkpoint/lease resize after all owners relinquish.
+* **Update**: Observe skipped and failed sampled seed verification separately from detected divergence.
+* **Update**: Distinguish rolled-back precondition refusal from domain rejection, acceptance and durable request receipts.
+* **Update**: Define protected relational preconditions, rollback outcomes, callback restrictions and participating-writer authority.
+* **Update**: Replace the planned relational guard with the released runner and bound process-wide snapshot verification.
+* **Update**: Retain removal reports before the breaking exit and classify contract shape/admission and used-lift evolution.
+* **Update**: Document the 0.21 contract-list and mapped-construction candidate additions without relabelling Language 6 stable.
+* **Update**: Prove hole-owned initial edges from history-backed live witnesses instead of empty-register probes.
+* **Update**: Migrate whole-name helpers, ContractScalarType/CScalar/CList clients and optional mapped-lift fields.
+* **Update**: Require whole-name helper migration, preserved create-once bodies and 0.21 witness/lift conformance.
+* **Update**: Revisit construct-only transition holes using total declared lifts and retain historical replay evidence.
+* **Update**: Route declaration-owned mapped construction, optional lift API fields, create-once cases and replay obligations.
+* **Update**: Replace unavailable-construction guidance with Language 6 mapped initial/lift writes, total-function obligations and replay identity rules.
+* **Update**: Adopt the verified seven-package 0.21 cohort and route DSL, subscription, inspection and migration cutover obligations.
+
 ## 2026-10-11
 * **Update**: Make async query models and post-commit position waits the agent default; constrain inline work to minimum invariant state, document shared-store costs and the planned guarded API, and align catalog, command, and gotcha guidance.
 

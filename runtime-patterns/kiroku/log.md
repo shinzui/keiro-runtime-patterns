@@ -1,5 +1,14 @@
 # kiroku Update Log
 
+## 2026-10-14
+* **Update**: Add stopped-group topology and release-cutover rules and distinguish typed decode exhaustion from ordinary retry.
+* **Update**: Adopt Store 0.11, migrations 0.7.1, adapter 0.6.0.1 and metrics 0.3; route cutovers and read-only inspection.
+* **Update**: Route durable inspection separately from process metrics and expose typed decode/stall and tail-loss signals.
+* **Update**: Define bounded durable browsing, provider discovery, exact cursors, recoverable tails and explicit browser/hosting boundaries.
+* **Update**: Require Either-returning decode hooks and distinguish typed data refusal from programming exceptions.
+* **Update**: Distinguish exact duplicate-event constraints from stream-version invariant failures and document opt-in originated stream heads.
+* **Update**: Require validated capacities, target-bound startup, public stopped-group resize/rebind, and explicit typed decode and stall policies.
+
 ## 2026-10-11
 * **Update**: Limit append continuations to required atomic SQL; route rich query models to async delivery and keep position waits outside append transactions.
 

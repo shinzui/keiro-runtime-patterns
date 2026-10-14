@@ -2,10 +2,10 @@
 type: Standard
 title: "Typed Background Jobs On PGMQ"
 description: "Typed background jobs on keiro-pgmq 0.17: required job ordering, FIFO-heads, retry and VT rules, guarded DLQ retention, and partitioned provisioning"
-timestamp: 2026-09-18T13:01:11Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:01:11Z"
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-pgmq-jobs
 tags: [messaging, pgmq-jobs]
 status: current
@@ -125,6 +125,18 @@ The `runJobOnce*` implementation sends to the job DLQ and then deletes the main 
 Operate a job DLQ through the [Keiro operations console](../keiro/operations-console.md): `pgmq dlq read` decodes entries, `redrive` returns them to the main queue once the cause is fixed, and `archive` retains evidence where `purge` destroys it. A forced console purge uses the guarded `purgeDlq` and fails without deleting when rows are hidden.
 
 PGMQ integration events are a separate, deferred transport concern. A future implementation must use `Keiro.PGMQ.Runtime`; do not model integration contracts as `Job` values.
+
+## Use the recoverable adapter finalizer
+
+Use `shibuya-pgmq-adapter` 0.16.1.0 with Shibuya 0.10. Its transactional direct/topic DLQ transfer claims the source row before sending; after a committed transaction loses its reply, retry sees the source absent and emits no second DLQ copy. A failed send rolls back the claim. This guarantee belongs to the supervised adapter and does not make `runJobOnce*`'s separate send/delete atomic.
+
+Acknowledgement handles serialize callers, release ownership on cancellation, and make completed duplicates no-ops; failed or cancelled attempts remain retryable. Exhausted acknowledgement errors call `onAckFailure` and throw `PgmqAcknowledgementException`, allowing Shibuya to retain a failed lifecycle even after ingestion stops. Keep finalizer failures visible to supervision; do not turn the callback into successful acknowledgement.
+
+## Avoid server-side long polling on the released adapter
+
+Prefer `PollEvery` in Keiro jobs and `StandardPolling` for raw adapter consumers on 0.16.1.0. The adapter's `LongPolling` still issues `read_with_poll` or a grouped `*WithPoll` call, holding a pool connection throughout the server loop. Concurrent ingesters can occupy every connection and starve acknowledgements or handler SQL; enlarging the pool only moves the threshold.
+
+A worker kill can leave that server loop alive until it returns. It may lease a newly visible message and consume a read attempt before PostgreSQL notices the missing client, delaying redelivery and exhausting attempts without a handler call. The current Keiro 0.21 `LongPoll` path still maps to adapter `LongPolling`; do not assume a plan or guide describing client-side polling means the fix shipped. Confirm ordinary reads and acknowledgement completion under active intake in fault tests. Track `mori://shinzui/shibuya-pgmq-adapter/okf/bug-reports/concepts/BUG-1` and `mori://shinzui/shibuya-pgmq-adapter/okf/bug-reports/concepts/BUG-4`.
 
 ## Related Patterns
 

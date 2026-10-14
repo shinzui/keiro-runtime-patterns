@@ -9,7 +9,7 @@
 
 # Runbook
 
-- [Kiroku Operational Invariants](operational-invariants.md) - The ten invariants every kiroku-backed service must respect in production
+- [Kiroku Operational Invariants](operational-invariants.md) - The operational invariants every kiroku-backed service must respect in production
 
 # Standard
 
@@ -17,6 +17,7 @@
 - [Kiroku durable checkpoint inventory](checkpoint-inventory.md) - Reading one member-aware durable checkpoint snapshot in-process or through the frozen v1 relation, without mislabeling cursor distance as event lag
 - [Kiroku Connection Settings](connection-settings.md) - Store schema and NOTIFY channel, extraSearchPath seam, timeouts, and synchronous handler discipline
 - [Kiroku Replay-History Retention](history-retention.md) - Holding a renewable retention lease so a long replay sees stable history, and how that lease refuses destructive work
+- [Kiroku read-only inspection](inspection.md) - Discover store inspection capabilities, page durable reads, preserve exact cursors, and recover live-tail loss
 - [Kiroku Subscription Patterns](subscriptions.md) - At-least-once subscriptions, explicit first-run checkpoint intent, durable checkpoint inventory, overflow policies, and Serial consumer groups
 - [Kiroku Transactions and Projections](transactions-and-projections.md) - Atomic append plus projection with runTransactionAppendingResource, and why the other combinators are traps
 

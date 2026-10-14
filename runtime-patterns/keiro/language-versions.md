@@ -2,10 +2,10 @@
 type: Standard
 title: "Keiro DSL language versions"
 description: "Requiring Language 6 from Keiro 0.17.0.0, handling registry metadata, and deliberately migrating older sources"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-language-versions
 tags: [keiro, language-versions]
 status: current
@@ -198,6 +198,10 @@ Adding or changing the preamble alone is reported as `SourceLanguageDeclarationC
 `diff` classifies the version 4-to-5 query-policy migration on its own terms. Weakening a legacy `consistency = Strong` to `freshness = immediate`, or narrowing the waited head scope, is a **breaking** `QueryFreshnessChanged` finding; a scope-preserving rewrite is equivalent; a strengthening is an additive `CompatibilityStrengthened` finding. Same-language classification is unchanged.
 
 Sidecar ledgers carry additive source-language rows. A ledger written before this contract has no such row and is interpreted as legacy, so an old ledger does not force a spurious rescaffold.
+
+## Use the 0.21 candidate additions explicitly
+
+Language 6 in Keiro 0.21 adds `ContractListFieldSyntax` and `MappedRegisterConstructionSyntax`. Keep `language keiro-dsl 6` and the adopted-version CI gate; Language 5 remains the stable registry entry and `new` still emits it. Use [public scalar lists](../messaging/integration-events.md#declare-public-scalar-lists) and [declared mapped construction](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts) only with the 0.21 toolchain. A package release does not convert the candidate's support label to stable or broaden earlier frozen syntax profiles.
 
 ## Related Patterns
 

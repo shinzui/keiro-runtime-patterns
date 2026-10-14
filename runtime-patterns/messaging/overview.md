@@ -2,10 +2,10 @@
 type: Overview
 title: "Keiro Messaging Patterns"
 description: "Index of messaging standards for Keiro services, including pgmq-hs 0.6 queue lifecycle and reconciliation"
-timestamp: 2026-09-30T21:30:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-30T21:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-overview
 tags: [messaging, overview]
 status: current
@@ -55,6 +55,10 @@ Use this area for process managers, public integration contracts, transactional 
 ## Before Production
 
 - [Messaging gotchas](gotchas.md) — failure modes that must be addressed in design and operations.
+
+## Inspect the processing runtime
+
+Use [Shibuya health and inspection](shibuya-inspection.md) for the released lifecycle, health and WebSocket contract. Use [Kiroku read-only inspection](../kiroku/inspection.md) for durable browsing, checkpoint/dead-letter truth and recoverable live tails.
 
 ## Related Patterns
 

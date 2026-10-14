@@ -2,10 +2,10 @@
 type: Runbook
 title: "Keiro operations console"
 description: "Mounting and operating keiro-ops with schema checks, preview-before-force mutations, per-group operating rules, application hooks, and stable JSON"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-operations-console
 tags: [keiro, operations-console]
 status: current
@@ -86,6 +86,10 @@ Use `outbox list --source SOURCE --status rejected` to inspect permanent publica
 ## Preserve operator evidence
 
 Capture the preview, JSON result, operator identity, ticket or incident, binary revision, and database target for every forced mutation. `keiro-ops` records runtime failure evidence where the underlying API supports it, but it does not own the organization's administrative audit log.
+
+## Distinguish runtime-managed binding views from schema drift
+
+With Keiro 0.21, schema verification admits runtime binding views registered as `managed_by = 'keiro'` in `keiro.keiro_managed_read_objects`, including retained retired objects. Supply schema `USAGE` and registry table `SELECT` to the verification role; when the registry is absent or unreadable, comparison retains its catalog-only behavior. Migration-owned missing/changed objects and unregistered additions remain drift. Registry identity does not verify a runtime-only view definition or its hash; keep catalog reconciliation as a separate gate. See [migration operations](../migrations/operations.md).
 
 ## Related Patterns
 

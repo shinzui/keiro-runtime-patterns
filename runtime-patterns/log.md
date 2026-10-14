@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-10-14
+* **Update**: Route inspection-client work to the Kiroku and Shibuya standards with exact cursor and release boundaries.
+
 ## 2026-09-30
 * **Update**: Route the transport choice to the PGMQ connection-faults standard for retry budgets, supervision, and idempotent enqueues
 

@@ -2,10 +2,10 @@
 type: Assessable Standard
 title: "Behavior conformance and obligations"
 description: "Inventorying every live transition, rejection cell, and replay-only transition of a declared aggregate and proving each one with a typed witness"
-timestamp: 2026-09-19T15:34:04Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: human:nadeem
-  at: "2026-09-19T15:34:04Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-behavior-conformance
 tags: [keiro, behavior-conformance]
 status: current
@@ -118,6 +118,10 @@ From Keiro 0.11 the JSON report also carries an append-only `subject` field nami
 `behaviorConformancePassedWith True` — the `--fail-on-unverified` policy — additionally requires an empty `unverified` set. Adopt it where the aggregate's guards are fully generated and total; do not adopt it as a blanket default, or teams will be pushed to relabel honest uncertainty.
 
 `unverified` is an honest surface, not a bug to paper over. Under Keiki 0.7 a guard reading through a one-way projection is classified conservatively, so its key stays unverified until the projection declares an [exact domain](../keiki/exact-projection-domains.md). Conformance tooling must preserve that classification and never relabel it as source-proved.
+
+## Prove hole-owned initial transitions from real history
+
+With Keiro 0.21, regenerate aggregate harnesses so hole-owned live initial transitions use the consumer's history-backed `LiveWitness` through generated `BehaviorContract.behaviorObligationReport`. Supply the history that establishes the required registers; do not weaken the model to make the command succeed from empty registers. Pending, missing, duplicate, stale or invalid witnesses still fail whole-service conformance. This harness correction does not change event bytes, fold fingerprints, snapshot identity or replay semantics.
 
 ## Related Patterns
 

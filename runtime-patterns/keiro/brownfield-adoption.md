@@ -2,10 +2,10 @@
 type: Guide
 title: "Brownfield Keiro Adoption"
 description: "Adopting Keiro around existing types and history with catalog ownership, codec evidence, full replay, and write-path parity gates"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-brownfield-adoption
 tags: [keiro, brownfield-adoption]
 status: current
@@ -167,6 +167,10 @@ Run the complete migration ladder before traffic switches:
 9. Use a stop-the-world or blue/green switch with exclusive ownership of each stream category; after the first new-version append, rollback is roll-forward-only.
 
 For later changes, use the diff's replay-impact file and `AuditTargeted`. Run `diff --coverage-report ... --fail-on-opaque-increase` only when the service has chosen that operator policy. A binding symbol or version change is not inspectable from spec text, so the differ points to binding laws, fixtures, historical comparison, and replay evidence instead of claiming compatibility.
+
+## Replace construct-only holes after upgrading
+
+On Keiro 0.21, revisit holes that only clear or construct a mapped register. Use [declared initial/lift writes](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts) where the constructor is pure and total over its admitted scalar source. Preserve historical codec authority and run the same cross-build replay evidence before deleting the hole. Do not replace a rejecting smart constructor with an asserted total lift.
 
 ## Related Patterns
 

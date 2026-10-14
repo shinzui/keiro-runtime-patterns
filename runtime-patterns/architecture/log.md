@@ -1,5 +1,8 @@
 # architecture Update Log
 
+## 2026-10-14
+* **Update**: Use same-database resource pools for contention and keep durable or exclusively leased benchmark fixtures separate from ordinary correctness tests.
+
 ## 2026-10-11
 * **Update**: Align domain design and Conversation example with async query defaults, direct command responses, bounded post-commit waits, and minimum atomic invariant state.
 

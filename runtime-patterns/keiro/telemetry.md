@@ -2,10 +2,10 @@
 type: Standard
 title: "Telemetry"
 description: "Keiro tracing, command-decision and position-distance metrics, W3C propagation, Kiroku bridging, and logging seams"
-timestamp: 2026-09-18T13:41:24Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-18T13:41:24Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-telemetry
 tags: [keiro, telemetry]
 status: current
@@ -90,6 +90,10 @@ Keiro intentionally ships no structured-logging framework and no request logger.
 - When running workflow garbage collection, use `runWorkflowGcWorkerWith policy pollMicros logPass` to route failed-pass and partial-pass diagnostics to the application logger. Its `logPass` hook receives `Text`; `runWorkflowGcWorker` supplies a compact stderr logger by default. A failed pass retries on the next tick, and a partial pass reports workflows that remain eligible for later collection.
 
 Metrics and traces do not replace these diagnostic events, and the hooks must remain non-blocking enough for their workers.
+
+## Observe bounded seed verification
+
+Use `seedVerifyInFlightLimit` (default one process-wide task) to bound detached sampled snapshot replays. Custom `KeiroMetrics` construction must supply `snapshotSeedSkipped` and `snapshotSeedVerificationFailed`. Track `keiro.snapshot.seed.skipped` as saturation of evidence collection, `keiro.snapshot.seed.verification.failed` as a failed check, and `keiro.snapshot.seed.divergence` as a detected disagreement. A skipped or failed sample proves no fold equivalence.
 
 ## Related Patterns
 

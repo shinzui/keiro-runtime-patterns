@@ -2,10 +2,10 @@
 type: Guide
 title: "Kiroku Observability"
 description: "Wiring kiroku-metrics and kiroku-otel: collector composition, spans, Prometheus names, health probes"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-14T21:56:57Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:56:57Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-observability
 tags: [kiroku, observability]
 status: current
@@ -100,6 +100,12 @@ Treat the documented surface as a frozen wire contract under Kiroku ADR-9 (`mori
 Point liveness at `/health/live` and readiness at `/health/ready`. Add `postgresPing store` as a dependency check. Readiness fails when a subscription last stopped from overflow, when any observed lag exceeds `readinessMaxLag` (default 10,000), or when a dependency check fails.
 
 Subscription lag is an upper bound: the collector learns a worker’s position at lifecycle and delivery callbacks, so a quiet caught-up worker can briefly look behind until the next callback. Choose alert windows and readiness thresholds with that sampling behavior in mind.
+
+## Expose durable inspection separately from process metrics
+
+Serve [read-only inspection](inspection.md) with the 0.11 Store / 0.3 metrics cohort. Discover provider wiring through `/capabilities`, use `/subscription-checkpoints` for cross-process durable progress, and keep `/subscriptions` and health scoped to the answering process. Compose `ServerProviders` from its defaults and qualify configuration record updates where umbrella exports make labels ambiguous.
+
+Observe typed publisher decode failures, undecodable stops, and `kiroku_subscription_handler_stalls_total`. A stall warning does not advance the collector's subscription position. WebSocket event overflow is an explicit loss notice requiring history recovery, not permission to continue from the next surviving frame.
 
 ## Related Patterns
 

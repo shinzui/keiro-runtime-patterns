@@ -2,10 +2,10 @@
 type: Pattern
 title: "Transport Selection"
 description: "Choosing a transport: the pgmq vs Kafka vs kiroku-subscription matrix and rule of thumb"
-timestamp: 2026-09-18T04:30:00Z
+timestamp: 2026-10-14T22:01:17Z
 generated:
-  by: process:claude-code
-  at: "2026-09-18T04:30:00Z"
+  by: process:codex
+  at: "2026-10-14T22:01:17Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/messaging-transport-selection
 tags: [messaging, transport-selection]
 status: current
@@ -68,6 +68,10 @@ Use Kiroku subscriptions only for reactions to the local event log.
 Keiro currently ships Kafka codecs for integration outbox and inbox boundaries. PGMQ as an integration-event transport is roadmap status, not scheduled. If that case is implemented, build it on `Keiro.PGMQ.Runtime`, never on the background-job `Keiro.PGMQ.Job` abstraction.
 
 The durable rationale for this choice is recorded in [ADR 0003](https://github.com/shinzui/keiro-runtime-patterns/blob/master/docs/adr/0003-pgmq-vs-kafka-transport-selection.md).
+
+## Keep PGMQ polling independent of handler capacity
+
+With adapter 0.16.1.0, prefer standard client polling (`PollEvery` for Keiro jobs). Server-side long polls occupy pool connections concurrently with handlers and may starve finalization or outlive a killed client. Apply the [released polling constraints](pgmq-jobs.md#avoid-server-side-long-polling-on-the-released-adapter) before sizing worker concurrency.
 
 ## Related Patterns
 

@@ -2,10 +2,10 @@
 type: Standard
 title: "Mapped consumer surfaces"
 description: "Carrying mapped declarations through private events, snapshots, work queues, query contracts, and aggregate-sourced projections"
-timestamp: 2026-09-21T20:25:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
   by: process:codex
-  at: "2026-09-21T20:25:00Z"
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-mapped-consumer-surfaces
 tags: [keiro, mapped-consumer-surfaces]
 status: current
@@ -99,6 +99,12 @@ Persist the new semantic-impact baseline, then run `diff` against the deployed r
 - `consumer-build`: rebuild the exact named consumer even when no durable history changes.
 
 Do not clear one consequence with evidence for another. A compatible query build says nothing about queued payloads; a green projection replay says nothing about an external public contract.
+
+## Prefer declared construction before a transition hole
+
+Keiro 0.21 permits mapped register `initial` writes and a declaration-owned scalar `write-lift` under Language 6. Follow the [construction rules](aggregate-expressions.md#construct-mapped-registers-with-declared-lifts) before writing a whole transition hole. Construction does not broaden private codec support into public contracts or add collection operators. Keep the mapping's binding laws and historical codec evidence: the constructor does not replace them.
+
+Initialize newly added optional lift fields in raw/checked mapped declarations and mapping identities; extend exhaustive expression, diagnostic and binding-obligation matches. Use generated create-once stubs for missing lift functions/cases, preserving filled modules on regeneration. Version hand-written lift semantics explicitly and audit every used aggregate fold; an unused lift or cases-symbol edit alone is build-only.
 
 ## Related Patterns
 

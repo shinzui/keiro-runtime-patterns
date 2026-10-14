@@ -2,10 +2,10 @@
 type: Standard
 title: "Command cycle and errors"
 description: "Command hydration, decision, append, projection, typed domain outcomes, and prescriptive error handling"
-timestamp: 2026-10-11T21:13:17Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:codex-cli
-  at: "2026-10-11T21:13:17Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/keiro-command-cycle-and-errors
 tags: [keiro, command-cycle-and-errors]
 status: current
@@ -138,6 +138,10 @@ The glossary rule is normative: **`CommandAmbiguous` is never benign.** Multiple
 Keiro records rejected process-manager and router dispatches in `keiro.keiro_dead_letters`; each row is one failed dispatch whose source subscription event counts as handled and may advance its checkpoint. Terminal subscription failures — including deliveries a `PoisonDeadLetter` policy parks — land in Kiroku-owned `kiroku.dead_letters` instead. After correcting the handler, codec, or definition, use `replaySubscriptionDeadLetters` to re-drive Kiroku subscription dead letters; do not treat replay as a substitute for fixing the cause.
 
 For table layout and operational controls, see the keiro repo's `docs/user/dead-letters.md`.
+
+## Keep relational refusal distinct from domain rejection
+
+Use [guarded catalog commands](projection-catalogs.md#check-relational-command-preconditions-under-the-catalog-fence) for a supported atomic relational precondition. `PreconditionRefused` proves the tentative append rolled back; it is not `DomainRejected`, accepted work, or a committed command receipt. Do not wait on its tentative position. Silent domain decisions bypass the callback entirely. Retain the application-owned request receipt protocol when callers need durable replay of those outcomes.
 
 ## Related Patterns
 

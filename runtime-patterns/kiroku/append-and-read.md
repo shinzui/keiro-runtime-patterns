@@ -2,10 +2,10 @@
 type: Standard
 title: "Kiroku Append and Read Patterns"
 description: "ExpectedVersion semantics, idempotent retries via supplied event ids, and streaming reads"
-timestamp: 2026-09-06T21:22:15Z
+timestamp: 2026-10-14T21:56:57Z
 generated:
   by: process:codex
-  at: "2026-09-06T21:22:15Z"
+  at: "2026-10-14T21:56:57Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/kiroku-append-and-read
 tags: [kiroku, append-and-read]
 status: current
@@ -88,6 +88,16 @@ Two different "heads" exist and they answer different questions.
 Hard deletion of the visible tail can make the visible head regress while the append frontier does not. Anything that waits for a consumer to catch up — a read-model freshness wait, a projection distance gauge — must use the visible head, or it will wait forever for a position no reader can ever reach. Anything that reports how far the store has advanced should use the frontier and say so. Never subtract one from the other and call the result a backlog.
 
 Use `eventExistsInStream` for a cheap event-id membership check. For fan-in reads, batch the distinct `RecordedEvent.originalStreamId` values and resolve them with `lookupStreamNames`; do not query Kiroku’s internal tables or add a stream-name lookup per event.
+
+## Distinguish identity collisions from invariant failures
+
+Store 0.10 matches unique-constraint names exactly. `events_pkey` and `stream_events_pkey` identify duplicate event IDs; confirm a returned caller ID before treating a duplicate as success. `ux_stream_events_stream_version` instead produces `UnexpectedServerError "23505"`: investigate the stream-version invariant rather than treating it as an optimistic conflict. Do not classify all `23505` failures as retryable.
+
+## Read a stream head only when its scope is sufficient
+
+Use Store 0.11's opt-in `getStreamWithHead` for metadata and the newest surviving originated global position in one SQL snapshot. Outer `Nothing` means absent or hard-deleted; inner `Nothing` means an existing stream has no surviving originated event. `$all`, empty streams, and link-only streams have no originated head. Links can advance the stream version without advancing this head.
+
+For an origin-only stream with retained history, capture the pair, require the needed version and a present head, then wait outside the append transaction for the projection cursor to reach it. Bound that wait: the read neither locks history nor prevents later physical removal. Soft deletion and logical truncation preserve this head; physical retention may remove it. Keep ordinary `getStream` for metadata-only callers. See [bounded store inspection](inspection.md) for catalog browsing.
 
 ## Related Patterns
 

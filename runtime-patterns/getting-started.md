@@ -2,10 +2,10 @@
 type: Navigation
 title: "Getting started with the runtime patterns"
 description: "Task-oriented routes into the prescriptive Keiro runtime standards"
-timestamp: 2026-09-30T21:30:00Z
+timestamp: 2026-10-14T21:58:53Z
 generated:
-  by: process:claude-code
-  at: "2026-09-30T21:30:00Z"
+  by: process:codex
+  at: "2026-10-14T21:58:53Z"
 resource: mori://shinzui/keiro-runtime-patterns/docs/runtime-patterns-getting-started
 tags: [navigation, runtime-patterns]
 status: current
@@ -119,6 +119,11 @@ need the surrounding rules.
   supported lifecycle APIs. Resume a parked `Dead` timer only through
   [dead timer resume](keiro/dead-timer-resume.md), after the migration `0032`
   writer rollout.
+- **Building or operating an inspection client:** use
+  [Kiroku read-only inspection](kiroku/inspection.md) for durable store reads and
+  recoverable tails, and [Shibuya health and inspection](messaging/shibuya-inspection.md)
+  for process lifecycle, readiness and WebSocket state. Discover actual wiring
+  and preserve exact cursors and the deployed release boundary.
 - **Choosing a transport:** use the
   [transport-selection matrix](messaging/transport-selection.md) before adopting
   PGMQ, Kafka, or a Kiroku subscription. For PGMQ, also apply the
